@@ -52,6 +52,8 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	godfather tinytext,
 	tipper text,
 	to_scan_office tinyint(3) DEFAULT '0' NOT NULL,
+	eval_state tinyint(3) DEFAULT '0' NOT NULL,
+	inputform_verify tinytext,
 	
 	PRIMARY KEY (uid),
 	KEY parent (pid)

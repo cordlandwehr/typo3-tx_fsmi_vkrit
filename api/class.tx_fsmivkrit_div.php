@@ -38,8 +38,10 @@ require_once(PATH_t3lib.'class.t3lib_iconworks.php');
  *
  */
 class tx_fsmivkrit_div {
-	const kSTATUS_INFO = 0;
-	const kSTATUS_ERROR = 1;
+	const kSTATUS_INFO 		= 0;
+	const kSTATUS_WARNING 	= 1;
+	const kSTATUS_ERROR 	= 2;
+	const kSTATUS_OK 		= 3;
 
 	/**
 	 *
@@ -49,7 +51,17 @@ class tx_fsmivkrit_div {
 	 */
 	function printSystemMessage($status, $text) {
 		$content = '';
-		$content .= '<div style="padding: 5px; border: 2px dotted; background-color: #eee; margin-top: 10px; max-width: 400px;">';
+		$content .= '<div ';
+		switch ($status) {
+			case self::kSTATUS_INFO: 
+				$content .= 'class="fsmivkrit_notify_info">'; break;
+			case self::kSTATUS_WARNING: 
+				$content .= 'class="fsmivkrit_notify_warning">'; break;
+			case self::kSTATUS_ERROR: 
+				$content .= 'class="fsmivkrit_notify_error">'; break;
+			case self::kSTATUS_OK: 
+				$content .= 'class="fsmivkrit_notify_ok">'; break;
+		}
 		// TODO switch $status
 		$content .= $text;
 		$content .= '</div>';

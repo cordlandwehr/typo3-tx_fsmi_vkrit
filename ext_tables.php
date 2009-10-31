@@ -130,4 +130,6 @@ t3lib_extMgm::addPlugin(array(
 	$_EXTKEY . '_pi4',
 	t3lib_extMgm::extRelPath($_EXTKEY) . 'ext_icon.gif'
 ),'list_type');
+
+t3lib_extMgm::addStaticFile($_EXTKEY,"static/css/","Vkrit CSS Style");
 ?>

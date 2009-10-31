@@ -55,6 +55,9 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
 	
+		//http://TODO/fsmi_vkrit[lecture]=1&fsmi_vkrit[auth]=6e92614da69fd5f9ee85e3f327fcf6c7 |
+		
+		
 		$content='
 			<strong>This is a few paragraphs:</strong><br />
 			<p>This is line 1</p>

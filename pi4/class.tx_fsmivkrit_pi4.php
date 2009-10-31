@@ -109,12 +109,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 							$this->saveImportData($csvArray, intval($GETcommands['survey']));
 							//TODO check save info output
 							$content .= tx_fsmivkrit_div::printSystemMessage(
-									tx_fsmivkrit_div::kSTATUS_INFO, 
+									tx_fsmivkrit_div::kSTATUS_OK, 
 									'Daten gespeichert.');
 							$content .= $this->printImportData($csvArray);
 						} else {
 							$content .= tx_fsmivkrit_div::printSystemMessage(
-									tx_fsmivkrit_div::kSTATUS_INFO, 
+									tx_fsmivkrit_div::kSTATUS_WARNING, 
 									'Datei Eingelesen, aber noch nicht gespeichert!');
 							$content .= $this->createImportDataConfirmForm($filepath,intval($GETcommands['survey']));
 							$content .= $this->printImportData($csvArray);

@@ -1,0 +1,54 @@
+ plugin.tx_fsmi_vkrit {
+	_CSS_DEFAULT_STYLE (
+		div.fsmivkrit_notify_ok {
+			background-color: #d3efd3;
+			border: solid 2px;
+			border-color: #40b424;
+			padding: 10px;
+			margin-top:10px;
+			margin-bottom:10px;
+		}
+		div.fsmivkrit_notify_warning {
+			background-color: #fffe8c;
+			border: solid 2px;
+			border-color: #ffb309;
+			padding: 10px;
+			margin-top:10px;
+			margin-bottom:10px;
+		}
+		div.fsmivkrit_notify_error {
+			background-color: #ffc7c7;
+			border: solid 2px;
+			border-color: #b42424;
+			padding: 10px;
+			margin-top:10px;
+			margin-bottom:10px;
+		}
+		div.fsmivkrit_notify_info {
+			background-color: #abb3ea;
+			border: solid 2px;
+			border-color: #2b45ff;
+			padding: 10px;
+			margin-top:10px;
+			margin-bottom:10px;
+		}
+		table.fsmivkrit {
+
+		}
+		tr.fsmivkrit_state_0 {
+			background-color: #ffc7c7;
+		}
+		tr.fsmivkrit_state_1 {
+			background-color: #edeea9;
+		}
+		tr.fsmivkrit_state_2 {
+			background-color: #d3efd3;
+		}
+		tr.fsmivkrit_state_3 {
+			background-color: #d3efd3;
+		}
+		tr.fsmivkrit_state_4 {
+			background-color: #d3efd3;
+		}
+ 	)
+ } 

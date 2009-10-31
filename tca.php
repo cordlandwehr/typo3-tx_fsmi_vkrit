@@ -283,9 +283,31 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 				'type' => 'check',
 			)
 		),
+		'eval_state' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.eval_state',		
+			'config' => array (
+				'type' => 'radio',
+				'items' => array (
+					array('LLL:EXT:locallang_db.xml:tx_fsmivkrit_lecture.eval_state.I.0', '0'),
+					array('LLL:EXT:locallang_db.xml:tx_fsmivkrit_lecture.eval_state.I.1', '1'),
+					array('LLL:EXT:locallang_db.xml:tx_fsmivkrit_lecture.eval_state.I.2', '2'),
+					array('LLL:EXT:locallang_db.xml:tx_fsmivkrit_lecture.eval_state.I.3', '3'),
+					array('LLL:EXT:locallang_db.xml:tx_fsmivkrit_lecture.eval_state.I.4', '4'),
+				),
+			)
+		),
+		'godfather' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.inputform_verify',		
+			'config' => array (
+				'type' => 'input',	
+				'size' => '30',
+			)
+		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office, eval_state, inputform_verify')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')
