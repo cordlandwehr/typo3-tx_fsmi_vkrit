@@ -15,6 +15,7 @@
 			<label index="tx_fsmivkrit_lecture">Lecture</label>
 			<label index="tx_fsmivkrit_lecture.name">Name</label>
 			<label index="tx_fsmivkrit_lecture.lecturer">Lecturer</label>
+			<label index="tx_fsmivkrit_lecture.survey">Survey</label>
 			<label index="tx_fsmivkrit_lecture.participants">Participants</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_1">Evaluation Date 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_2">Evaluation Date 2</label>
@@ -60,6 +61,7 @@
 			<label index="tx_fsmivkrit_lecture">Veranstaltung</label>
 			<label index="tx_fsmivkrit_lecture.name">Name</label>
 			<label index="tx_fsmivkrit_lecture.lecturer">Dozent</label>
+			<label index="tx_fsmivkrit_lecture.survey">Umfrage</label>
 			<label index="tx_fsmivkrit_lecture.participants">Teilnehmer</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_1">Vkrit Vorschlag 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_2">Vkrit Vorschlag 2</label>

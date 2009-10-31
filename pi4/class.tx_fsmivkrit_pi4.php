@@ -106,7 +106,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					else {
 						// is there a confirmed filed
 						if ($GETcommands['file_confirmed']) {
-							$this->saveImportData($csvArray, intval($GETcommands['storage']));
+							$this->saveImportData($csvArray, intval($GETcommands['survey']));
 							//TODO check save info output
 							$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_INFO, 
@@ -116,7 +116,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 							$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_INFO, 
 									'Datei Eingelesen, aber noch nicht gespeichert!');
-							$content .= $this->createImportDataConfirmForm($filepath,intval($GETcommands['storage']));
+							$content .= $this->createImportDataConfirmForm($filepath,intval($GETcommands['survey']));
 							$content .= $this->printImportData($csvArray);
 						}
 					}
@@ -166,7 +166,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			
 			<fieldset>
 				<label for="'.$this->extKey.'_import_storage">Umfrage:</label>
-				<select name="'.$this->extKey.'[storage]" id="'.$this->extKey.'_storage"  	
+				<select name="'.$this->extKey.'[survey]" id="'.$this->extKey.'_storage"  	
 					value="'.htmlspecialchars($this->piVars["storage"]).'">
 					';
 		
@@ -175,7 +175,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												WHERE deleted=0 AND hidden=0');
 		
 		while ($res && $row = mysql_fetch_assoc($res))
-			$content .= '<option value="'.$row['storage'].'">'.$row['semester'].' - '.$row['name'].'</option>';
+			$content .= '<option value="'.$row['uid'].'">'.$row['semester'].' - '.$row['name'].'</option>';
 		
 		$content .= '</select>';
 		$content .= '<div>Die entsprechende Umfrage muss über das Backend bereits angelegt worden sein.</div>
@@ -188,14 +188,14 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $content;	
 	}
 	
-	function createImportDataConfirmForm ($filepath,$storage) {
+	function createImportDataConfirmForm ($filepath,$survey) {
 		$content = '';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
 		// hidden field to tell system, that IMPORT data is coming
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kIMPORT.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[file_confirmed]'.'" value="'.$filepath.'" />';
-		$content .= '<input type="hidden" name="'.$this->extKey.'[storage]'.'" value="'.$storage.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$survey.'" />';
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Import abschließen').'">';
 		
@@ -238,9 +238,17 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $content;
 	}
 	
-	function saveImportData ($csvArray, $storage) {
+	function saveImportData ($csvArray, $survey) {
 		// get lecturers
 		$lecturerArr = $this->createLecturerArray (&$csvArray);
+		
+		// get storage
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+											FROM tx_fsmivkrit_survey 
+											WHERE deleted=0 AND hidden=0
+											AND uid=\''.$survey.'\'');
+		if ($res && $row = mysql_fetch_assoc($res))
+			$storage=$row['storage'];
 		
 		// save lecturers
 		foreach ($lecturerArr as $lecturer) {
@@ -276,6 +284,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 											'tstamp' => time(),
 											'name' => $lecture[self::kCSV_LV_NAME],
 											'lecturer' => $lecturerUID,
+											'survey' => $survey
 									));
 		}
 	}

@@ -42,6 +42,10 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	var $scriptRelPath = 'pi2/class.tx_fsmivkrit_pi2.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'fsmi_vkrit';	// The extension key.
 	
+	// global const
+	const kLIST			= 1;
+	const kASK_INPUT 	= 2;
+	
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -54,23 +58,86 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
-	
-		$content='
-			<strong>This is a few paragraphs:</strong><br />
-			<p>This is line 1</p>
-			<p>This is line 2</p>
-	
-			<h3>This is a form:</h3>
-			<form action="'.$this->pi_getPageLink($GLOBALS['TSFE']->id).'" method="POST">
-				<input type="text" name="'.$this->prefixId.'[input_field]" value="'.htmlspecialchars($this->piVars['input_field']).'">
-				<input type="submit" name="'.$this->prefixId.'[submit_button]" value="'.htmlspecialchars($this->pi_getLL('submit_button_label')).'">
-			</form>
-			<br />
-			<p>You can click here to '.$this->pi_linkToPage('get to this page again',$GLOBALS['TSFE']->id).'</p>
-		';
-	
+		
+		$content = '';
+
+		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		
+		// type selection head
+		$content .= $this->createTypeSelector();
+		
+		// subselecter head
+		$this->survey = intval($GETcommands['survey']);
+		$content .= $this->createSurveySelector();
+		
+		// select input type
+		
+		switch (intval($GETcommands['type'])) {
+			case self::kLIST: {
+				// check for POST data
+				debug('adsf');
+				break;
+			}
+			default: 
+				$content .= '<div>Diese Ansicht dient zur Organisation der Eintragung, Information der
+				Dozenten und Bearbeitung der Eintragungen.</div>';
+				break;
+		}
+		
 		return $this->pi_wrapInBaseClass($content);
 	}
+	
+	function createSurveySelector () {
+		
+		// no survey selected, yet
+		if ($this->survey==0) {
+			$content = '<div>Wähle Umfrage:<ul>';
+			
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_survey 
+													WHERE deleted=0 AND hidden=0');
+			while ($res && $row = mysql_fetch_assoc($res))
+				$content .= '<li>'.$this->pi_linkTP($row['name'].' - '.$row['semester'],
+														array (	$this->extKey.'[survey]' => $row['uid'])).
+							'</li>';
+			
+			$content .= '</div>';
+		}
+		else {
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_survey 
+													WHERE deleted=0 AND hidden=0
+													AND uid=\''.$this->survey.'\'');
+			while ($res && $row = mysql_fetch_assoc($res))
+				$content .= '<div>Aktuelle Umfrage: '.$row['name'].' - '.$row['semester'].'</div>';
+		}
+		return $content;
+	}
+	
+	function createTypeSelector () {
+		$content = '<div>';
+		$content .= $this->pi_linkTP('Listenansicht', 
+								array (	$this->extKey.'[type]' => self::kLIST));
+		$content .= ' | ';
+		$content .= $this->pi_linkTP('Eintragung anfordern (alle)', 
+								array (	$this->extKey.'[type]' => self::kASK_INPUT));
+		$content .= '</div>';
+		
+		return $content;							
+	}
+	
+	function printLectureList() {
+		if ($this->survey==0)
+			return '';
+		
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+												FROM tx_fsmivkrit_lecture 
+												WHERE deleted=0 AND hidden=0
+												AND survey=\''.$this->survey.'\'');
+			while ($res && $row = mysql_fetch_assoc($res))
+				$content .= '<div>Aktuelle Umfrage: '.$row['name'].' - '.$row['semester'].'</div>';
+	}
+	
 }
 
 

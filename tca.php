@@ -106,6 +106,18 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 				'maxitems' => 1,
 			)
 		),
+		'survey' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.survey',		
+			'config' => array (
+				'type' => 'group',	
+				'internal_type' => 'db',	
+				'allowed' => 'tx_fsmivkrit_survey',	
+				'size' => 1,	
+				'minitems' => 1,
+				'maxitems' => 1,
+			)
+		),
 		'participants' => array (		
 			'exclude' => 0,		
 			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.participants',		
@@ -273,7 +285,7 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')

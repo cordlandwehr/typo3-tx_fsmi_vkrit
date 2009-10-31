@@ -34,6 +34,7 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	name tinytext,
 	lecturer text,
+	survey text,
 	participants int(11) DEFAULT '0' NOT NULL,
 	eval_date_1 int(11) DEFAULT '0' NOT NULL,
 	eval_date_2 int(11) DEFAULT '0' NOT NULL,
