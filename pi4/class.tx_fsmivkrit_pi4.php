@@ -43,23 +43,23 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	var $extKey        	= 'fsmi_vkrit';	// The extension key.
 	
 	// types
-	var $kIMPORT		= 1;
-	var $kEXPORT		= 2;
+	const kIMPORT		= 1;
+	const kEXPORT		= 2;
 	
 	// csv Columns
-	var $kCSV_FUNKTION 		= 0;
-	var $kCSV_ANREDE 		= 1;
-	var $kCSV_TITEL			= 2;
-	var $kCSV_VORNAME		= 3;
-	var $kCSV_NACHNAME		= 4;
-	var $kCSV_EMAIL			= 5;
-	var $kCSV_LV_NAME		= 6;
-	var $kCSV_LV_KENNUNG	= 7;
-	var $kCSV_LV_ORT		= 8;
-	var $kCSV_STUDIENGANG	= 9;
-	var $kCSV_LV_ART		= 10;
-	var $kCSV_TEILNEHMER	= 11;
-	var $kCSV_ORGAEINHEIT	= 12;
+	const kCSV_FUNKTION 	= 0;
+	const kCSV_ANREDE 		= 1;
+	const kCSV_TITEL		= 2;
+	const kCSV_VORNAME		= 3;
+	const kCSV_NACHNAME		= 4;
+	const kCSV_EMAIL		= 5;
+	const kCSV_LV_NAME		= 6;
+	const kCSV_LV_KENNUNG	= 7;
+	const kCSV_LV_ORT		= 8;
+	const kCSV_STUDIENGANG	= 9;
+	const kCSV_LV_ART		= 10;
+	const kCSV_TEILNEHMER	= 11;
+	const kCSV_ORGAEINHEIT	= 12;
 
 	/**
 	 * The main method of the PlugIn
@@ -83,7 +83,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		// select input type
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		switch (intval($GETcommands['type'])) {
-			case $this->kIMPORT: {
+			case self::kIMPORT: {
 				// check for POST data
 				if (t3lib_div::_POST($this->extKey)) {
 					// form files
@@ -107,6 +107,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 						// is there a confirmed filed
 						if ($GETcommands['file_confirmed']) {
 							$this->saveImportData($csvArray, intval($GETcommands['storage']));
+							//TODO check save info output
 							$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_INFO, 
 									'Daten gespeichert.');
@@ -115,7 +116,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 							$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_INFO, 
 									'Datei Eingelesen, aber noch nicht gespeichert!');
-							$content .= $this->createImportDataConfirmForm($filepath);
+							$content .= $this->createImportDataConfirmForm($filepath,intval($GETcommands['storage']));
 							$content .= $this->printImportData($csvArray);
 						}
 					}
@@ -134,10 +135,10 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	function createTypeSelector () {
 		$content = '<div>';
 		$content .= $this->pi_linkTP('Import PAUL Data', 
-								array (	$this->extKey.'[type]' => $this->kIMPORT));
+								array (	$this->extKey.'[type]' => self::kIMPORT));
 		$content .= ' | ';
 		$content .= $this->pi_linkTP('Export EvaSys Data', 
-								array (	$this->extKey.'[type]' => $this->kEXPORT));
+								array (	$this->extKey.'[type]' => self::kEXPORT));
 		$content .= '</div>';
 		
 		return $content;
@@ -149,7 +150,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.$this->kIMPORT.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kIMPORT.'" />';
 		
 		$content .= '<fieldset>
 			<label for="'.$this->extKey.'_file">Importdatei:</label>
@@ -164,9 +165,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			</fieldset>
 			
 			<fieldset>
-				<label for="'.$this->extKey.'_import_survey">Umfrage:</label>
-				<select name="'.$this->extKey.'[survey]" id="'.$this->extKey.'_survey"  	
-					value="'.htmlspecialchars($this->piVars["survey"]).'">
+				<label for="'.$this->extKey.'_import_storage">Umfrage:</label>
+				<select name="'.$this->extKey.'[storage]" id="'.$this->extKey.'_storage"  	
+					value="'.htmlspecialchars($this->piVars["storage"]).'">
 					';
 		
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
@@ -174,7 +175,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												WHERE deleted=0 AND hidden=0');
 		
 		while ($res && $row = mysql_fetch_assoc($res))
-			$content .= '<option value="'.$row['uid'].'">'.$row['semester'].' - '.$row['name'].'</option>';
+			$content .= '<option value="'.$row['storage'].'">'.$row['semester'].' - '.$row['name'].'</option>';
 		
 		$content .= '</select>';
 		$content .= '<div>Die entsprechende Umfrage muss über das Backend bereits angelegt worden sein.</div>
@@ -187,13 +188,14 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $content;	
 	}
 	
-	function createImportDataConfirmForm ($filepath) {
+	function createImportDataConfirmForm ($filepath,$storage) {
 		$content = '';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.$this->kIMPORT.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kIMPORT.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[file_confirmed]'.'" value="'.$filepath.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[storage]'.'" value="'.$storage.'" />';
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Import abschließen').'">';
 		
@@ -214,6 +216,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			
 		$csvArray = array ();	
 		$file = fopen($filepath, 'r');
+		// delete first line
+		$data = fgetcsv($file);
 		while (($data = fgetcsv($file)))
     		array_push($csvArray, $data);
     	fclose($file);
@@ -225,9 +229,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$content = '<table>';
 		for ($i=0; $i<count($csvArray); $i++)
 			$content .= '<tr>'.
-				'<td>'.$csvArray[$i][$this->kCSV_NACHNAME].'</td>'.
-				'<td>'.$csvArray[$i][$this->kCSV_EMAIL].'</td>'.
-				'<td>'.$csvArray[$i][$this->kCSV_LV_NAME].'</td>'.
+				'<td>'.$csvArray[$i][self::kCSV_NACHNAME].'</td>'.
+				'<td>'.$csvArray[$i][self::kCSV_EMAIL].'</td>'.
+				'<td>'.$csvArray[$i][self::kCSV_LV_NAME].'</td>'.
 				'</tr>';
 		$content .= '</table>';
 				
@@ -235,20 +239,75 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	}
 	
 	function saveImportData ($csvArray, $storage) {
-		// dismiss first line
-//TODO until now everything prepared to create lecturers and lectures
-//		for ($i=1; $i<count($csvArray); $i++) {
-//		
-//			$res = $GLOBALS['TYPO3_DB']->exec_INSERTquery(	
-//									'tx_fsmivkrit_lecture',
-//									array (	'pid' => $this->storageLecturer,
-//											'crdate' => time(),
-//											'tstamp' => time(),
-//											'firstname' => $GLOBALS['TYPO3_DB']->quoteStr($formData['firstname'], 'tx_fsmiexams_lecturer'),
-//											'lastname' => $GLOBALS['TYPO3_DB']->quoteStr($formData['lastname'], 'tx_fsmiexams_lecturer'),
-//									));
-//		//TODO check if $res exists 
-//		}
+		// get lecturers
+		$lecturerArr = $this->createLecturerArray (&$csvArray);
+		
+		// save lecturers
+		foreach ($lecturerArr as $lecturer) {
+		
+			$res = $GLOBALS['TYPO3_DB']->exec_INSERTquery(	
+									'tx_fsmivkrit_lecturer',
+									array (	'pid' => $storage,
+											'crdate' => time(),
+											'tstamp' => time(),
+											'name' => $lecturer[self::kCSV_NACHNAME],
+											'forename' => $lecturer[self::kCSV_VORNAME],
+											'email' => $lecturer[self::kCSV_EMAIL],
+											'foreign_id' => $lecturer['hash']
+									));
+		//TODO check if $res exists 
+		}
+		
+		// save lectures
+		foreach ($csvArray as $lecture) {
+		
+			// get lecturer ID
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+												FROM tx_fsmivkrit_lecturer 
+												WHERE deleted=0 AND hidden=0
+												AND foreign_id=\''.$lecture['lecturer_hash'].'\'');
+			if ($res && $row = mysql_fetch_assoc($res))
+				$lecturerUID=$row['uid'];
+			
+			$res = $GLOBALS['TYPO3_DB']->exec_INSERTquery(	
+									'tx_fsmivkrit_lecture',
+									array (	'pid' => $storage,
+											'crdate' => time(),
+											'tstamp' => time(),
+											'name' => $lecture[self::kCSV_LV_NAME],
+											'lecturer' => $lecturerUID,
+									));
+		}
+	}
+	
+	/**
+	 * This function creates an array with lecturers and sets corresponding IDs into the CSV-array (CSV-array is expected by reference) 
+	 * @param $csvArray
+	 * @return $lecturerArr array with keys
+	 */
+	function createLecturerArray ($csvArray) {
+		$lecturerArr = array ();
+		
+		for ($i=0; $i<count($csvArray); $i++) {
+			// hash it to get a good 
+			$hash = hash('sha256', $csvArray[$i][self::kCSV_VORNAME].$csvArray[$i][self::kCSV_NACHNAME].$csvArray[$i][self::kCSV_EMAIL]);
+			if (!array_key_exists($hash, $lecturerArr)) {
+				$lecturerArr[$hash] = $csvArray[$i];
+				$lecturerArr[$hash]['hash'] = $hash;
+				$csvArray[$i]['lecturer_hash'] = $hash;
+			} else
+			// hash really identifies same person 
+			if ($lecturerArr[$hash][self::kCSV_NACHNAME]==$csvArray[$i][self::kCSV_NACHNAME]
+						&& $lecturerArr[$hash][self::kCSV_VORNAME]==$csvArray[$i][self::kCSV_VORNAME]
+						&& $lecturerArr[$hash][self::kCSV_EMAIL]==$csvArray[$i][self::kCSV_EMAIL]) {
+				$csvArray[$i]['lecturer_hash'] = $hash;
+				continue;
+			} else {
+				debug('Oh my god, we found a SHA-256 collision!');
+				// TODO do some thing but this is not likely to happen...
+			}
+		}
+		return $lecturerArr;
 	}
 	
 }
