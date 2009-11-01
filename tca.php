@@ -321,9 +321,18 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 				'size' => '30',
 			)
 		),
+		"comment" => Array (		
+			"exclude" => 1,		
+			"label" => "LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.comment",		
+			"config" => Array (
+				"type" => "text",
+				"cols" => "30",
+				"rows" => "5",
+			)
+		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, eval_room_3, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office, eval_state, inputform_verify')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, eval_room_3, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office, eval_state, inputform_verify, comment')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')

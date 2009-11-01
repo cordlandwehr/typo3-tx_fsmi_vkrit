@@ -29,6 +29,7 @@
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
+require_once(t3lib_extMgm::extPath('fsmi_vkrit').'pi2/class.tx_fsmivkrit_pi2.php');
 require_once(t3lib_extMgm::extPath('rlmp_dateselectlib').'class.tx_rlmpdateselectlib.php');
 
 
@@ -121,17 +122,17 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[auth]'.'" value="'.$hash.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		
-		$content .= '<fieldset><table>';
+		$content .= '<fieldset><legend>Vorlesung</legend><table>';
 		// participants
 		$content .= '<tr>
 						<td><label for="'.$this->extKey.'_participants">Teilnehmer:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[participants]" id="'.$this->extKey.'_participants"  	
+						<td><input type="text" name="'.$this->extKey.'[participants]" size="3" id="'.$this->extKey.'_participants"  	
 								value="'.htmlspecialchars($this->piVars["participants"]).'" /></td>
 					</tr>'; //TODO make selector
 
 		// assistents
 		$content .= '<tr>
-						<td><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
+						<td style="vertical-align:top"><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
 						<td><div>Exakt einen Tutor pro Zeile eintragen "Vorname,Nachname", mit Komma (,) trennen.<br />
 							Beispiel: "Max,Mustermann"</div>
 							<textarea name="'.$this->extKey.'[assistants]" id="'.$this->extKey.'_assistants" cols="74" rows="15"></textarea></td>
@@ -147,6 +148,10 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
          		)
 			);
 		
+		$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_INFO,
+									'Sie können bis zu drei Terminwünsche angeben. Notwendig ist jedoch nur die Eingabe des ersten Termins.');
+			
 		// Vkrit suggestion 1
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 1:</legend>';
@@ -212,7 +217,13 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 						<td><input type="text" name="'.$this->extKey.'[eval_room_3]" id="'.$this->extKey.'_eval_room_3"  	
 								value="'.htmlspecialchars($this->piVars["eval_room_3"]).'" />			
 					</td></tr></table></fieldset>';		
-								
+		
+		// comment input
+		$content .= '<fieldset>';
+		$content .= '<legend>Ergänzende Informationen:</legend>';
+		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment"></textarea></fieldset>';	
+
+		// submit button
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Daten überprüfen').'">';
 		
@@ -269,6 +280,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		}
 		$content .= '</ol>';
 		
+		$content .= '<div><strong>Kommentar/Ergänzung</strong></div>';
+		$content .= '<pre>'.$inputData['comment'].'</pre>';
+		
 		// save everything in session
 		$GLOBALS['TSFE']->fe_user->setKey('ses','inputData', $inputData);
 				
@@ -310,6 +324,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			$inputData['eval_'.$i]['room'] = htmlspecialchars($POSTdata['eval_room_'.$i]);
 		}
 		
+		$inputData['comment'] = htmlspecialchars($POSTdata['comment']);
+		
 		return $inputData;
 		
 	}
@@ -350,14 +366,15 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									'uid=\''.$lecture.'\'',
 									array (	'crdate' => time(),
 											'tstamp' => time(),
-											'participants' => $inputData['participants'],
-											'eval_date_1' => $inputData['eval_1']['date'],
-											'eval_date_2' => $inputData['eval_2']['date'],
-											'eval_date_3' => $inputData['eval_3']['date'],
+											'participants' 	=> $inputData['participants'],
+											'eval_date_1' 	=> $inputData['eval_1']['date'],
+											'eval_date_2' 	=> $inputData['eval_2']['date'],
+											'eval_date_3'	=> $inputData['eval_3']['date'],
 											'eval_room_1'	=> $inputData['eval_1']['room'],
 											'eval_room_2'	=> $inputData['eval_2']['room'],
 											'eval_room_3'	=> $inputData['eval_3']['room'],
-											'eval_state'	=> self::kEVAL_STATE_COMPLETED
+											'eval_state'	=> self::kEVAL_STATE_COMPLETED,
+											'comment'		=> $inputDate['comment']
 									));
 		if (!$res)
 			return tx_fsmivkrit_div::printSystemMessage(
@@ -385,6 +402,27 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_OK,
 							'Daten erfolgreich gespeichert.'); 
+							
+		// give oppurtinity to insert another lecture
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+												FROM tx_fsmivkrit_lecture 
+												WHERE deleted=0 AND hidden=0
+												AND survey=\''.$surveyUID['uid'].'\'
+												AND (eval_state='.self::kEVAL_STATE_CREATED.'
+													OR eval_state='.self::kEVAL_STATE_NOTIFIED.')
+												AND lecturer=\''.$lecturerUID['uid'].'\'');
+		$lectureArr = array();
+		if ($res && $row = mysql_fetch_assoc($res)) {
+			$content .= '<div>Sie können direkt mit weiteren Eintragungen fortfahren:</div>';
+			$content .= $this->pi_linkTP('Vorlesung eintragen', 
+								array (	
+									$this->extKey.'[auth]' => $row['inputform_verify'],
+									$this->extKey.'[lecture]' => $row['uid']
+								));
+		}
+		else
+			$content .= '<div>Vielen Dankd für Ihre Eintragungen.</div>';
+			
 		return $content;
 	}
 }

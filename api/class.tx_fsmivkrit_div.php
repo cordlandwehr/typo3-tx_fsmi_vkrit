@@ -42,6 +42,7 @@ class tx_fsmivkrit_div {
 	const kSTATUS_WARNING 	= 1;
 	const kSTATUS_ERROR 	= 2;
 	const kSTATUS_OK 		= 3;
+	const imgPath			= 'typo3conf/ext/fsmi_vkrit/gfx/'; // absolute path to images
 
 	/**
 	 *
@@ -51,16 +52,28 @@ class tx_fsmivkrit_div {
 	 */
 	function printSystemMessage($status, $text) {
 		$content = '';
-		$content .= '<div ';
+		$content .= '<div style="min-height:30px; " ';
 		switch ($status) {
-			case self::kSTATUS_INFO: 
-				$content .= 'class="fsmivkrit_notify_info">'; break;
-			case self::kSTATUS_WARNING: 
-				$content .= 'class="fsmivkrit_notify_warning">'; break;
-			case self::kSTATUS_ERROR: 
-				$content .= 'class="fsmivkrit_notify_error">'; break;
-			case self::kSTATUS_OK: 
-				$content .= 'class="fsmivkrit_notify_ok">'; break;
+			case self::kSTATUS_INFO: { 
+				$content .= 'class="fsmivkrit_notify_info">';
+				$content .=  '<img src="'.self::imgPath.'info.png" width="30" style="float:left; margin-right:10px;" />';
+				break;
+			}
+			case self::kSTATUS_WARNING: { 
+				$content .= 'class="fsmivkrit_notify_warning">'; 
+				$content .=  '<img src="'.self::imgPath.'warning.png" width="30" style="float:left; margin-right:10px;" />';
+				break;
+			}
+			case self::kSTATUS_ERROR: { 
+				$content .= 'class="fsmivkrit_notify_error">'; 
+				$content .=  '<img src="'.self::imgPath.'error.png" width="30" style="float:left; margin-right:10px;" />';
+				break;
+			}
+			case self::kSTATUS_OK: { 
+				$content .= 'class="fsmivkrit_notify_ok">'; 
+				$content .=  '<img src="'.self::imgPath.'ok.png" width="30" style="float:left; margin-right:10px;" />';
+				break; 
+			}
 		}
 		// TODO switch $status
 		$content .= $text;

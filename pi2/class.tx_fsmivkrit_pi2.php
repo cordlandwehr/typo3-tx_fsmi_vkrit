@@ -223,10 +223,11 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 							tx_fsmivkrit_div::kSTATUS_INFO,
 							'Erinnerungsmail wird an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> geschickt.');
 		
-							
-		$content .= '<h3>E-mail Kopf</h3>'.
-					'<pre style="margin-left:20px">'.$this->printLecturerNotificationHead($lecturerUID['uid']).'</pre>';
-							
+		if ($lecturer!=0) {			
+			$content .= '<h3>E-mail Kopf</h3>'.
+						'<pre style="margin-left:20px">'.$this->printLecturerNotificationHead($lecturerUID['uid']).'</pre>';
+		}					
+		
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
 		// hidden field to tell system, that IMPORT data is coming
@@ -252,12 +253,13 @@ Veranstaltungen widerspiegelt, so teilen Sie uns dieses bitte umgehend
 mit. 
 </textarea></div>
 		';
-		
-		$content .= '<h3>Links</h3>';
-		$content .= '<pre style="margin-left:20px">'.
-					$this->printLecturerNotificationInputlinks($lecturer).
-					'</pre>';
-		
+		if ($lecturer!=0) {
+			$content .= '<h3>Links</h3>';
+			$content .= '<pre style="margin-left:20px">'.
+						$this->printLecturerNotificationInputlinks($lecturer).
+						'</pre>';
+		}
+					
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Mail absenden').'">';
 		$content .= '</form>';
@@ -280,7 +282,9 @@ mit.
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0 AND hidden=0
 												AND survey=\''.$this->survey.'\'
-												AND eval_state='.self::kEVAL_STATE_CREATED.'
+												AND (
+													eval_state='.self::kEVAL_STATE_CREATED.'
+													OR eval_state='.self::kEVAL_STATE_NOTIFIED.')
 												AND lecturer=\''.$lecturer.'\'');
 		$lectureArr = array();
 		while ($res && $row = mysql_fetch_assoc($res)) {
@@ -310,29 +314,64 @@ mit.
 		return implode("\n",$lectureArr);
 	}
 	
-	function sendLecturerNotification ($lecturer, $comment) {
-		$lectureInputArr = array ();
+	function sendLecturerNotification ($lecturer, $mailBody) {
+		$content = '';
+		$lecturerInputArr = array ();
 		
-		// TODO do something if SEND_ALL / 0
-		
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_lecture 
-												WHERE deleted=0 AND hidden=0
-												AND survey=\''.$this->survey.'\'
-												AND lecturer=\''.$lecturer.'\'');
+		if ($lecturer==0) {
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid
+												FROM tx_fsmivkrit_lecturer, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecturer.deleted=0 AND tx_fsmivkrit_lecturer.hidden=0
+												AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
+												AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
+												GROUP BY tx_fsmivkrit_lecturer.uid');
+			while ($res && $row = mysql_fetch_assoc($res))
+				array_push($lecturerInputArr,$row['uid']);
+		}
+		else
+			array_push($lecturerInputArr,$lecturer);
+
+		foreach($lecturerInputArr as $lecturer) {
+			$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecturer);
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_lecture 
+													WHERE deleted=0 AND hidden=0
+													AND survey=\''.$this->survey.'\'
+													AND lecturer=\''.$lecturer.'\'');
 													
-		// now start writing mail
-		$mailContent = '';
-		$mailContent .= $this->printLecturerNotificationHead($lecturer);
-		$mailContent .= $comment;
-		$mailContent .= "\n\n".$this->printLecturerNotificationInputlinks($lecturer); // remember: survey is set
-		$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team Fachschaft Mathematik/Informatik";
-			
-		return('<pre>'.$mailContent.'</pre>');
+			// now start writing mail
+			$mailContent = '';
+			$mailContent .= $this->printLecturerNotificationHead($lecturer);
+			$mailContent .= $mailBody;
+			$mailContent .= "\n\n".$this->printLecturerNotificationInputlinks($lecturer); // remember: survey is set
+			$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team Fachschaft Mathematik/Informatik";
+
+			$send = $this->cObj->sendNotifyEmail(
+				$msg=$mailContent, 
+				$recipients=$lecturerUID['email'], 
+				$cc='', 
+				$email_from='criticus@uni-paderborn.de', 
+				$email_fromName='', 
+				$replyTo='');
 				
-		//TODO really send
-		//TODO change pipeline value
-		
+			if ($send) {
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_OK,
+							'Senden der E-mail an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> erfolgreich.');
+				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery  ( 'tx_fsmivkrit_lecture',
+											'lecturer=\''.$lecturerUID['uid'].'\' 
+											AND survey=\''.$this->survey.'\'
+											AND eval_state=\''.self::kEVAL_STATE_CREATED.'\'',
+											array(
+												'eval_state' => self::kEVAL_STATE_NOTIFIED)
+											);
+							
+			} else
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_ERROR,
+							'Senden der E-mail an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> fehlgeschlagen.');
+		}
+		return($content);	
 	}
 	
 	/**
