@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:export-ydpi="70.309998"
+   inkscape:export-xdpi="70.309998"
+   inkscape:export-filename="/home/phoenixx/workspace/fsmi_vkrit/gfx/ok.png"
+   sodipodi:docname="Start_hand.svg"
+   sodipodi:docbase="C:\ide\workspace\spatialtools\src\images"
+   height="64.000000px"
+   width="64.000000px"
+   inkscape:version="0.46"
+   sodipodi:version="0.32"
+   id="svg1337"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <metadata
+     id="metadata1342">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>stop hand</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>silsor</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:source>http://commons.wikimedia.org/wiki/Image:Stop_hand.svg</dc:source>
+        <dc:description>A stop hand inside a red octagon.  Designed by silsor for Wikipedia.</dc:description>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/2.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/2.0/">
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Reproduction" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Distribution" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/Notice" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/Attribution" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs1340">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 32 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="64 : 32 : 1"
+       inkscape:persp3d-origin="32 : 21.333333 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:current-layer="svg1337"
+     inkscape:window-y="0"
+     inkscape:window-x="0"
+     inkscape:cy="38.473012"
+     inkscape:cx="32.098755"
+     inkscape:zoom="8"
+     gridtolerance="0.50000000px"
+     inkscape:grid-points="true"
+     inkscape:grid-bbox="true"
+     showgrid="false"
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="880"
+     showguides="true"
+     inkscape:guide-bbox="true">
+    <inkscape:grid
+       id="GridFromPre046Settings"
+       type="xygrid"
+       originx="0px"
+       originy="0.0000000px"
+       spacingx="1.0000000px"
+       spacingy="1.0000000px"
+       color="#0000ff"
+       empcolor="#0000ff"
+       opacity="0.2"
+       empopacity="0.4"
+       empspacing="8" />
+  </sodipodi:namedview>
+  <path
+     inkscape:export-ydpi="90.000000"
+     inkscape:export-xdpi="90.000000"
+     inkscape:export-filename="/home/silsor/graphics/mine/stop_hand.png"
+     transform="matrix(4, 1.65685, -1.65685, 4, -242.258, -2152.01)"
+     d="M 256.85654,447.07878 L 251.55324,449.27548 L 246.24994,447.07878 L 244.05324,441.77548 L 246.24994,436.47218 L 251.55324,434.27548 L 256.85654,436.47218 L 259.05324,441.77548 L 256.85654,447.07878 z "
+     inkscape:randomized="0"
+     inkscape:rounded="0"
+     inkscape:flatsided="false"
+     sodipodi:arg2="1.5707963"
+     sodipodi:arg1="0.78539816"
+     sodipodi:r2="7.5"
+     sodipodi:r1="7.5"
+     sodipodi:cy="441.77548"
+     sodipodi:cx="251.55324"
+     sodipodi:sides="4"
+     id="path8145"
+     style="overflow: visible; marker: none; opacity: 1; color: black; fill: rgb(25, 197, 25); fill-opacity: 1; fill-rule: evenodd; stroke: rgb(0, 116, 0); stroke-width: 0.923895; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-dashoffset: 0pt; stroke-opacity: 1; visibility: visible; display: inline;"
+     sodipodi:type="star" />
+  <g
+     id="g3846"
+     transform="translate(49.4838, 8.43751)">
+    <path
+       inkscape:export-ydpi="90.000000"
+       inkscape:export-xdpi="90.000000"
+       inkscape:export-filename="/home/silsor/graphics/mine/stop_hand.png"
+       sodipodi:nodetypes="ccscscssssccccscscc"
+       id="path2957"
+       d="M -38.155312,25.650567 C -38.120694,33.522114 -38.212971,41.088188 -17.213181,40.995836 C -16.787356,40.978293 -15.476769,40.282467 -14.682032,39.538481 C -12.860722,37.833478 -14.046978,36.923569 -15.205691,35.706093 L -13.552105,35.336364 C -11.181846,34.806393 -11.421779,29.726973 -13.335998,29.729851 L -14.829318,29.702504 C -16.085743,29.679495 -12.071739,30.208325 -11.519276,28.943518 C -11.001405,27.757904 -10.744095,24.162259 -12.359817,23.827225 C -13.121816,23.669218 -17.411233,23.612566 -15.541278,23.731483 C -13.463468,23.863618 -22.792239,23.705266 -0.33673398,23.515447 L 0.91279462,23.487808 C 3.225001,23.416142 4.8257678,17.598699 0.32653902,17.463911 C -6.673391,17.494695 -17.70807,17.338675 -19.940129,17.441064 C -21.811498,15.768035 -14.747466,14.208346 -11.388767,11.826701 C -9.3418177,10.375214 -9.2568446,8.3362871 -10.283211,6.3613855 C -11.293573,5.4012187 -13.784366,7.6111623 -17.516099,9.2862427 C -22.825042,11.669293 -29.24962,13.996737 -30.31142,14.579217 C -32.037783,15.526267 -38.181274,19.746906 -38.155312,25.650567 z "
+       style="fill: white; fill-opacity: 1; fill-rule: evenodd; stroke: black; stroke-width: 1.98389; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 1.5; stroke-dasharray: none; stroke-opacity: 1;" />
+    <g
+       transform="matrix(-0.00439772, -0.99999, -0.99999, 0.00439772, 13.8676, 56.972)"
+       id="g1930" />
+  </g>
+</svg>
