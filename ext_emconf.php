@@ -33,6 +33,7 @@ Import of CampusNet data and export of EvaSys data is provided.',
 	'version' => '0.0.0',
 	'constraints' => array(
 		'depends' => array(
+			'rlmp_dateselectlib' => '0.1.8-'
 		),
 		'conflicts' => array(
 		),

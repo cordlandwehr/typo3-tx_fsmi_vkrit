@@ -299,7 +299,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 											'name' => $lecture[self::kCSV_LV_NAME],
 											'lecturer' => $lecturerUID,
 											'survey' => $survey,
-											'foreign_key' => $lecture[self::kCSV_LV_KENNUNG],
+											'foreign_id' => $lecture[self::kCSV_LV_KENNUNG],
 									));
 		}
 		return true;

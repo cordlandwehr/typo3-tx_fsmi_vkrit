@@ -42,6 +42,7 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	eval_date_3 int(11) DEFAULT '0' NOT NULL,
 	eval_room_1 tinytext,
 	eval_room_2 tinytext,
+	eval_room_3 tinytext,
 	no_eval tinyint(3) DEFAULT '0' NOT NULL,
 	foreign_id tinytext,
 	kritter_1 tinytext,

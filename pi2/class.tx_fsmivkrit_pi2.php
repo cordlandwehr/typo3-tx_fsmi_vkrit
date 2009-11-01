@@ -177,13 +177,18 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">
 							<td width="50">'.($row['eval_state']).'</td>
 							<td width="250">'.$row['name'].'</td>
-							<td width="300"><a href="mailto:'.$resLecturer['email'].'">'.$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>
-							<td width="100">'.$this->pi_linkTP('erinnern', 
+							<td width="300"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
+								$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
+			//TODO this does not work: change to check if there is such a lecture!
+			if ($resLecture['eval_state']<self::kEVAL_STATE_COMPLETED)
+				$content .= '<td width="100">'.$this->pi_linkTP('erinnern', 
 								array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecturer]' => $resLecturer['uid'])).
-							'</td>
-						</tr>';
+							'</td>';
+			else
+				$content .= '<td width="100">erinnern</td>';
+			$contetn .= '</tr>';
 			
 		}
 		$content .= '</table>';
@@ -216,7 +221,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		else
 			$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_INFO,
-							'Erinnerungsmail wir an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> geschickt.');
+							'Erinnerungsmail wird an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> geschickt.');
 		
 							
 		$content .= '<h3>E-mail Kopf</h3>'.
