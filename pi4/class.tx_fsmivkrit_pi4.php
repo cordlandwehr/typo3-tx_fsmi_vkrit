@@ -125,6 +125,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					$content .= $this->createImportDataForm();
 				break;
 			}
+			case self::kEXPORT: {
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+													tx_fsmivkrit_div::kSTATUS_INFO,
+													'Noch nicht implementiert! Bei Bedarf den überarbeiteten Programmierer kontaktieren...');
+				break;
+			}
 			default: 
 				break;
 		}
@@ -147,6 +153,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	
 	function createImportDataForm() {
 		$content = '';
+		$content .= '<h2>Import/Export Data from CSV file</h2>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
 		// hidden field to tell system, that IMPORT data is coming
@@ -208,7 +215,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	 * Function reads CSV File from $_FILES[fsmi_vkrit][file] and
 	 * imports everything as array
 	 * 
-	 * @return array $csvArray
+	 * @return array with imported data, called $csvArray
 	 */
 	function loadImportData ($filepath) {		
 		if ($filepath=='')
@@ -238,6 +245,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $content;
 	}
 	
+	/**
+	 * This function performs database MYSQL INSERT queries for lecturer and lecture
+	 * @param array		$csvArray
+	 * @param array		$survey
+	 * @return unknown_type
+	 */
 	function saveImportData ($csvArray, $survey) {
 		// get lecturers
 		$lecturerArr = $this->createLecturerArray (&$csvArray);
@@ -258,6 +271,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 									array (	'pid' => $storage,
 											'crdate' => time(),
 											'tstamp' => time(),
+											'title' => $lecturer[self::kCSV_ANREDE],
 											'name' => $lecturer[self::kCSV_NACHNAME],
 											'forename' => $lecturer[self::kCSV_VORNAME],
 											'email' => $lecturer[self::kCSV_EMAIL],
@@ -284,9 +298,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 											'tstamp' => time(),
 											'name' => $lecture[self::kCSV_LV_NAME],
 											'lecturer' => $lecturerUID,
-											'survey' => $survey
+											'survey' => $survey,
+											'foreign_key' => $lecture[self::kCSV_LV_KENNUNG],
 									));
 		}
+		return true;
+		//TODO break before if not everything went fine!
 	}
 	
 	/**

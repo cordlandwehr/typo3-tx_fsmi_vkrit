@@ -9,6 +9,7 @@ CREATE TABLE tx_fsmivkrit_lecturer (
 	cruser_id int(11) DEFAULT '0' NOT NULL,
 	deleted tinyint(4) DEFAULT '0' NOT NULL,
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
+	title tinytext,
 	name tinytext,
 	forename tinytext,
 	email tinytext,

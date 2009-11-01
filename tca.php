@@ -16,6 +16,14 @@ $TCA['tx_fsmivkrit_lecturer'] = array (
 				'default' => '0'
 			)
 		),
+		'title' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.title',		
+			'config' => array (
+				'type' => 'input',	
+				'size' => '30',
+			)
+		),
 		'name' => array (		
 			'exclude' => 0,		
 			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.name',		
@@ -61,7 +69,7 @@ $TCA['tx_fsmivkrit_lecturer'] = array (
 		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, forename, email, reshipment, foreign_id')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, title, name, forename, email, reshipment, foreign_id')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')
