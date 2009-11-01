@@ -421,7 +421,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 								));
 		}
 		else
-			$content .= '<div>Vielen Dankd für Ihre Eintragungen.</div>';
+			$content .= '<div>Vielen Dank für Ihre Eintragungen.</div>';
 			
 		return $content;
 	}

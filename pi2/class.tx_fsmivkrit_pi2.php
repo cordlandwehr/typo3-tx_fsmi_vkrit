@@ -347,7 +347,8 @@ mit.
 			$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team Fachschaft Mathematik/Informatik";
 
 			$send = $this->cObj->sendNotifyEmail(
-				$msg=$mailContent, 
+				$msg='Eintragung Veranstaltungskritik'."\n". // first line is subject
+						$mailContent, 
 				$recipients=$lecturerUID['email'], 
 				$cc='', 
 				$email_from='criticus@uni-paderborn.de', 

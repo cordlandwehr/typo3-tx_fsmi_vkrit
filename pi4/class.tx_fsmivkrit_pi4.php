@@ -253,7 +253,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	 */
 	function saveImportData ($csvArray, $survey) {
 		// get lecturers
-		$lecturerArr = $this->createLecturerArray (&$csvArray);
+		$lecturerArr = $this->createLecturerArray ($csvArray);
 		
 		// get storage
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
@@ -311,7 +311,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	 * @param $csvArray
 	 * @return $lecturerArr array with keys
 	 */
-	function createLecturerArray ($csvArray) {
+	function createLecturerArray (&$csvArray) {
 		$lecturerArr = array ();
 		
 		for ($i=0; $i<count($csvArray); $i++) {
