@@ -82,7 +82,6 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$content .= $this->createSurveySelector();
 		
 		// select input type
-		
 		switch (intval($GETcommands['type'])) {
 			case self::kLIST: {
 				// check for POST data
@@ -308,7 +307,7 @@ mit.
 			
 			// create links
 			array_push	(	$lectureArr,
-							$link
+							$row['name'].":\n".$link."\n"
 						);
 		}
 		return implode("\n",$lectureArr);
@@ -377,7 +376,7 @@ mit.
 	
 	/**
 	 * To prevent unauthorized modification of lecture contents, we put a secred hash value on each lecture.
-	 * This function fails if there is already any hash value set. On failure '0' is returned, else a md5-hash.
+	 * Function returns hash value if there is any set.
 	 * @param $lecture UID of lecture
 	 * @return $hash string with hash value
 	 */
@@ -385,8 +384,8 @@ mit.
 		$lecture = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 				
 		// check if already hash value set: if yes, break
-		if ($lecture['inputform_verify'])
-			return 0;
+		if ($lecture['inputform_verify']!=0)
+			return $lecture['inputform_verify'];
 			
 		$data = $lecture['name'].$lecture['lecturer'].time();
 		$hash = hash('md5',$data);

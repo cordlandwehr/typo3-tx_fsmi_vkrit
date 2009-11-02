@@ -133,8 +133,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// assistents
 		$content .= '<tr>
 						<td style="vertical-align:top"><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
-						<td><div>Exakt einen Tutor pro Zeile eintragen "Vorname,Nachname", mit Komma (,) trennen.<br />
-							Beispiel: "Max,Mustermann"</div>
+						<td><div>Exakt einen Tutor pro Zeile eintragen "Nachname,Vorname", mit Komma (,) trennen.<br />
+							Beispiel: "Mustermann,Max"</div>
 							<textarea name="'.$this->extKey.'[assistants]" id="'.$this->extKey.'_assistants" cols="74" rows="15"></textarea></td>
 					</tr>'; //TODO make selector
 		
@@ -249,8 +249,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		
 		$content .= '<h3>Einzutragende Veranstaltung</h3>';
 		$content .= '<ul>'.
-					'<li><strong>Veranstaltung:</strong> '.$lectureUID['name'].'</li>'.
-					'<li><strong>PAUL-ID:</strong> '.$lectureUID['foreign_id'].'</li>'.
+					'<li><strong>Veranstaltung:</strong> '.$lectureUID['name'].' ('.$lectureUID['foreign_id'].')</li>'.
 					'<li><strong>Dozent:</strong> '.$lecturerUID['name'].', '.$lecturerUID['forename'].'</li>'.
 					'</ul>';
 
@@ -267,7 +266,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<div><strong>Tutoren:</strong></div>';
 		$content .= '<ol>';
 		foreach ($inputData['assistant'] as $tutor)
-			$content .= '<li>'.trim($tutor[1]).', '.trim($tutor[0]).'</li>'."\n";
+			$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).'</li>'."\n";
 		$content .= '</ol>';
 
 		$content .= '<div><strong>V-Krit Termine:</strong></div>';
@@ -295,7 +294,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 									
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
-				value="'.htmlspecialchars('Daten Speichern').'">';
+				value="'.htmlspecialchars('Daten speichern').'">';
 		
 		$content .= '</form>';
 
@@ -327,7 +326,6 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$inputData['comment'] = htmlspecialchars($POSTdata['comment']);
 		
 		return $inputData;
-		
 	}
 	
 	/**
@@ -388,8 +386,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									array (	'pid' => $lectureUID['pid'],
 											'crdate' => time(),
 											'tstamp' => time(),
-											'assistant_name' => $tutor[1],
-											'assistant_forename' => $tutor[0],
+											'assistant_name' => $tutor[0],
+											'assistant_forename' => $tutor[1],
 											'lecture' => $lectureUID['uid'],
 									));
 			if (!$res)
@@ -397,7 +395,6 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 							tx_fsmivkrit_div::kSTATUS_ERROR,
 							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.'); 				
 		}
-							
 		
 		$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_OK,
