@@ -343,7 +343,7 @@ mit.
 			$mailContent .= $this->printLecturerNotificationHead($lecturer);
 			$mailContent .= $mailBody;
 			$mailContent .= "\n\n".$this->printLecturerNotificationInputlinks($lecturer); // remember: survey is set
-			$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team Fachschaft Mathematik/Informatik";
+			$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team der Fachschaft Mathematik/Informatik";
 
 			$send = $this->cObj->sendNotifyEmail(
 				$msg='Eintragung Veranstaltungskritik'."\n". // first line is subject
