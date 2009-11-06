@@ -416,15 +416,22 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 													OR eval_state='.self::kEVAL_STATE_NOTIFIED.')
 												AND lecturer=\''.$lecturerUID['uid'].'\'');
 		$lectureArr = array();
-		if ($res && $row = mysql_fetch_assoc($res)) {
-			$content .= '<h3>Eingabe fortsetzen</h3><div>Sie können direkt mit weiteren Eintragungen fortfahren:</div>';
-			$content .= '<div style="text-align:center;">'.$this->pi_linkTP('<strong>weitere Vorlesung eintragen</strong>', 
-								array (	
-									$this->extKey.'[auth]' => $row['inputform_verify'],
-									$this->extKey.'[lecture]' => $row['uid']
-								)).'</div>';
-		}
-		else
+		
+		if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)>0) {
+			$content .= '<h3>Eingabe fortsetzen</h3>
+				<div>Sie können direkt mit weiteren Eintragungen fortfahren:</div>';
+			$content .= '<ul>'; 
+
+			while ($res && $row = mysql_fetch_assoc($res)) {
+				$content .= '<li>'.$this->pi_linkTP('<strong>'.$row['name'].'</strong>',
+									array (	
+										$this->extKey.'[auth]' => $row['inputform_verify'],
+										$this->extKey.'[lecture]' => $row['uid']
+									)).'</li>';
+			}
+			$content .= '</ul>';
+			
+		} else
 			$content .= '<div>Vielen Dank für Ihre Eintragungen.</div>';
 			
 		return $content;
