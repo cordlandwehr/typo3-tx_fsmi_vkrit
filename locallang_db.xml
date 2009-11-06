@@ -54,6 +54,8 @@
 			<label index="tx_fsmivkrit_survey.semester">Semester</label>
 			<label index="tx_fsmivkrit_survey.storage">Storage</label>
 			<label index="tx_fsmivkrit_survey.importdata_origin">Origin date of imported Data</label>
+			<label index="tx_fsmivkrit_survey.eval_start">Start of evaluation</label>
+			<label index="tx_fsmivkrit_survey.eval_end">End of evaluation</label>
 			<label index="tx_fsmivkrit_helper">helper</label>
 			<label index="tx_fsmivkrit_helper.name">Name</label>
 			<label index="tx_fsmivkrit_helper.email">Email</label>
@@ -99,6 +101,8 @@
 			<label index="tx_fsmivkrit_lecture.eval_state.I.3">Für V-Krit freigegeben</label>
 			<label index="tx_fsmivkrit_lecture.eval_state.I.4">Gekrittet</label>
 			<label index="tx_fsmivkrit_lecture.eval_state.I.5">Fertig</label>
+			<label index="tx_fsmivkrit_survey.eval_start">Anfang der Evaluation</label>
+			<label index="tx_fsmivkrit_survey.eval_end">Ende der Evaluation</label>
 			<label index="tx_fsmivkrit_lecture.inputform_verify">Eingabe Autorisation (für Dozent)</label>
 			<label index="tx_fsmivkrit_lecture.comment">Kommentar/Ergänzung</label>
 			<label index="tx_fsmivkrit_tutorial">Übung</label>

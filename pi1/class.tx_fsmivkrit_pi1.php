@@ -188,12 +188,15 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		
 		// configure Date Selector
 		$dateSelectorConf = array (
-		 	'calConf.' => array (
-		 		'dateTimeFormat' => 'dd.mm.y',
-	//	 		'stylesheet' => 'fileadmin/mystyle.css'
-         		)
-			);
+   			'calConf.' => array (
+     		'dateTimeFormat' => 'dd.mm.y',
+    		'inputFieldDateTimeFormat' => '%d.%m.%Y'
+			)
+		);
 		
+		//TODO think about what to display if only one value is selected
+		if ($surveyUID['eval_start']!=0 && $surveyUID['eval_end']!=0)
+			$content .= '<h3>Evaluation findet statt vom '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'</h3>';
 
 		// Vkrit suggestion 1
 		$content .= '<fieldset>';
@@ -324,6 +327,11 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				continue;
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y h:i', $inputData['eval_'.$i]['date']).', 
 						<strong>Raum:</strong> '.$inputData['eval_'.$i]['room'].'</li>';
+			if ($inputData['eval_'.$i]['date']<$surveyUID['eval_start'] || ($surveyUID['eval_end']!=0 && $inputData['eval_'.$i]['date']>$surveyUID['eval_end']))
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_WARNING,
+									'Der vorgeschlagene Termin liegt außerhalb des Evaluationszeitraumes. 
+									Der Zeitraum ist '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'.');
 		}
 		$content .= '</ol>';
 		
@@ -505,7 +513,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// set dates
 		for ($i=1; $i<=3; $i++) {
 			if ($this->piVars["eval_date_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
-				$this->piVars["eval_date_".$i] = date('y-m-d',$lectureUID['eval_date_'.$i]);
+				$this->piVars["eval_date_".$i] = date('d.m.Y',$lectureUID['eval_date_'.$i]);
 				
 			if ($this->piVars["eval_time_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
 				$this->piVars["eval_time_".$i] = date('h:i',$lectureUID['eval_date_'.$i]);

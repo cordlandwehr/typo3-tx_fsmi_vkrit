@@ -101,6 +101,8 @@ CREATE TABLE tx_fsmivkrit_survey (
 	semester tinytext,
 	storage text,
 	importdata_origin int(11) DEFAULT '0' NOT NULL,
+	eval_start int(11) DEFAULT '0' NOT NULL,
+	eval_end int(11) DEFAULT '0' NOT NULL,
 	
 	PRIMARY KEY (uid),
 	KEY parent (pid)

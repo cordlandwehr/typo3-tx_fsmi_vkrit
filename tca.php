@@ -458,9 +458,33 @@ $TCA['tx_fsmivkrit_survey'] = array (
 				'default'  => '0'
 			)
 		),
+		'eval_start' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_survey.eval_start',		
+			'config' => array (
+				'type'     => 'input',
+				'size'     => '8',
+				'max'      => '20',
+				'eval'     => 'date',
+				'checkbox' => '0',
+				'default'  => '0'
+			)
+		),
+		'eval_end' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_survey.eval_end',		
+			'config' => array (
+				'type'     => 'input',
+				'size'     => '8',
+				'max'      => '20',
+				'eval'     => 'date',
+				'checkbox' => '0',
+				'default'  => '0'
+			)
+		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, semester, storage, importdata_origin')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, semester, storage, importdata_origin, eval_start, eval_end')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')
