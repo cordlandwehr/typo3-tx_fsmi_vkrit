@@ -277,7 +277,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 											'email' => $lecturer[self::kCSV_EMAIL],
 											'foreign_id' => $lecturer['hash']
 									));
-		//TODO check if $res exists 
+			// break on error
+			if(!$res)
+				return false;
 		}
 		
 		// save lectures

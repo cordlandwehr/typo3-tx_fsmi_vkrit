@@ -148,10 +148,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
          		)
 			);
 		
-		$content .= tx_fsmivkrit_div::printSystemMessage(
-									tx_fsmivkrit_div::kSTATUS_INFO,
-									'Sie können bis zu drei Terminwünsche angeben. Notwendig ist jedoch nur die Eingabe des ersten Termins.');
-			
+
 		// Vkrit suggestion 1
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 1:</legend>';
@@ -174,9 +171,14 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 								value="'.htmlspecialchars($this->piVars["eval_room_1"]).'" />			
 					</td></tr></table></fieldset>';		
 						
+		$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_INFO,
+									'Mindestens ein Terminvorschlag muss angegeben werden. Weitere Vorschläge sind optional.');
+			
+								
 		// Vkrit suggestion 2
 		$content .= '<fieldset>';
-		$content .= '<legend>V-Krit-Termin Vorschlag 2:</legend>';
+		$content .= '<legend>V-Krit-Termin Vorschlag 2 (optional):</legend>';
 		$content .= '<table><tr>
 						<td><label for="'.$this->extKey.'_eval_date_2">Datum:</label></td>
 						<td><input type="text" name="'.$this->extKey.'[eval_date_2]" id="'.$this->extKey.'_eval_date_2"  	
@@ -198,7 +200,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// Vkrit suggestion 3
 		$content .= '<fieldset>';
-		$content .= '<legend>V-Krit-Termin Vorschlag 3:</legend>';
+		$content .= '<legend>V-Krit-Termin Vorschlag 3 (optional):</legend>';
 		$content .= '<table><tr>
 						<td><label for="'.$this->extKey.'_eval_date_3">Datum:</label></td>
 						<td><input type="text" name="'.$this->extKey.'[eval_date_3]" id="'.$this->extKey.'_eval_date_3"  	
@@ -410,12 +412,12 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 												AND lecturer=\''.$lecturerUID['uid'].'\'');
 		$lectureArr = array();
 		if ($res && $row = mysql_fetch_assoc($res)) {
-			$content .= '<div>Sie können direkt mit weiteren Eintragungen fortfahren:</div>';
-			$content .= $this->pi_linkTP('Vorlesung eintragen', 
+			$content .= '<h3>Eingabe fortsetzen</h3><div>Sie können direkt mit weiteren Eintragungen fortfahren:</div>';
+			$content .= '<div style="text-align:center;">'.$this->pi_linkTP('<strong>weitere Vorlesung eintragen</strong>', 
 								array (	
 									$this->extKey.'[auth]' => $row['inputform_verify'],
 									$this->extKey.'[lecture]' => $row['uid']
-								));
+								)).'</div>';
 		}
 		else
 			$content .= '<div>Vielen Dank für Ihre Eintragungen.</div>';
