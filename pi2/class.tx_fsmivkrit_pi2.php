@@ -47,6 +47,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	const kLIST			= 1;
 	const kNOTIFY_FORM 	= 2;
 	const kNOTIFY_SEND 	= 3;
+	const kCHANGE_ENABLE_LECTURE	= 4;
 	
 	// states for lecture by 'eval_state' from table
 	const kEVAL_STATE_CREATED	= 0;
@@ -96,6 +97,23 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= $this->sendLecturerNotification(
 								intval($GETcommands['lecturer']), 
 								htmlspecialchars($GETcommands['comment']));
+				break;
+			}
+			case self::kCHANGE_ENABLE_LECTURE: {
+				$resLecture = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', intval($GETcommands['lecture']));
+				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+									'tx_fsmivkrit_lecture',
+									'uid=\''.intval($GETcommands['lecture']).'\'',
+									array (	'crdate' => time(),
+											'tstamp' => time(),
+											'hidden' => (($resLecture['hidden']+1) % 2)
+									));
+				if (!$res)
+					$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_ERROR,
+									'Fehler bei Datenbankzugriff.');
+									
+				$content .= $this->printLectureList();
 				break;
 			}
 			default: 
@@ -163,7 +181,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 												FROM tx_fsmivkrit_lecture 
-												WHERE deleted=0 AND hidden=0
+												WHERE deleted=0
 												AND survey=\''.$this->survey.'\'');
 		// print head
 		$content .= '<table cellpadding="5" cellspacing="2" class="fsmivkrit">';
@@ -173,9 +191,18 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			// get lecturer name
 			$resLecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
 			
-			$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">
-							<td width="50">'.($row['eval_state']).'</td>
-							<td width="250">'.$row['name'].'</td>
+			if ($row['hidden']==0)
+				$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">';
+			if ($row['hidden']==1)
+				$content .= '<tr style="background-color: #ccc;">';
+				
+			$content .= '	<td width="50">'.($row['eval_state']).'</td>
+							<td width="200">'.($row['name']).' '.
+								$this->pi_linkTP('(X)', 
+								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
+										$this->extKey.'[survey]' => $this->survey,
+										$this->extKey.'[lecture]' => $row['uid'])
+							).'</td>
 							<td width="300"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 								$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 			//TODO this does not work: change to check if there is such a lecture!
