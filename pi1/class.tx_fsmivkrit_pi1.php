@@ -76,18 +76,23 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$lecture = intval($GETcommands['lecture']);
 		$hash = htmlspecialchars($GETcommands['auth']);
 		
-		$content .= '<h2>Dateneingabe für Veranstaltungen</h2>';
+		$content .= '<h1>Dateneingabe für Veranstaltungen</h1>';
 		
 		switch (intval($GETcommands['type'])) {
 			case self::kVERIFY: {
+				$content .= '<h2>Eingabe bestätigen</h2>';
 				$content .= $this->printInputValuesToCheck($lecture,$hash); 
 				break;
 			}
 			case self::kSAVE: {
+				$content .= '<h2>Eingabe abgeschlossen</h2>';
 				$content .= $this->saveInputValues($lecture,$hash);
 				break;
 			}
-			default: $content .= $this->printInputForm($lecture, $hash);
+			default: {
+				$content .= '<h2>Daten eingeben</h2>';
+				$content .= $this->printInputForm($lecture, $hash);
+			}
 		}
 	
 		return $this->pi_wrapInBaseClass($content);
