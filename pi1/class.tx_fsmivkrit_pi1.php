@@ -85,8 +85,16 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				break;
 			}
 			case self::kSAVE: {
-				$content .= '<h2>Eingabe abgeschlossen</h2>';
-				$content .= $this->saveInputValues($lecture,$hash);
+				if ($GETcommands['submit_button']) {
+					$content .= '<h2>Eingabe abgeschlossen</h2>';
+					$content .= $this->saveInputValues($lecture,$hash);
+				}
+				else {
+					$content .= '<h2>Daten ändern</h2>';
+					$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+					$this->fillPiVarsWithPostValues($GETcommands);
+					$content .= $this->printInputForm($lecture, $hash);
+				}
 				break;
 			}
 			default: {
@@ -270,7 +278,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<fieldset>';
 		$content .= '<legend>Ergänzende Informationen:</legend>';
 		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment">'.$this->piVars["comment"].'</textarea></fieldset>';	
-
+				
 		// submit button
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Daten überprüfen').'">';
@@ -290,7 +298,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content = '';
 		
 		$content .= tx_fsmivkrit_div::printSystemMessage(
-							tx_fsmivkrit_div::kSTATUS_INFO,
+							tx_fsmivkrit_div::kSTATUS_WARNING,
 							'Daten wurden noch nicht gespeichert.'); 
 		
 		$content .= '<strong>Evaluation:</strong> '.$surveyUID['name'].' - '.$surveyUID['semester'];
@@ -313,7 +321,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		$content .= '<div><strong>Tutoren:</strong></div>';
 		$content .= '<ol>';
-		foreach ($inputData['assistant'] as $tutor) {
+		foreach ($inputData['assistants'] as $tutor) {
 			$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).'</li>'."\n";
 			if ($tutor[0]=='' && $tutor[1]=='')
 				continue;
@@ -344,11 +352,28 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<h3>Daten übermitteln</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 		
+		// TODO should be switched to sessions, to dangerous for data loss cause of typos
 		// hidden field to tell system, that IMPORT data is coming
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kSAVE.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[auth]'.'" value="'.$hash.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
-									
+		$content .= '<input type="hidden" name="'.$this->extKey.'[participants]'.'" value="'.$inputData['participants'].'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[comment]'.'" value="'.$inputData['comment'].'" />';
+		
+		$assistants = array ();
+		foreach($inputData['assistants'] as $tutor)
+			array_push($assistants,implode(',',$tutor));
+		$content .= '<input type="hidden" name="'.$this->extKey.'[assistants]'.'" value="'.implode("\n",$assistants).'" />';
+		
+		for ($i=1; $i<=3; $i++) {
+			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_date_'.$i.']" value="'.date('d.m.Y',$inputData["eval_".$i]['date']).'" />';
+			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_time_'.$i.']" value="'.date('H:i',$inputData["eval_".$i]['date']).'" />';
+			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_room_'.$i.']" value="'.$inputData["eval_".$i]['room'].'" />';
+		}
+		
+		
+		$content .= '<input type="submit" name="'.$this->extKey.'[back_button]" 
+				value="'.htmlspecialchars('Eingaben ändern').'">  ';
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Daten speichern').'">';
 		
@@ -366,9 +391,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		
 		// assistants
 		$tutorArr = explode("\n",htmlspecialchars($POSTdata['assistants']));
-		$inputData['assistant'] = array ();
+		$inputData['assistants'] = array ();
 		foreach($tutorArr as $tutor)
-			array_push($inputData['assistant'],explode(',',$tutor));
+			array_push($inputData['assistants'],explode(',',$tutor));
 
 		// vkrit dates
 		for ($i=1; $i<=3; $i++) {
@@ -446,7 +471,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 								);						
 							
 		// insert tutorials
-		foreach ($inputData['assistant'] as $tutor) {
+		foreach ($inputData['assistants'] as $tutor) {
 			if ($tutor[0]=='' && $tutor[1]=='')
 				continue;
 			
@@ -531,6 +556,18 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				$this->piVars["assistants"] .= "\n".$row['assistant_name'].','.$row['assistant_forename'];
 			}
 		}			
+	}
+	
+	function fillPiVarsWithPostValues ($data) {
+		$this->piVars['participants'] = intval($data['participants']);
+		$this->piVars['comment'] = strip_tags($data['comment']);
+		$this->piVars["assistants"]=strip_tags($data['assistants']);
+			// set dates
+		for ($i=1; $i<=3; $i++) {
+			$this->piVars["eval_date_".$i] = strip_tags($data['eval_date_'.$i]);
+			$this->piVars["eval_time_".$i] = strip_tags($data['eval_time_'.$i]);
+			$this->piVars["eval_room_".$i] = strip_tags($data['eval_room_'.$i]);
+		}
 	}
 }
 
