@@ -91,7 +91,46 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			}
 			default: {
 				$content .= '<h2>Daten eingeben</h2>';
-				$content .= $this->printInputForm($lecture, $hash);
+				$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+				
+				switch ($lectureUID['eval_state']) {
+					case self::kEVAL_STATE_NOTIFIED: {
+						$content .= $this->printInputForm($lecture, $hash);
+						break;
+					}
+					case self::kEVAL_STATE_CREATED: {
+						$content .= $this->printInputForm($lecture, $hash);
+						break;
+						}
+					case self::kEVAL_STATE_COMPLETED: {
+						$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_WARNING,
+										'Für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurden bereits Daten eingegeben.');
+//						$content .= '<div>Sie können die ensprechenden Einträge an dieser Stelle ändern:</div>';
+						$this->fillPiVarsWithDBValues($lecture);
+										
+						$content .= $this->printInputForm($lecture, $hash);
+						break;
+					}
+					case self::kEVAL_STATE_APPROVED: {
+						$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_ERROR,
+										'Die Eintragung für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurde gesperrt.');
+						$content .= '<div>Das Orga-Team hat die Eintragung für diesen Datensatz gesperrt. Grund ist die bereits erfolgte
+										Festlegung auf einen Evaluationstermin.<br />
+										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:criticus@upb.de">criticus@upb.de</a>.</div>';
+						break;
+					}
+					default: { // same as before, but to not get confused... again here
+						$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_ERROR,
+										'Die Eintragung für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurde gesperrt.');
+						$content .= '<div>Das Orga-Team hat die Eintragung für diesen Datensatz gesperrt. Grund ist die bereits erfolgte
+										Festlegung auf einen Evaluationstermin.<br />
+										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:criticus@upb.de">criticus@upb.de</a>.</div>';
+						break;
+					}
+				}
 			}
 		}
 	
@@ -140,7 +179,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 						<td style="vertical-align:top"><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
 						<td><div>Exakt einen Tutor pro Zeile eintragen "Nachname,Vorname", mit Komma (,) trennen.<br />
 							Beispiel: "Mustermann,Max"</div>
-							<textarea name="'.$this->extKey.'[assistants]" id="'.$this->extKey.'_assistants" cols="74" rows="15"></textarea></td>
+							<textarea name="'.$this->extKey.'[assistants]" id="'.$this->extKey.'_assistants" cols="74" rows="15">'.
+							$this->piVars['assistants'].
+							'</textarea></td>
 					</tr>'; //TODO make selector
 		
 		$content .= '</table></fieldset>';
@@ -165,9 +206,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_1">Uhrzeit:</label></td>
-						<td><select type="text" name="'.$this->extKey.'[eval_time_1]" id="'.$this->extKey.'_eval_time_1"  	
-								value="'.htmlspecialchars($this->piVars["eval_time_1"]).'">'.
-								$this->printOptionListTime().
+						<td><select type="text" name="'.$this->extKey.'[eval_time_1]" id="'.$this->extKey.'_eval_time_1">'.
+								$this->printOptionListTime($this->piVars["eval_time_1"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -192,9 +232,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_2">Uhrzeit:</label></td>
-						<td><select type="text" name="'.$this->extKey.'[eval_time_2]" id="'.$this->extKey.'_eval_time_2"  	
-								value="'.htmlspecialchars($this->piVars["eval_time_2"]).'">'.
-								$this->printOptionListTime().
+						<td><select type="text" name="'.$this->extKey.'[eval_time_2]" id="'.$this->extKey.'_eval_time_2">'.
+								$this->printOptionListTime($this->piVars["eval_time_2"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -214,9 +253,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_3">Uhrzeit:</label></td>
-						<td><select type="text" name="'.$this->extKey.'[eval_time_3]" id="'.$this->extKey.'_eval_time_3"  	
-								value="'.htmlspecialchars($this->piVars["eval_time_3"]).'">'.
-								$this->printOptionListTime().
+						<td><select type="text" name="'.$this->extKey.'[eval_time_3]" id="'.$this->extKey.'_eval_time_3">'.
+								$this->printOptionListTime($this->piVars["eval_time_3"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -228,7 +266,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// comment input
 		$content .= '<fieldset>';
 		$content .= '<legend>Ergänzende Informationen:</legend>';
-		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment"></textarea></fieldset>';	
+		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment">'.$this->piVars["comment"].'</textarea></fieldset>';	
 
 		// submit button
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
@@ -272,8 +310,11 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		$content .= '<div><strong>Tutoren:</strong></div>';
 		$content .= '<ol>';
-		foreach ($inputData['assistant'] as $tutor)
+		foreach ($inputData['assistant'] as $tutor) {
 			$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).'</li>'."\n";
+			if ($tutor[0]=='' && $tutor[1]=='')
+				continue;
+		}
 		$content .= '</ol>';
 
 		$content .= '<div><strong>V-Krit Termine:</strong></div>';
@@ -337,16 +378,20 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 	
 	/**
 	 * Creates a list of time steps from 7am to 8pm in steps of a quarter.
+	 * @param comperator string to see if value should be marked as selected
 	 * @return list of <option>...</option> entries for a HTML selector.
 	 */
-	function printOptionListTime() {
+	function printOptionListTime($selected) {
 		$content = '';
 		for ($hour=7; $hour<20; $hour++)
 			for ($min=0; $min<60; $min+=15) {
 				$hour<10? $hourPrint='0'.$hour: $hourPrint=$hour;
 				$min<10? $minPrint='0'.$min: $minPrint=$min;
 				
-				$content .= '<option value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
+				if ($selected==$hourPrint.':'.$minPrint)
+					$content .= '<option selected="selected" value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
+				else
+					$content .= '<option value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
 			}
 		return $content;
 	}
@@ -379,22 +424,31 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 											'eval_room_2'	=> $inputData['eval_2']['room'],
 											'eval_room_3'	=> $inputData['eval_3']['room'],
 											'eval_state'	=> self::kEVAL_STATE_COMPLETED,
-											'comment'		=> $inputDate['comment']
+											'comment'		=> $inputData['comment']
 									));
 		if (!$res)
 			return tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_ERROR,
 							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.'); 
+
+		// clear up tutors if lecture maybe was saved before
+		// this could be the case if lecturere saves and starts edit again
+		$GLOBALS['TYPO3_DB']->exec_DELETEquery(
+										'tx_fsmivkrit_tutorial','lecture='.$lecture
+								);						
 							
 		// insert tutorials
 		foreach ($inputData['assistant'] as $tutor) {
+			if ($tutor[0]=='' && $tutor[1]=='')
+				continue;
+			
 			$res = $GLOBALS['TYPO3_DB']->exec_INSERTquery(	
 									'tx_fsmivkrit_tutorial',
 									array (	'pid' => $lectureUID['pid'],
 											'crdate' => time(),
 											'tstamp' => time(),
-											'assistant_name' => $tutor[0],
-											'assistant_forename' => $tutor[1],
+											'assistant_name' => trim($tutor[0]),
+											'assistant_forename' => trim($tutor[1]),
 											'lecture' => $lectureUID['uid'],
 									));
 			if (!$res)
@@ -435,6 +489,40 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			$content .= '<div>Vielen Dank für Ihre Eintragungen.</div>';
 			
 		return $content;
+	}
+	
+	function fillPiVarsWithDBValues ($lecture) {
+		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		
+		// set participants
+		if ($this->piVars["participants"]=='' && $lectureUID['participants']!=0)
+			$this->piVars["participants"] = $lectureUID['participants'];
+			
+		// set comment
+		if ($this->piVars["comment"]=='' && $lectureUID['comment']!='')
+			$this->piVars["comment"] = $lectureUID['comment'];
+			
+		// set dates
+		for ($i=1; $i<=3; $i++) {
+			if ($this->piVars["eval_date_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
+				$this->piVars["eval_date_".$i] = date('y-m-d',$lectureUID['eval_date_'.$i]);
+				
+			if ($this->piVars["eval_time_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
+				$this->piVars["eval_time_".$i] = date('h:i',$lectureUID['eval_date_'.$i]);
+
+			if ($this->piVars["eval_room_".$i]=='' && $lectureUID['eval_room_'.$i]!='')
+				$this->piVars["eval_room_".$i] = $lectureUID['eval_room_'.$i];
+		}
+
+		if ($this->piVars["assistants"]=='') {
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_tutorial 
+													WHERE deleted=0 AND hidden=0
+													AND lecture=\''.$lectureUID['uid'].'\'');
+			while ($res && $row = mysql_fetch_assoc($res)) {
+				$this->piVars["assistants"] .= "\n".$row['assistant_name'].','.$row['assistant_forename'];
+			}
+		}			
 	}
 }
 
