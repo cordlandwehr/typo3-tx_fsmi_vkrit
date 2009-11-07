@@ -218,7 +218,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_1">Uhrzeit:</label></td>
 						<td><select type="text" name="'.$this->extKey.'[eval_time_1]" id="'.$this->extKey.'_eval_time_1">'.
-								$this->printOptionListTime($this->piVars["eval_time_1"]).
+								tx_fsmivkrit_div::printOptionListTime($this->piVars["eval_time_1"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -244,7 +244,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_2">Uhrzeit:</label></td>
 						<td><select type="text" name="'.$this->extKey.'[eval_time_2]" id="'.$this->extKey.'_eval_time_2">'.
-								$this->printOptionListTime($this->piVars["eval_time_2"]).
+								tx_fsmivkrit_div::printOptionListTime($this->piVars["eval_time_2"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -265,7 +265,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_3">Uhrzeit:</label></td>
 						<td><select type="text" name="'.$this->extKey.'[eval_time_3]" id="'.$this->extKey.'_eval_time_3">'.
-								$this->printOptionListTime($this->piVars["eval_time_3"]).
+								tx_fsmivkrit_div::printOptionListTime($this->piVars["eval_time_3"]).
 						'</select>	
 					</td></tr>
 					<tr><td>
@@ -409,25 +409,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		return $inputData;
 	}
 	
-	/**
-	 * Creates a list of time steps from 7am to 8pm in steps of a quarter.
-	 * @param comperator string to see if value should be marked as selected
-	 * @return list of <option>...</option> entries for a HTML selector.
-	 */
-	function printOptionListTime($selected) {
-		$content = '';
-		for ($hour=7; $hour<20; $hour++)
-			for ($min=0; $min<60; $min+=15) {
-				$hour<10? $hourPrint='0'.$hour: $hourPrint=$hour;
-				$min<10? $minPrint='0'.$min: $minPrint=$min;
-				
-				if ($selected==$hourPrint.':'.$minPrint)
-					$content .= '<option selected="selected" value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
-				else
-					$content .= '<option value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
-			}
-		return $content;
-	}
+
 	
 	function saveInputValues($lecture,$hash) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);

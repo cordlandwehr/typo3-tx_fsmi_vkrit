@@ -24,6 +24,8 @@
 			<label index="tx_fsmivkrit_lecture.eval_room_1">Evaluation Room 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_room_2">Evaluation Room 2</label>
 			<label index="tx_fsmivkrit_lecture.eval_room_3">Evaluation Room 3</label>
+			<label index="tx_fsmivkrit_lecture.eval_date_fixed">Fixed Evaluation Date</label>
+			<label index="tx_fsmivkrit_lecture.eval_room_fixed">Fixed Evaluation Room</label>
 			<label index="tx_fsmivkrit_lecture.no_eval">No Evaluation (too small)</label>
 			<label index="tx_fsmivkrit_lecture.foreign_id">Foreign ID</label>
 			<label index="tx_fsmivkrit_lecture.kritter_1">Evaluator 1</label>
@@ -83,6 +85,8 @@
 			<label index="tx_fsmivkrit_lecture.eval_room_1">Vkrit Raum 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_room_2">Vkrit Raum 2</label>
 			<label index="tx_fsmivkrit_lecture.eval_room_3">Vkrit Raum 3</label>
+			<label index="tx_fsmivkrit_lecture.eval_date_fixed">Festgelegter Vkrit Termin</label>
+			<label index="tx_fsmivkrit_lecture.eval_room_fixed">Festgelegter Vkrit Raum</label>
 			<label index="tx_fsmivkrit_lecture.no_eval">Keine Vkrit (zu klein)</label>
 			<label index="tx_fsmivkrit_lecture.foreign_id">Externe ID</label>
 			<label index="tx_fsmivkrit_lecture.kritter_1">Kritter 1</label>

@@ -51,6 +51,9 @@ class tx_fsmivkrit_div {
 	 * @return string of HTML div box
 	 */
 	function printSystemMessage($status, $text) {
+		
+		// TODO it would be nice if the info boxes may be hidden on click
+		
 		$content = '';
 		$content .= '<div style="min-height:30px; " ';
 		switch ($status) {
@@ -82,6 +85,25 @@ class tx_fsmivkrit_div {
 		return $content;
 	}
 
+	/**
+	 * Creates a list of time steps from 7am to 8pm in steps of a quarter.
+	 * @param comperator string to see if value should be marked as selected
+	 * @return list of <option>...</option> entries for a HTML selector.
+	 */
+	function printOptionListTime($selected) {
+		$content = '';
+		for ($hour=7; $hour<20; $hour++)
+			for ($min=0; $min<60; $min+=15) {
+				$hour<10? $hourPrint='0'.$hour: $hourPrint=$hour;
+				$min<10? $minPrint='0'.$min: $minPrint=$min;
+				
+				if ($selected==$hourPrint.':'.$minPrint)
+					$content .= '<option selected="selected" value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
+				else
+					$content .= '<option value="'.$hourPrint.':'.$minPrint.'">'.$hourPrint.':'.$minPrint.'</option>'."\n";
+			}
+		return $content;
+	}
 }
 
 // Include extension?

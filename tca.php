@@ -193,6 +193,23 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 				'size' => '30',
 			)
 		),
+		'eval_date_fixed' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.eval_date_fixed',		
+			'config' => array (
+				'type' => 'input',	
+				'size' => '30',	
+				'eval' => 'datetime',
+			)
+		),
+		'eval_room_fixed' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.eval_room_fixed',		
+			'config' => array (
+				'type' => 'input',	
+				'size' => '30',
+			)
+		),
 		'no_eval' => array (		
 			'exclude' => 0,		
 			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.no_eval',		
@@ -332,7 +349,7 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, eval_room_3, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office, eval_state, inputform_verify, comment')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, lecturer, survey, participants, eval_date_1, eval_date_2, eval_date_3, eval_room_1, eval_room_2, eval_room_3, eval_date_fixed, eval_room_fixed, no_eval, foreign_id, kritter_1, kritter_2, kritter_3, kritter_4, weight, pictures, godfather, tipper, to_scan_office, eval_state, inputform_verify, comment')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')
