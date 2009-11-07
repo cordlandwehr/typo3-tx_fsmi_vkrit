@@ -557,6 +557,7 @@ mit.</textarea></div>
 					'<li><strong>Dozent:</strong> '.$lecturerUID['name'].', '.$lecturerUID['forename'].'</li>'.
 					'<li><strong>Teilnehmer:</strong> '.$lectureUID['participants'].'</li>'.
 					'</ul>';
+		$content .= '<pre>'.$lectureUID['comment'].'</pre>';
 		
 		$content .= '<h3>Evaluationstermin</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
