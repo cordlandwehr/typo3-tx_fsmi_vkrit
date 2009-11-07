@@ -194,15 +194,20 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			if ($row['hidden']==0)
 				$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">';
 			if ($row['hidden']==1)
-				$content .= '<tr style="background-color: #ccc;">';
+				$content .= '<tr style="background-color: #ddd; font-style: italic;">';
 				
+			// lecture and lecture activation state
+			$lectureActivation = array ();
+			$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
+			$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
 			$content .= '	<td width="50">'.($row['eval_state']).'</td>
-							<td width="200">'.($row['name']).' '.
-								$this->pi_linkTP('(X)', 
+							<td width="200">'.
+								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
 								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecture]' => $row['uid'])
-							).'</td>
+							).
+							' '.$row['name'].'</td>
 							<td width="300"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 								$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 			//TODO this does not work: change to check if there is such a lecture!
