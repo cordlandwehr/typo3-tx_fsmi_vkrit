@@ -206,14 +206,14 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 							<td width="300"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 								$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 			//TODO this does not work: change to check if there is such a lecture!
-			if ($resLecture['eval_state']<self::kEVAL_STATE_COMPLETED)
+			if ($row['eval_state']<self::kEVAL_STATE_COMPLETED)
 				$content .= '<td width="100">'.$this->pi_linkTP('erinnern', 
 								array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecturer]' => $resLecturer['uid'])).
 							'</td>';
 			else
-				$content .= '<td width="100">erinnern</td>';
+				$content .= '<td width="100">moderieren (tba)</td>';
 			$contetn .= '</tr>';
 			
 		}
@@ -392,6 +392,9 @@ mit.
 											array(
 												'eval_state' => self::kEVAL_STATE_NOTIFIED)
 											);
+				t3lib_div::sysLog (
+					'Sent notification mail to '.$lecturerUID['name'].'.',
+					$this->extKey);
 							
 			} else
 				$content .= tx_fsmivkrit_div::printSystemMessage(

@@ -488,6 +488,11 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				return tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_ERROR,
 							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.'); 				
+							
+			// set system log
+			t3lib_div::sysLog (
+					'Lecturer updated data for '.$lectureUID['name'].' ['.$lectureUID['uid'].'].',
+					$this->extKey);
 		}
 		
 		$content .= tx_fsmivkrit_div::printSystemMessage(
