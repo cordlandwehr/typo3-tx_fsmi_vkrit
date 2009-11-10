@@ -80,11 +80,26 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		
 		switch (intval($GETcommands['type'])) {
 			case self::kVERIFY: {
+				if ($lecture==0) {
+					$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_ERROR,
+										'Die von Ihnen verwendete URL ist nicht korrekt. Es fehlt die Angabe einer Veranstaltung.');
+					break;
+				}
+				
 				$content .= '<h2>Eingabe bestätigen</h2>';
 				$content .= $this->printInputValuesToCheck($lecture,$hash); 
 				break;
 			}
 			case self::kSAVE: {
+				if ($lecture==0) {
+					$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_ERROR,
+										'Die von Ihnen verwendete URL ist nicht korrekt. Es fehlt die Angabe einer Veranstaltung.');
+					break;
+				}
+				
+				
 				if ($GETcommands['submit_button']) {
 					$content .= '<h2>Eingabe abgeschlossen</h2>';
 					$content .= $this->saveInputValues($lecture,$hash);
@@ -335,6 +350,11 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).'</li>'."\n";
 			if ($tutor[0]=='' && $tutor[1]=='')
 				continue;
+			// check for comma count
+			if (count($tutur)>2)
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_WARNING,
+									'Bitte überprüfen Sie, ob Tutor korrekt angegeben wurde: in entsprechender Zeile wurde mehr als ein Komma angegeben.');
 		}
 		$content .= '</ol>';
 
