@@ -98,6 +98,16 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				break;
 			}
 			default: {
+				// crucial:
+				// if this is not here the lecturer gets no notification that its data totally screwed up, cause the input lecuture does not exist
+				// reasion for this is e.g. Thunderbird that does not include GET arguments.
+				if ($lecture==0) {
+					$content .= tx_fsmivkrit_div::printSystemMessage(
+										tx_fsmivkrit_div::kSTATUS_ERROR,
+										'Die von Ihnen verwendete URL ist nicht korrekt. Es fehlt die Angabe einer Veranstaltung.');
+					break;
+				}
+				
 				$content .= '<h2>Daten eingeben</h2>';
 				$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 				
