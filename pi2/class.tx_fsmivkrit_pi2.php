@@ -476,7 +476,7 @@ mit.</textarea></div>
 				$msg='Eintragung Veranstaltungskritik'."\n". // first line is subject
 						$mailContent, 
 				$recipients=$lecturerUID['email'], 
-				$cc='', 
+				$cc='criticus@upb.de', 
 				$email_from='criticus@uni-paderborn.de', 
 				$email_fromName='', 
 				$replyTo='');
@@ -735,7 +735,7 @@ mit.</textarea></div>
 				$msg='Termin für Veranstaltungskritik wurde festgelegt'."\n". // first line is subject
 					$mailContent, 
 				$recipients=$lecturerUID['email'], 
-				$cc='', 
+				$cc='criticus@upb.de', 
 				$email_from='criticus@uni-paderborn.de', 
 				$email_fromName='', 
 				$replyTo='');
