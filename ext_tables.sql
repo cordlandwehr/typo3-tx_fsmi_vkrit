@@ -10,6 +10,7 @@ CREATE TABLE tx_fsmivkrit_lecturer (
 	deleted tinyint(4) DEFAULT '0' NOT NULL,
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	title tinytext,
+	sex int(11) DEFAULT '0' NOT NULL,
 	name tinytext,
 	forename tinytext,
 	email tinytext,

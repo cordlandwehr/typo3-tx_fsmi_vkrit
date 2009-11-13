@@ -7,7 +7,11 @@
 	<data type="array">
 		<languageKey index="default" type="array">
 			<label index="tx_fsmivkrit_lecturer">Lecturer</label>
-			<label index="tx_fsmivkrit_title.name">Title</label>
+			<label index="tx_fsmivkrit_lecturer.title">Title</label>
+			<label index="tx_fsmivkrit_lecturer.sex">Sex</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.0">Not specified</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.1">Female</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.2">Male</label>
 			<label index="tx_fsmivkrit_lecturer.name">Name</label>
 			<label index="tx_fsmivkrit_lecturer.forename">Forename</label>
 			<label index="tx_fsmivkrit_lecturer.email">Email</label>
@@ -68,7 +72,11 @@
 		</languageKey>
 		<languageKey index="de" type="array">
 			<label index="tx_fsmivkrit_lecturer">Dozent</label>
-			<label index="tx_fsmivkrit_title.name">Anrede</label>
+			<label index="tx_fsmivkrit_lecturer.title">Anrede</label>
+			<label index="tx_fsmivkrit_lecturer.sex">Geschlecht</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.0">Nicht angegeben</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.1">Weiblich</label>
+			<label index="tx_fsmivkrit_lecturer.sex.I.2">Männlich</label>
 			<label index="tx_fsmivkrit_lecturer.name">Name</label>
 			<label index="tx_fsmivkrit_lecturer.forename">Vorname</label>
 			<label index="tx_fsmivkrit_lecturer.email">Email</label>

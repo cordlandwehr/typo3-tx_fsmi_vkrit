@@ -389,7 +389,12 @@ mit.</textarea></div>
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecturer);
 		
 		$content = '';
-		$content .= 'Sehr geehrte/r '.$lecturerUID['title'].' '.$lecturerUID['name'].','.
+		switch ($lecturerUID['sex']) {
+			case tx_fsmivkrit_pi4::kDB_SEX_FEMALE: 	$content .= 'Sehr geehrte Frau '; break;
+			case tx_fsmivkrit_pi4::kDB_SEX_MALE:	$content .= 'Sehr geehrter Herr '; break;
+			default: $content .= 'Sehr geehrte/r '.$lecturerUID['title'];
+		}
+		$content .= $lecturerUID['name'].','.
 					"\n\n";
 		return $content;
 		
@@ -570,6 +575,11 @@ mit.</textarea></div>
 		$content .= '<fieldset>';
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=3; $i++) {
+			// do not select non-set dates
+			if ($lectureUID['eval_date_'.$i]==0)
+				continue;
+			
+			// radio button
 			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" 
 							id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).'</label>'."<br />\n";

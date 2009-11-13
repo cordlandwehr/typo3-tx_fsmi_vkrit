@@ -24,6 +24,18 @@ $TCA['tx_fsmivkrit_lecturer'] = array (
 				'size' => '30',
 			)
 		),
+		"sex" => Array (		
+			"exclude" => 0,		
+			"label" => "LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.sex",		
+			"config" => Array (
+				"type" => "radio",
+				"items" => Array (
+					Array("LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.sex.I.0", "0"),
+					Array("LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.sex.I.1", "1"),
+					Array("LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.sex.I.2", "2"),
+				),
+			)
+		),
 		'name' => array (		
 			'exclude' => 0,		
 			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.name',		
@@ -69,7 +81,7 @@ $TCA['tx_fsmivkrit_lecturer'] = array (
 		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, title, name, forename, email, reshipment, foreign_id')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, title, sex, name, forename, email, reshipment, foreign_id')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')

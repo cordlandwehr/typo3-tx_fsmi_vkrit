@@ -61,6 +61,11 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	const kCSV_TEILNEHMER	= 11;
 	const kCSV_ORGAEINHEIT	= 12;
 
+	// values for sex-field
+	const kDB_SEX_UNKNOWN	= 0;
+	const kDB_SEX_FEMALE	= 1;
+	const kDB_SEX_MALE		= 2;
+	
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -265,13 +270,22 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		
 		// save lecturers
 		foreach ($lecturerArr as $lecturer) {
-		
+			
+			// try to calculate sex
+			if ($lecturer[self::kCSV_ANREDE] == 'Frau')
+				$lecturer['sex'] = self::kDB_SEX_FEMALE;
+			else if ($lecturer[self::kCSV_ANREDE] == 'Herr')
+				$lecturer['sex'] = self::kDB_SEX_MALE;
+			else
+				$lecturer['sex'] = self::kDB_SEX_UNKNOWN;
+				
 			$res = $GLOBALS['TYPO3_DB']->exec_INSERTquery(	
 									'tx_fsmivkrit_lecturer',
 									array (	'pid' => $storage,
 											'crdate' => time(),
 											'tstamp' => time(),
 											'title' => $lecturer[self::kCSV_ANREDE],
+											'sex' => $lecturer['sex'],
 											'name' => $lecturer[self::kCSV_NACHNAME],
 											'forename' => $lecturer[self::kCSV_VORNAME],
 											'email' => $lecturer[self::kCSV_EMAIL],

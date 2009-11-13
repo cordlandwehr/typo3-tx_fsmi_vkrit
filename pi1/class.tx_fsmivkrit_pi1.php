@@ -455,6 +455,18 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									tx_fsmivkrit_div::kSTATUS_ERROR,
 									'Der Verifikationswert ist falsch. Bitte verwenden sie die exakte URL aus der Benachrichtigungsmail.');
 
+		// inform if eval-date is not in survey time periode
+		for ($i=1; $i<=3; $i++) {
+			if (
+				$inputData['eval_'.$i]['date'] < $surveyUID['eval_start'] ||
+				$inputData['eval_'.$i]['date'] > $surveyUID['eval_end']
+			) {
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_WARNING,
+									'Im '.$i.'-ten Eingabefeld haben Sie einen Termin angegeben, welcher außerhalb des Evaluationszeitraumes liegt.');
+			}
+		}
+									
 		// update Lecture
 		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
 									'tx_fsmivkrit_lecture',
