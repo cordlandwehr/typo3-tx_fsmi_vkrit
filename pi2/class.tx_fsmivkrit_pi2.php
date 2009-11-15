@@ -29,6 +29,7 @@
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
+require_once(t3lib_extMgm::extPath('fsmi_vkrit').'pi4/class.tx_fsmivkrit_pi4.php');
 require_once(t3lib_extMgm::extPath('rlmp_dateselectlib').'class.tx_rlmpdateselectlib.php');
 
 /**
