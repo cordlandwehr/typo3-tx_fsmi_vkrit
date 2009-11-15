@@ -363,6 +363,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		for($i=1; $i<=3; $i++) {
 			if ($inputData['eval_'.$i]['date']=='')
 				continue;
+				
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y h:i', $inputData['eval_'.$i]['date']).', 
 						<strong>Raum:</strong> '.$inputData['eval_'.$i]['room'].'</li>';
 			if ($inputData['eval_'.$i]['date']<$surveyUID['eval_start'] || ($surveyUID['eval_end']!=0 && $inputData['eval_'.$i]['date']>$surveyUID['eval_end']))

@@ -134,6 +134,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 													tx_fsmivkrit_div::kSTATUS_INFO,
 													'Noch nicht implementiert! Bei Bedarf den überarbeiteten Programmierer kontaktieren...');
+				// TODO not hardcoded!
+				$content .= $this->createOutputDOM(1);
 				break;
 			}
 			default: 
@@ -351,6 +353,226 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		}
 		return $lecturerArr;
 	}
+	
+	/**
+	 * This function creates an object of type DomDocument that represents a given survey in XSD style as requested by 
+	 * "Handbuch für den XML-Import V4.0" by EvaSys.
+	 * Please note that only the data is included that is contained in the database. 
+	 * @param Integer for $survey UID
+	 * @return DocumentDOM as object
+	 */
+	function createOutputDOM($survey) {
+		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $survey);
+		
+		// we expect data
+		if (!$surveyUID)
+			return false;
+		
+		$document = new DomDocument('1.0', 'utf-8');	// *THE* return value
+		$document->formatOutput = true;
+		
+		$evasysDOM = $document->appendChild(
+			$document->createElement('EvaSys')
+		);
+		
+		/*
+		 * Frist Step:
+		 * Create Survey
+		 */
+		$surveyDOM = $evasysDOM->appendChild(
+			$document->createElement('Survey')
+		);
+		$surveyDOM->setAttribute('key', $this->getKeyForSurvey($surveyUID['uid']));
+		$surveyDOM->appendChild(
+			$document->createElement(
+				'survey_period',
+				$surveyUID['semester'])
+			);
+		//TODO type? no idea if mandatory, ask SVK team!
+		
+			
+		/*
+		 * Second Step:
+		 * Create Lecturers
+		 */
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid,
+													tx_fsmivkrit_lecturer.name as name, 
+													tx_fsmivkrit_lecturer.forename as forename, 
+													tx_fsmivkrit_lecturer.email as email,
+													tx_fsmivkrit_lecturer.title as title
+												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_lecturer 
+												WHERE tx_fsmivkrit_lecturer.deleted=0
+												AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
+												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'');
+			
+		while ($res && $lecturer = mysql_fetch_assoc($res)) {
+			$newLecturer = $evasysDOM->appendChild(
+				$document->createElement('Person')
+			);
+			// set key
+			$newLecturer->setAttribute('key', $this->getKeyForLecturer($lecturer['uid']));
+			// set name
+			$newLecturer->appendChild(
+				$document->createElement(
+					'firstname',
+					$lecturer['forename']
+				)
+			);
+			$newLecturer->appendChild(
+				$document->createElement(
+					'lastname',
+					$lecturer['name']
+				)
+			);
+			// set email
+			$newLecturer->appendChild(
+				$document->createElement(
+					'email',
+					$lecturer['email']
+				)
+			);
+		}
+		
+		// TODO question: what to do with tutors: send them mails directly, or to lecturers?
+		// talk to Vkrit-Team
+		/*
+		 * Third Step:
+		 * Create Assistants
+		 */
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_tutorial.uid as uid,
+													tx_fsmivkrit_tutorial.assistant_name as name, 
+													tx_fsmivkrit_tutorial.assistant_forename as forename
+												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_tutorial 
+												WHERE tx_fsmivkrit_tutorial.deleted=0
+												AND tx_fsmivkrit_lecture.uid =  tx_fsmivkrit_tutorial.lecture
+												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'');
+			
+		while ($res && $tutor = mysql_fetch_assoc($res)) {
+			$newTutor = $evasysDOM->appendChild(
+				$document->createElement('Person')
+			);
+			// set key
+			$newLecturer->setAttribute('key', $this->getKeyForTutor($tutor['uid']));
+			// set name
+			$newTutor->appendChild(
+				$document->createElement(
+					'firstname',
+					$tutor['forename']
+				)
+			);
+			$newTutor->appendChild(
+				$document->createElement(
+					'lastname',
+					$tutor['name']
+				)
+			);
+			// TODO here: mail
+		}
+		
+		/*
+		 * Fourth Step:
+		 * Create Lectures
+		 */
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+												FROM tx_fsmivkrit_lecture 
+												WHERE deleted=0
+												AND survey=\''.$survey.'\'');
+			
+		while ($res && $lecture = mysql_fetch_assoc($res)) {
+			$newLecture = $evasysDOM->appendChild(
+				$document->createElement('Lecture')
+			);
+			$newLecture->setAttribute('key', $this->getKeyForLecture($lecture['uid']));
+
+			// container for lecturer and tutors
+			$newDozs = $newLecture->appendChild(
+				$document->createElement('dozs')
+			);
+			
+			// include lecturer
+			$newSingleDoz = $newDozs->appendChild(
+				$document->createElement('doz')
+			);
+			$newEvaRef = $newSingleDoz->appendChild(
+				$document->createElement('EvaSysRef')
+			);
+			$newEvaRef->setAttribute('type', 'Person');
+			$newEvaRef->setAttribute('key',$this->getKeyForLecturer($lecture['lecturer']));
+			
+			// include tutors
+			$resTutors = $GLOBALS['TYPO3_DB']->sql_query('SELECT uid
+												FROM tx_fsmivkrit_tutorial 
+												WHERE deleted=0
+												AND lecture=\''.$lecture['uid'].'\'');
+			while ($resTutors && $tutor = mysql_fetch_assoc($res)) {
+				$newSingleDoz = $newDozs->appendChild(
+					$document->createElement('doz')
+				);
+				$newEvaRef = $newSingleDoz->appendChild(
+					$document->createElement('EvaSysRef')
+				);
+				$newEvaRef->setAttribute('type', 'Person');
+				$newEvaRef->setAttribute('key',$this->getKeyForTutor($tutor['uid']));
+			}
+			
+			// lecture information (name, term...)
+			$newLecture->appendChild(
+				$document->createElement(
+					'name',
+					htmlspecialchars($lecture['name'])
+				)
+			);
+			$newLecture->appendChild(
+				$document->createElement(
+					'period',
+					htmlspecialchars($surveyUID['semester'])
+				)
+			);
+			
+		}
+		
+		return $document->saveXML();
+	}
+	
+	/**
+	 * Function creates unique key for lecture according to Electric Paper guidances
+	 * @param $lecture UID as integer
+	 * @return key as string
+	 */
+	function getKeyForLecture($lecture) {
+		//$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		return 'lec'.$lecture;
+	}
+
+	/**
+	 * Function creates unique key for lecturer according to Electric Paper guidances.
+	 * @param $lecturer UID as integer
+	 * @return key as string
+	 */
+	function getKeyForLecturer($lecturer) {
+		//$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		return 'doz'.$lecturer;
+	}	
+
+	/**
+	 * Function creates unique key for teaching assistant according to Electric Paper guidances.
+	 * @param $tutor UID as integer
+	 * @return key as string
+	 */
+	function getKeyForTutor($tutor) {
+		//$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		return 'tut'.$lecturer;
+	}	
+	
+	/**
+	 * Function creates unique key for survey according to Electric Paper guidances.
+	 * @param $survey UID as integer
+	 * @return key as string
+	 */
+	function getKeyForSurvey($survey) {
+		return 'sur'.$survey;
+	}	
+		
 	
 }
 
