@@ -100,7 +100,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				if ($lecture==0) {
 					$content .= tx_fsmivkrit_div::printSystemMessage(
 										tx_fsmivkrit_div::kSTATUS_ERROR,
-										'Die von Ihnen verwendete URL ist nicht korrekt. Es fehlt die Angabe einer Veranstaltung.');
+										'Die von Ihnen verwendete URL ist nicht korrekt. Es fehlt die Angabe einer Veranstaltung.<br />
+										Bitte kopieren Sie den vollständigen Link aus Ihrem E-Mail Programm in die
+										Adressleiste ihres Browsers.');
 					break;
 				}
 				

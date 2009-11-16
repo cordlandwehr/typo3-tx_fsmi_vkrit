@@ -418,16 +418,16 @@ mit.</textarea></div>
 			else
 				$hash = $row['inputform_verify'];
 				
-			// TODO correct this!	
+			// '<' and '>' is needed to process links correctly in Thunderbird
 			$baseLink = htmlspecialchars($this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'baseUrl')).
 				'index.php?id='.
 				intval($this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'pidInputform'));
 				
-			$link = $baseLink.
+			$link = '<'.$baseLink.
 					'&'.
 					$this->extKey.'[auth]='.$hash.
 					'&'.
-					$this->extKey.'[lecture]='.$row['uid'];
+					$this->extKey.'[lecture]='.$row['uid'].'>';
 			
 			
 			// create links
