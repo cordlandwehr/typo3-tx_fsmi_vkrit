@@ -583,7 +583,7 @@ mit.</textarea></div>
 			// radio button
 			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" ';
 			if ($i==1) //TODO change this to something dynamically
-				$content .= 'selected="selected" ';
+				$content .= 'checked="checked" ';
 			$content .= '				id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).'</label>'."<br />\n";
 		}
