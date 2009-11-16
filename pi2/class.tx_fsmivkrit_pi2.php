@@ -581,8 +581,10 @@ mit.</textarea></div>
 				continue;
 			
 			// radio button
-			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" 
-							id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
+			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" ';
+			if ($i==1) //TODO change this to something dynamically
+				$content .= 'selected="selected" ';
+			$content .= '				id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).'</label>'."<br />\n";
 		}
 
@@ -685,6 +687,7 @@ mit.</textarea></div>
 			}
 			else {
 				$content .= $this->sendEvaldateSetMail($lecture);
+				
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
 								'Evaluationstermin für '.$lectureUID['name'].' wurde auf den <strong>'.
@@ -729,17 +732,17 @@ mit.</textarea></div>
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		
 		// check if mail shall really be sent
-		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
-		if (intval($GETcommands['notify_lecturer'])!=1)
+		$GPcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		if (!$GPcommands['notify_lecturer'])
 			return;
 		
 		// now start writing mail
 		$mailContent = '';
-		$mailContent .= $this->printLecturerNotificationHead($lecturer);
+		$mailContent .= $this->printLecturerNotificationHead($lecturerUID['uid']);
 		$mailContent .= 'als Termin für die Evaluation Ihrer Veranstaltung '."\n".
-						'   '.$lecture['name']."\n".
+						'   '.$lectureUID['name']."\n".
 						'wurde folgender Termin festgelegt:'."\n". 
-						'   '.date('d.m.y - H:i',$lecture['eval_date_fixed']);
+						'   '.date('d.m.y - H:i',$lectureUID['eval_date_fixed']);
 		$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team der Fachschaft Mathematik/Informatik";
 
 		$send = $this->cObj->sendNotifyEmail(
