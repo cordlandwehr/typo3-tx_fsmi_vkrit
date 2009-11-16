@@ -452,7 +452,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$document->createElement('Person')
 			);
 			// set key
-			$newLecturer->setAttribute('key', $this->getKeyForTutor($tutor['uid']));
+			$newTutor->setAttribute('key', $this->getKeyForTutor($tutor['uid']));
 			// set name
 			$newTutor->appendChild(
 				$document->createElement(
@@ -473,12 +473,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		 * Fourth Step:
 		 * Create Lectures
 		 */
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+		$resLecture = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 												FROM tx_fsmivkrit_lecture 
-												WHERE deleted=0
+												WHERE deleted=0 AND hidden=0
 												AND survey=\''.$survey.'\'');
 			
-		while ($res && $lecture = mysql_fetch_assoc($res)) {
+		while ($resLecture && $lecture = mysql_fetch_assoc($resLecture)) {
 			$newLecture = $evasysDOM->appendChild(
 				$document->createElement('Lecture')
 			);
@@ -561,7 +561,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	 */
 	function getKeyForTutor($tutor) {
 		//$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-		return 'tut'.$lecturer;
+		return 'tut'.$tutor;
 	}	
 	
 	/**
