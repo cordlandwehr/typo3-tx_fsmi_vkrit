@@ -69,6 +69,11 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
 	
+		// take care to use german
+		//TODO switch on typo3-language
+		// BUT THIS IS NOT WORKING!
+		setlocale(LC_ALL, 'de_DE.utf8');
+		
 		// invoke calender frontend library
 		tx_rlmpdateselectlib::includeLib();
 		
@@ -361,7 +366,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<div><strong>V-Krit Termine:</strong></div>';
 		$content .= '<ol>';
 		for($i=1; $i<=3; $i++) {
-			if ($inputData['eval_'.$i]['date']=='')
+			if ($inputData['eval_'.$i]['date']=='' || $inputData['eval_'.$i]['date']==0)
 				continue;
 				
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y h:i', $inputData['eval_'.$i]['date']).', 
@@ -455,18 +460,20 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			return $content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_ERROR,
 									'Der Verifikationswert ist falsch. Bitte verwenden sie die exakte URL aus der Benachrichtigungsmail.');
-
-		// inform if eval-date is not in survey time periode
-		for ($i=1; $i<=3; $i++) {
-			if (
-				$inputData['eval_'.$i]['date'] < $surveyUID['eval_start'] ||
-				$inputData['eval_'.$i]['date'] > $surveyUID['eval_end']
-			) {
-				$content .= tx_fsmivkrit_div::printSystemMessage(
-									tx_fsmivkrit_div::kSTATUS_WARNING,
-									'Im '.$i.'-ten Eingabefeld haben Sie einen Termin angegeben, welcher außerhalb des Evaluationszeitraumes liegt.');
-			}
-		}
+//	TODO useless here, lecturer cannot modify dates anymore
+//		// inform if eval-date is not in survey time periode
+//		for ($i=1; $i<=3; $i++) {
+//			if (
+//				($inputData['eval_'.$i]['date'] < $surveyUID['eval_start'] ||
+//				$inputData['eval_'.$i]['date'] > $surveyUID['eval_end'] ) 
+//				&&
+//				$inputData['eval_'.$i]['date'] != 0
+//			) {
+//				$content .= tx_fsmivkrit_div::printSystemMessage(
+//									tx_fsmivkrit_div::kSTATUS_WARNING,
+//									'Im '.$i.'-ten Eingabefeld haben Sie einen Termin angegeben, welcher außerhalb des Evaluationszeitraumes liegt.');
+//			}
+//		}
 									
 		// update Lecture
 		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
