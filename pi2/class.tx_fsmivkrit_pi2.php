@@ -53,6 +53,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	const kASSIGN_EVAL_DATE_FORM	= 5;
 	const kASSIGN_EVAL_DATE_SAVE	= 6;
 	
+	// value if 01.01.1970 - 7 am. (this is default value) 
+	const kLOWER_BOUND_DATE			= 21600;
 	
 	// states for lecture by 'eval_state' from table
 	const kEVAL_STATE_CREATED	= 0;
@@ -196,14 +198,15 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0
-												AND eval_state BETWEEN 0 AND 2
-												AND survey=\''.$this->survey.'\'');
+													AND eval_state BETWEEN 0 AND 2
+													AND survey=\''.$this->survey.'\'
+												ORDER BY eval_state DESC, eval_date_1 DESC, name');
 		// lectures within process 0-2
 		// print head
 		if ($GLOBALS['TYPO3_DB']->sql_num_rows($res)>0) {
 			$content .= '<h3>Vorlesungen in Vorbereitung</h3>';
 			$content .= '<table cellpadding="5" cellspacing="2" class="fsmivkrit">';
-			$content .= '<tr><th>Status</th><th>Veranstaltung</th><th>Dozent</th><th>Erinnerungsmail</th>';
+			$content .= '<tr><th>Status</th><th>Anz.</th><th>Veranstaltung</th><th>Dozent</th><th>Wunschtermin</th><th>Erinnerungsmail</th>';
 				
 			while ($res && $row = mysql_fetch_assoc($res)) {
 				// get lecturer name
@@ -219,6 +222,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
 				$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
 				$content .= '	<td width="50">'.($row['eval_state']).'</td>
+								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
 								<td width="200">'.
 									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
 									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
@@ -228,6 +232,14 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 								' '.$row['name'].'</td>
 								<td width="200"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
+				// show first eval date
+				$content .= '	<td width="100">'.(
+									$row['eval_data_1']>self::kLOWER_BOUND_DATE ? 
+										date('d.m. - H:i', $row['eval_data_1']) : 
+										'').
+									'</td>';
+									
+									
 				// if no lecturer input, yet: notification option
 				if ($row['eval_state']<self::kEVAL_STATE_COMPLETED)
 					$content .= '<td width="200">'.$this->pi_linkTP('erinnern', 
@@ -245,6 +257,22 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= '</tr>';
 				
 			}
+			
+			// some statistics data:
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants) 
+												FROM tx_fsmivkrit_lecture 
+												WHERE deleted=0
+												AND eval_state BETWEEN 0 AND 2
+												AND survey=\''.$this->survey.'\'');
+			if ($res && $row = mysql_fetch_assoc($res)) {
+				$content .= '<tr><td></td>
+							<td><strong>'.$row['SUM(participants)'].'</strong></td>'.
+							'<td></td>'.
+							'<td></td>'.
+							'<td></td>'.
+							'<td></td>';
+			}
+			
 			$content .= '</table>';
 		}
 		
@@ -453,9 +481,14 @@ mit.</textarea></div>
 		if ($lecturer==0) {
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid
 												FROM tx_fsmivkrit_lecturer, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_lecturer.deleted=0 AND tx_fsmivkrit_lecturer.hidden=0
-												AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
-												AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
+												WHERE 
+													tx_fsmivkrit_lecturer.deleted=0 
+													AND tx_fsmivkrit_lecturer.hidden=0
+													AND tx_fsmivkrit_lecture.deleted=0 
+													AND tx_fsmivkrit_lecture.hidden=0
+													AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
+													AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
+													AND tx_fsmivkrit_lecture.eval_state BETWEEN 0 AND 2
 												GROUP BY tx_fsmivkrit_lecturer.uid');
 			while ($res && $row = mysql_fetch_assoc($res))
 				array_push($lecturerInputArr,$row['uid']);
@@ -470,7 +503,15 @@ mit.</textarea></div>
 													WHERE deleted=0 AND hidden=0
 													AND survey=\''.$this->survey.'\'
 													AND lecturer=\''.$lecturer.'\'');
-													
+
+			// if no lectures that need input: go to next one
+			if ($GLOBALS['TYPO3_DB']->sql_num_rows($res)==0) {
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+								tx_fsmivkrit_div::kSTATUS_WARNING,
+								'Keine zu benachrichtigen Vorlesungen für <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> vorhanden.');
+				continue;
+			}
+			
 			// now start writing mail
 			$mailContent = '';
 			$mailContent .= $this->printLecturerNotificationHead($lecturer);
@@ -577,7 +618,7 @@ mit.</textarea></div>
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=3; $i++) {
 			// do not select non-set dates
-			if ($lectureUID['eval_date_'.$i]==0)
+			if ($lectureUID['eval_date_'.$i] < self::kLOWER_BOUND_DATE)
 				continue;
 			
 			// radio button
