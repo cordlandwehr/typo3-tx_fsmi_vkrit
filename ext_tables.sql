@@ -126,6 +126,7 @@ CREATE TABLE tx_fsmivkrit_helper (
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	name tinytext,
 	email tinytext,
+	survey text,
 	
 	PRIMARY KEY (uid),
 	KEY parent (pid)

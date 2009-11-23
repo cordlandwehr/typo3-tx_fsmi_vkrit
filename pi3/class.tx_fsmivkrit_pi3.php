@@ -49,7 +49,13 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	var $nulleins = array(true => 1, false => 0);
 	var $editMode = false;
 	
+	var $survey;
+	
 	const kLOCKTIME		= 300;	// system locking time in seconds
+	
+	const kLIST					= 1;	// mode: assign kritter form
+	const kASSIGN_KRITTER_FORM	= 2;	// mode: assign kritter form
+	const kASSIGN_KRITTER_SAVE	= 3;	// mode: assign kritter form
 	
 	/**
 	 * The main method of the PlugIn
@@ -64,61 +70,36 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
 	
+
+		
+		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		$this->survey = intval($GETcommands['survey']);
+		
 		//TODO 
-		$survey = 1;
+		$this->survey = 1;
 		
-		$content .= '<h1>Coordination</h1>';
-		
-		$content = '<h2 align="center">VKrit-Übersicht</h2>';
-		$content .= $this->printTable($survey);
-		
-		// TODO here: check if edit, admin etc.
-		
-	
+		switch(intval($GETcommands['type'])) {
+			case self::kASSIGN_KRITTER_FORM: {
+				$content .= '<h2>Kritter-Daten ändern</h2>';
+				$content .= $this->printLectureEditForm(intval($GETcommands['lecture']));
+				break;
+			}
+			case self::kASSIGN_KRITTER_SAVE: {
+				$content .= '<h2>Koordination - Übersicht</h2>';
+				$content .= $this->saveKritterData(intval($GETcommands['lecture']));
+				$content .= $this->printTable($this->survey);
+				break;
+			}
+			default: {	// could also be kLIST
+				$content .= '<h2>Koordination - Übersicht</h2>';
+				$content .= $this->printTable($this->survey);
+				break;
+			}
+		}
+
 		return $this->pi_wrapInBaseClass($content);
 	}
 	
-	/**
-	 * This function locks modification of survey 
-	 * @return unknown_type
-	 */
-	function unlock() {
-		// TODO unlock survey modification
-		// war irgendwas mit lock auf 0	
-		//if (!$mysqlfs->query("update VkritLock set locktime=".time()." where formular like 'vkritplan'")) echo 'ERR1';
-	}
-	
-	function lock() {
-		//TODO
-		//if (!$mysqlfs->query("update VkritLock set locktime=".time()." where formular like 'vkritplan'")) echo 'ERR1';
-	}
-	
-	function islocked() {
-		// TODO implement
-//    		global $mysqlfs, $locktime;
-//    		if ($mysqlfs->query("select * from VkritLock where formular like 'vkritplan'")) {
-//    			if ($row = $mysqlfs->fetch()) {
-//    				return ($row->locktime != 0) && (time() - $row->locktime < $locktime);
-//    			}
-//    			$mysqlfs->free();
-//    		} else echo 'ERR3';
-//    		return false;
-		return false;
-    }
-    
-	function getlocktime() {
-		//TODO implement
-//    			global $mysqlfs;
-//   			if ($mysqlfs->query("select * from VkritLock where formular like 'vkritplan'")) {
-//    				if ($row = $mysqlfs->fetch()) {
-//    					if ($row->locktime == 0) return 0;
-//    					return time() - $row->locktime;
-//    				}
-//    				$mysqlfs->free();
-//    			} else echo 'ERR4';
-//    			return 0;
-		return 0;
-    }
     
 	function nix($s) {	//TODO rework
 		if (trim($s) == '') return '&nbsp;'; else return $s;
@@ -152,152 +133,22 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '	<td align="center" style="color:white"><b>Kriter&nbsp;4</b></td>';
 		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>PATE</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
-		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
+//		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
   	
 		$content .= '	<td align="center" style="color:white"><b>Tipper</b></td>';
-		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
+//		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
 //		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
 //		$content .= '	<td align="center" style="color:white"><b>bereit zum verschicken</b></td>';
+		$content .= '	<td align="center" style="color:white"><b>EDIT</b></td>';
 		$content .= '</tr>';
 		
 		return $content ;
    	}
-
-/*
-   		$zuspaet = false;
-   		if (isset($_REQUEST['eintragen']) || isset($_REQUEST['verwerfen'])) {
-   			if ((time() - $_REQUEST['edittime']) > $locktime) $zuspaet = true;
-   		}
-   		
-   		if (isset($_REQUEST['eintragen'])) {
-   		
-   			if (!$zuspaet) {
-   		
-   				$idList = array();
-   				if ($mysqlfs->query('select id from VkritPlan')) {
-   				while ($row = $mysqlfs->fetch()) {
-   						array_push($idList, $row->id);
-   					}
-   					$mysqlfs->free();
-  				}	
-   	
-   				foreach ($idList as $muell => $id) {//Dozent
-   	
-   					$q = 'update VkritPlan set ';
-   	
-   					for ($i = 1; $i < 5; $i++)
-   						$q .= 'kritter'.$i." = '".htmlspecialchars($_REQUEST['kritter'.$id.'_'.$i])."', ";
-   	
-   					$q .= 'gewicht = '.null(htmlspecialchars($_REQUEST['gewicht'.$id])).', ';
-   	
-   					$q .= 'getippt = '.$nulleins[isset($_REQUEST['getippt'.$id])].', ';
-   	
-   					$q .= 'bilder = '.null(htmlspecialchars($_REQUEST['bilder'.$id])).', ';
-  	
-   					$q .= 'tipper = '.htmlspecialchars($_REQUEST['tipper'.$id]).', ';
-   					$q .= 'pate = '.htmlspecialchars($_REQUEST['pate'.$id]).' ';
-   	
-   					
-   					
-   					if ($_REQUEST['adminform'] == 1) {
-   					
-   						$q .= ", date = '".htmlspecialchars($_REQUEST['date'.$id])."', ";
-   						$q .= "time = '".htmlspecialchars($_REQUEST['time'.$id])."', ";
-   						$q .= "raum = '".htmlspecialchars($_REQUEST['raum'.$id])."', ";
-  						$q .= "vorlesung = '".htmlspecialchars($_REQUEST['vorlesung'.$id])."', ";
- 						$q .= 'dozent = '.htmlspecialchars($_REQUEST['dozent'.$id]).', ';
- 						$q .= "teilnehmer = ".null(htmlspecialchars($_REQUEST['teilnehmer'.$id])).", ";
-   						$q .= "kommentar = '".htmlspecialchars($_REQUEST['kommentar'.$id])."', ";
- 						$q .= 'gedruckt = '.$nulleins[isset($_REQUEST['gedruckt'.$id])].', ';
-  						$q .= 'verteilt = '.$nulleins[isset($_REQUEST['verteilt'.$id])].' ';
-   					
-   					}
-   	
-   					$q .= 'where id = '.$id;
-   	
-   	//				echo $q.'<br>';
-  					if (!$mysqlfs->query($q)) {
-   					$efehler = 1;
-   						break;
-  					}
-   				}
-   
-  				if ($fehler == 1)	
-  					echo '<h3 align="center"><font color="#ff0000">Fehler beim Eintragen der Daten</font></h3>';
-   			else
-   					echo '<h3 align="center"><font color="#00aa00">Daten erfolgreich eingetragen</font></h3>';
-   	
-   				unlock();
-   				
-   			} else {
-   				echo '<h3 align="center"><font color="#ff0000">Daten zu sp�t eingetragen (Tabelle war schon wieder freigegeben!)</font></h3>';
-   			}
-   		} else
-   		if (isset($_REQUEST['verwerfen'])) {
-   			if (!$zuspaet) unlock();
-   		}
-   			
-   		if ($edit && islocked()) {
-   			$edit = false;	
-   		}
-   			
-   		if (!$edit) $admin = false;
-   			
-   		if ($edit) {
-   		
-   			lock();
-   		
-  			$tipperList = array();
-   			if ($mysqlfs->query('select * from VkritTipper order by name')) {
-   				while ($row = $mysqlfs->fetch()) {
-   					array_push($tipperList, array($row->name, $row->id));
-   				}
-   				$mysqlfs->free();
-   			}	
-   	
-   			$dozentList = array();
-   			if ($mysqlfs->query('select * from VkritDozent order by name')) {
-   				while ($row = $mysqlfs->fetch()) {
-   					array_push($dozentList, array($row->name, $row->id));
-   				}
-   				$mysqlfs->free();
-   			}	
-   ENDE PHP
-   					
-   	<script type="text/javascript">
-   	
-  	    function alarm() {
-   	       alert('Achtung\n\n' +
-   	             'Du hast noch eine Minute Zeit, die Daten einzutragen bevor die Tabelle\n' +
-   				 'wieder freigegeben wird und du die Daten nicht mehr eintragen kannst.');
-   	    }
-   	    window.setTimeout("alarm()", 4*60000);
-   	//
-   	</script>
-   	
-   	PHP		
-   			echo '<h2 align="center">VKrit-�bersicht �ndern</h2>';
-   	
-   		} else {*/
-   		
+   	 		
 
 	function printTable ($survey) {
-	
-		// check if table is locked
-		if ($this->islocked()) {
-   				
-   				$content .= '<h3 align="center"><font color="#ff0000">Die Tabelle zur Zeit gesperrt</font></h3>';
-   				$content .= '<h4 align="center"><font color="#ff0000">Sie wird spätestens in '.
-   					($locktime - $this->getlocktime()).' Sek. freigegeben</font></h4>';
-   		} 	
  		// table head
- 		
-   		//TODO next must be reworked: edit
-//	   	if ($edit) {
-//   			echo '<form action="'.$_SERVER['PHP_SELF'].'" method="post">';
-//   			echo '<div style="text-align:center;margin:20px"><input type="submit" name="eintragen" value=" Eintragen ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="verwerfen" value=" Verwerfen "></div>';
-//   			echo '<input type="hidden" name="edittime" value="'.time().'">';
-//  		}
+
    		//TODO here we need the current number of pictures per evaluater
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 												FROM tx_fsmivkrit_lecture 
@@ -307,7 +158,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND eval_state BETWEEN '.
 														tx_fsmivkrit_div::kEVAL_STATE_APPROVED.
 														' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
-													AND NOT eval_date_fixed=0 
+													AND no_eval=0 
 												ORDER BY eval_date_fixed');
 
 		$count = 0;
@@ -352,7 +203,12 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
 	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
 			$content .= '<td align="center" style="border-right:4px solid black">'.$row['eval_room_fixed'].'</td>';
-	  		$content .= '<td align="left">'.$row['name'].'</td>';
+	  		$content .= '<td align="left">'.$this->pi_linkTP($row['name'],
+														array (	
+															$this->extKey.'[survey]' => $this->survey,
+															$this->extKey.'[lecture]' => $row['uid'],
+															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
+														)).'</td>';
 			$content .= '<td align="left">'.$lecturerUID['name'].'</td>';
 			$content .= '<td align="center">'.$row['participants'].'</td>';
 			$content .= '<td align="left" style="border-right:4px solid black">'.$row['comment'].'</td>';
@@ -422,18 +278,153 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	  			for ($i = 1; $i < 5; $i++)
 					$content .= '<td align="center">'.$this->nix($row['kritter_'.$i]).'</td>';
 	
-				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($row['godfather']).'</td>';
-				$content .= '<td align="center">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
-				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
-				$content .= '<td align="center">'.$this->nix($row['tipper']).'</td>';
+				$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
+				$content .= '<td align="center" style="border-left:4px solid black">'.$godfatherUID['name'].'</td>';
+				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
+//				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
+				$tipperUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['tipper']);
+				$content .= '<td align="center">'.$tipperUID['name'].'</td>';
 				// TODO check by state!
-				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
+//				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
+	  			$content .= '<td align="left">'.$this->pi_linkTP('editieren',
+														array (	
+															$this->extKey.'[survey]' => $this->survey,
+															$this->extKey.'[lecture]' => $row['uid'],
+															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
+														)).'</td>';
 			}		
 		}	
 		
 		$content .= '</table>';
 		
 		return $content;
+	}
+	
+	function printLectureEditForm($lecture) {
+		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
+		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
+		
+		$content = '';
+		
+		// the user probably wants to have a way out:
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
+						array (	
+							$this->extKey.'[type]' => self::kLIST,
+							$this->extKey.'[survey]' => $this->survey
+						)).'</strong></div>';
+
+		// head information
+		$content .= '<h3>Allgemeine Daten</h3>';
+		$content .= '<ul>'.
+					'<li><strong>Veranstaltung:</strong> '.$lectureUID['name'].'</li>'.
+					'<li><strong>PAUL-ID:</strong> '.$lectureUID['foreign_id'].'</li>'.
+					'<li><strong>Dozent:</strong> '.$lecturerUID['name'].', '.$lecturerUID['forename'].'</li>'.
+					'<li><strong>Teilnehmer:</strong> '.$lectureUID['participants'].'</li>'.
+					'<li><strong>V-Krit Termin:</strong> '.date('d.m.Y - H:i',$lectureUID['eval_date_fixed']).'</li>'.
+					'<li><strong>Raum:</strong> '.$lectureUID['eval_room_fixed'].'</li>'.
+					'</ul>';
+		$content .= '<pre>'.$lectureUID['comment'].'</pre>';
+		
+		$content .= '<h3>Kritter- und Krit-Daten</h3>';
+		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
+
+		// hidden field to tell system, that IMPORT data is coming
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kASSIGN_KRITTER_SAVE.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
+		
+		$content .= '<fieldset>';
+		$content .= '<table>';
+		// here all three input fields and one additional ...
+		for ($i=1; $i<=4; $i++) {
+			$content .= '<tr><td><label for="'.$this->extKey.'_kritter_'.$i.'">Kritter '.$i.'</label></td><td>
+							<input type="text" name="'.$this->extKey.'[kritter_'.$i.']" id="'.$this->extKey.'_kritter_'.$i.'"  	
+								value="'.$lectureUID["kritter_".$i].'" size="20" />
+							</td></tr>';
+		}
+		
+		// Godfather
+	   	$content .= '<tr><td><label for="'.$this->extKey.'_godfather">Pate</label></td><td>
+	   		<select name="'.$this->extKey.'[godfather]" id="'.$this->extKey.'_godfather" size="1">';
+	   			$content .= '<option value="0"></option>';
+				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_helper 
+													WHERE deleted=0 AND hidden=0
+														AND survey='.$lectureUID['survey'].'
+													ORDER BY name');
+	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
+	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
+	   							$rowHelper['uid']==$lectureUID['godfather'] ? 
+	   								'selected="selected"':
+	   								''
+	   						).' >'.$rowHelper['name'].'</option>';
+	   					}
+	   			$content .= '</select></td></tr>';
+	   			
+		// Tipper
+	   	$content .= '<tr><td><label for="'.$this->extKey.'_tipper">Tipper</label></td>
+	   		<td><select name="'.$this->extKey.'[tipper]" id="'.$this->extKey.'_tipper" size="1">';
+	   			$content .= '<option value="0"></option>';
+				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+													FROM tx_fsmivkrit_helper 
+													WHERE deleted=0 AND hidden=0
+														AND survey='.$lectureUID['survey'].'
+													ORDER BY name');
+	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
+	   						// TODO change submit value
+	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
+	   							$rowHelper['uid']==$lectureUID['tipper'] ? 
+	   								'selected="selected"':
+	   								''
+	   						).' >'.$rowHelper['name'].'</option>';
+	   					}
+	   			$content .= '</select></td></tr>';
+
+	   	// weight
+	   	$content .= '<tr><td><label for="'.$this->extKey.'_weight">Gewicht</label></td><td>
+							<input type="text" name="'.$this->extKey.'[weight]" id="'.$this->extKey.'_weight"  	
+								value="'.($lectureUID["weight"]>0 ? $lectureUID["weight"]:'').'" size="10" />
+						</td></tr>';
+	   			
+		$content .= '</table>';
+	   	$content .= '</fieldset>';
+	   			
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+				value="'.htmlspecialchars('Speichern').'">';
+		$content .= '</form>';
+
+		return $content;
+	}
+	
+	function saveKritterData ($lecture) {
+		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		
+		// update Lecture
+		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+									'tx_fsmivkrit_lecture',
+									'uid=\''.$lecture.'\'',
+									array (	'crdate' => time(),
+											'tstamp' => time(),
+											'kritter_1' 	=> htmlspecialchars($GETcommands['kritter_1']),
+											'kritter_2' 	=> htmlspecialchars($GETcommands['kritter_2']),
+											'kritter_3' 	=> htmlspecialchars($GETcommands['kritter_3']),
+											'kritter_4' 	=> htmlspecialchars($GETcommands['kritter_4']),
+											'godfather'		=> intval($GETcommands['godfather']),
+											'tipper'		=> intval($GETcommands['tipper']),
+											'weight'		=> intval($GETcommands['weight'])
+									));
+		if (!$res) {
+			return $content .= tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_ERROR,
+							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
+		}
+		else {
+			return $content .= tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_INFO,
+							'Vorlesung '.$lectureUID['name'].' wurde editiert.');
+		}
 	}
 }
 

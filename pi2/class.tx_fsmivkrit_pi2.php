@@ -81,7 +81,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$content = '';
 
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
-		$this->survey = intval($GETcommands['survey']);require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
+		$this->survey = intval($GETcommands['survey']);
 		
 		// type selection head
 		$content .= $this->createTypeSelector();
@@ -305,7 +305,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				
 				if ($row['hidden']==0)
 					$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">';
-				if ($row['hidden']==1)
+				if ($row['hidden']==1 || $row['no_eval'] == 1)
 					$content .= '<tr style="background-color: #ddd; font-style: italic;">';
 					
 				// lecture and lecture activation state
@@ -353,6 +353,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0
 												AND eval_state BETWEEN 3 AND 5
+												AND no_eval = 0
 												AND survey=\''.$this->survey.'\'');
 			if ($res && $row = mysql_fetch_assoc($res)) {
 				$content .= '<tr><td></td>

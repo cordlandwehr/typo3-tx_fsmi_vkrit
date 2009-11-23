@@ -553,9 +553,21 @@ $TCA['tx_fsmivkrit_helper'] = array (
 				'size' => '30',
 			)
 		),
+		'survey' => array (		
+			'exclude' => 0,		
+			'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.survey',		//TODO
+			'config' => array (
+				'type' => 'group',	
+				'internal_type' => 'db',	
+				'allowed' => 'tx_fsmivkrit_survey',	
+				'size' => 1,	
+				'minitems' => 1,
+				'maxitems' => 1,
+			)
+		),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, email')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, name, email, survey')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')
