@@ -403,7 +403,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_lecturer 
 												WHERE tx_fsmivkrit_lecturer.deleted=0
 												AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
-												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'');
+												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
+												AND hidden=0');
 			
 		while ($res && $lecturer = mysql_fetch_assoc($res)) {
 			$newLecturer = $evasysDOM->appendChild(
