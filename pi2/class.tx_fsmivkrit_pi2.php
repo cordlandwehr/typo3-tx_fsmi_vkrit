@@ -234,8 +234,17 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 				// show first eval date
 				$content .= '	<td width="100">'.(
+									// first eval date
 									$row['eval_date_1']>self::kLOWER_BOUND_DATE ? 
-										date('d.m. | H:i', $row['eval_date_1']) : 
+										date('d.m. (H:i)', $row['eval_date_1']) : 
+										'').
+									// second eval date
+									($row['eval_date_2']>self::kLOWER_BOUND_DATE ?
+										'<br />'.date('d.m. (H:i)', $row['eval_date_2']) :
+										'').
+									// third eval date
+									($row['eval_date_3']>self::kLOWER_BOUND_DATE ?
+										'<br />'.date('d.m. (H:i)', $row['eval_date_3']) :
 										'').
 									'</td>';
 									
