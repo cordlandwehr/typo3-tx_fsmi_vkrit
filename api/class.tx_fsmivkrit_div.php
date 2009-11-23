@@ -44,6 +44,13 @@ class tx_fsmivkrit_div {
 	const kSTATUS_OK 		= 3;
 	const imgPath			= 'typo3conf/ext/fsmi_vkrit/gfx/'; // absolute path to images
 
+	const kEVAL_STATE_CREATED	= 0;
+	const kEVAL_STATE_NOTIFIED	= 1;
+	const kEVAL_STATE_COMPLETED	= 2;
+	const kEVAL_STATE_APPROVED	= 3;
+	const kEVAL_STATE_EVALUATED	= 4;
+	const kEVAL_STATE_FINISHED	= 5;
+	
 	/**
 	 *
 	 * @param integer $status from constants

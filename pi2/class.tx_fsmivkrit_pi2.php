@@ -421,7 +421,7 @@ mit.</textarea></div>
 		if ($lecturer!=0) {
 			$content .= '<h3>Links</h3>';
 			$content .= '<pre style="margin-left:20px">'.
-						$this->printLecturerNotificationInputlinks($lecturer).
+						htmlspecialchars($this->printLecturerNotificationInputlinks($lecturer)).
 						'</pre>';
 		}
 					

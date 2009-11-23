@@ -69,13 +69,13 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		
 		$content .= '<h1>Coordination</h1>';
 		
-		$content .= $this->printTableHead();
+		$content = '<h2 align="center">VKrit-Übersicht</h2>';
 		$content .= $this->printTable($survey);
 		
 		// TODO here: check if edit, admin etc.
 		
 	
-		//return $this->pi_wrapInBaseClass($content);
+		return $this->pi_wrapInBaseClass($content);
 	}
 	
 	/**
@@ -135,26 +135,6 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	function nospace($s) { //TODO rework
 		return str_replace(' ', '&nbsp;', $s);
 	}
-    		
-	//TODO rework
-	function dateconv($d) {
-		$wtage = array('Sonn', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sams');
-    		
-		if ($d == '') return '';
-		if ($d == '99-99-99') return '???';
-    			
-		$datum = explode('-', $d);
-   			
-		$date = getdate(mktime(0, 0, 0, $datum[1], $datum[2], '20'.$datum[0]));
-		return $wtage[$date['wday']].'<br>'.$datum[2].'.'.$datum[1];
-	}
-	
-	//TODO rework
-	function realdate($d, $t) {
-		$datum = explode('-', $d);
-		$zeit = explode(':', $t);
-		return mktime($zeit[0], $zeit[1], 0, $datum[1], $datum[2], '20'.$datum[0]);
-	}
 	
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
@@ -176,8 +156,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
   	
 		$content .= '	<td align="center" style="color:white"><b>Tipper</b></td>';
 		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>bereit zum verschicken</b></td>';
+//		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
+//		$content .= '	<td align="center" style="color:white"><b>bereit zum verschicken</b></td>';
 		$content .= '</tr>';
 		
 		return $content ;
@@ -302,8 +282,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
    		
 
 	function printTable ($survey) {
-		$content = '<h2 align="center">VKrit-Übersicht</h2>';
-		
+	
 		// check if table is locked
 		if ($this->islocked()) {
    				
@@ -325,7 +304,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 												WHERE deleted=0 
 													AND hidden=0
 													AND survey= \''.$survey.'\'
-													AND eval_state BETWEEN 3 AND 5
+													AND eval_state BETWEEN '.
+														tx_fsmivkrit_div::kEVAL_STATE_APPROVED.
+														' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
+													AND NOT eval_date_fixed=0 
 												ORDER BY eval_date_fixed');
 
 		$count = 0;
@@ -335,17 +317,18 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
    		$olddate = '';
    		$vor15minuten = mktime()-15*60;
 			
-		$content .= '<table align="center" style="border-collapse:collapse; border:2px solid black" cellspacing="0" cellpadding="3" border="0">';
-				
+		$content .= '<table style="border: 2px solid #000; border-collapse: collapse;" border="1" align="center" cellpadding="3" cellspacing="0">';
+		$content .= $this->printTableHead();
+		
 		while ($res && $row = mysql_fetch_assoc($res)) {
 	
-	   	
-			if ($this->realdate($row['date'],$row->time) < $vor15minuten) $old = true; else $old = false;
+			//TODO überarbeiten!
+			if ($row['eval_date_fixed'] < $vor15minuten) $old = true; else $old = false;
 	
 			// this tests if date is new and should be displayed (only disply once)
-			$newdate = $this->dateconv($row['eval_date_fixed']);
+			$newdate = date('D d.m.',$row['eval_date_fixed']);
 	   		if ($olddate == $newdate) 
-	   			$newdate = '&nbsp;<br>&nbsp;';
+	   			$newdate = '&nbsp;<br />&nbsp;';
 	  		else {
 	   			$olddate = $newdate;
 	   			$this->printTableHead();
@@ -367,7 +350,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   		
 	   		// print row
 			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
-	   		$content .= '<td align="center">'.date('M:i',$row['eval_date_fixed']).'</td>';
+	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
 			$content .= '<td align="center" style="border-right:4px solid black">'.$row['eval_room_fixed'].'</td>';
 	  		$content .= '<td align="left">'.$row['name'].'</td>';
 			$content .= '<td align="left">'.$lecturerUID['name'].'</td>';
@@ -449,6 +432,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		}	
 		
 		$content .= '</table>';
+		
+		return $content;
 	}
 }
 

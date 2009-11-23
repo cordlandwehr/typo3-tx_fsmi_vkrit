@@ -217,7 +217,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// assistents
 		$content .= '<tr>
 						<td style="vertical-align:top"><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
-						<td><div>Exakt einen Tutor pro Zeile eintragen "Nachname,Vorname", mit Komma (,) trennen.<br />
+						<td><div>Exakt <strong>einen Tutor pro Zeile</strong> eintragen "Nachname,Vorname", mit Komma (,) trennen. Jeden Tutor bitte genau einmal eingeben, auch wenn
+							von diesem mehrere Übungsgruppen betreut werden.<br />
 							Beispiel: "Mustermann,Max"</div>
 							<textarea name="'.$this->extKey.'[assistants]" id="'.$this->extKey.'_assistants" cols="74" rows="15">'.
 							$this->piVars['assistants'].

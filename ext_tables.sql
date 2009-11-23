@@ -59,7 +59,7 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	to_scan_office tinyint(3) DEFAULT '0' NOT NULL,
 	eval_state tinyint(3) DEFAULT '0' NOT NULL,
 	inputform_verify tinytext,
-	comment tinytext,
+	comment text,
 	
 	PRIMARY KEY (uid),
 	KEY parent (pid)
