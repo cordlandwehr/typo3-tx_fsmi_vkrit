@@ -506,7 +506,7 @@ mit.</textarea></div>
 													AND tx_fsmivkrit_lecture.hidden=0
 													AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
 													AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
-													AND tx_fsmivkrit_lecture.eval_state BETWEEN 0 AND 2
+													AND tx_fsmivkrit_lecture.eval_state BETWEEN 0 AND 1 
 												GROUP BY tx_fsmivkrit_lecturer.uid');
 			while ($res && $row = mysql_fetch_assoc($res))
 				array_push($lecturerInputArr,$row['uid']);
