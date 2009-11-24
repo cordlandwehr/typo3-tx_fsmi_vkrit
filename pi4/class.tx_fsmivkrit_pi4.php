@@ -133,9 +133,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			case self::kEXPORT: {
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 													tx_fsmivkrit_div::kSTATUS_INFO,
-													'Noch nicht implementiert! Bei Bedarf den überarbeiteten Programmierer kontaktieren...');
+													'Noch nicht validiert!');
 				// TODO not hardcoded!
-				$content .= $this->createOutputDOM(1);
+				$content .= $this->storeOutputDataXML($this->createOutputDOM(1));
 				break;
 			}
 			default: 
@@ -404,7 +404,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												WHERE tx_fsmivkrit_lecturer.deleted=0
 												AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
 												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-												AND hidden=0');
+												AND tx_fsmivkrit_lecture.hidden=0');
 			
 		while ($res && $lecturer = mysql_fetch_assoc($res)) {
 			$newLecturer = $evasysDOM->appendChild(
@@ -505,7 +505,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												FROM tx_fsmivkrit_tutorial 
 												WHERE deleted=0
 												AND lecture=\''.$lecture['uid'].'\'');
-			while ($resTutors && $tutor = mysql_fetch_assoc($res)) {
+			while ($resTutors && $tutor = mysql_fetch_assoc($resTutors)) {
 				$newSingleDoz = $newDozs->appendChild(
 					$document->createElement('doz')
 				);
@@ -533,6 +533,21 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		}
 		
 		return $document->saveXML();
+	}
+	
+	/**
+	 * Stores data to file system an returns link
+	 * @param $data
+	 * @return unknown_type
+	 */
+	function storeOutputDataXML ($data) {
+		// writing file
+		t3lib_div::writeFileToTypo3tempDir (	
+										PATH_site."typo3temp/".'fsmivkrit_export.xml',
+										$data
+										);
+
+		return '<a href="typo3temp/fsmivkrit_export.xml">XML Datei downloaden</a>';	
 	}
 	
 	/**

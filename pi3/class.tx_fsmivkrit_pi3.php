@@ -119,20 +119,20 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
-		$content .= '<tr bgcolor="#526FEB">';
-		$content .= '	<td align="center" style="color:white"><b>Tag</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Zeit</b></td>';
-		$content .= '	<td align="center" style="color:white; border-right:4px solid black;"><b>Raum</b></td>';
+		$content .= '<tr bgcolor="#526feb">';
+		$content .= '	<td align="center" style="color:white; width: 40px;"><b>Tag</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 35px;"><b>Zeit</b></td>';
+		$content .= '	<td align="center" style="color:white;"><b>Raum</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Vorlesung</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Dozent</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>#</b></td>';
-		$content .= '	<td align="center" style="color:white; border-right:4px solid black"><b>Kommentar</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Kritter</b></td>';
-		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>PATE</b></td>';
+		$content .= '	<td align="center" style="color:white; width:100px;"><b>Kommentar</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Kritter</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Pate</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
 //		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
   	
-		$content .= '	<td align="center" style="color:white"><b>Tipper</b></td>';
+		$content .= '	<td align="center" style="color:white; width:100px;"><b>Tipper</b></td>';
 //		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
 //		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
 //		$content .= '	<td align="center" style="color:white"><b>bereit zum verschicken</b></td>';
@@ -166,7 +166,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
    		$olddate = '';
    		$vor15minuten = mktime()-15*60;
 			
-		$content .= '<table style="border: 2px solid #000; border-collapse: collapse;" border="1" align="center" cellpadding="3" cellspacing="0">';
+		$content .= '<table cellpadding="3">';
 		$content .= $this->printTableHead();
 		
 		while ($res && $row = mysql_fetch_assoc($res)) {
@@ -206,7 +206,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   		// print row
 			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
 	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
-			$content .= '<td align="center" style="border-right:4px solid black">'.$row['eval_room_fixed'].'</td>';
+			$content .= '<td align="center">'.$row['eval_room_fixed'].'</td>';
 	  		$content .= '<td align="left">'.$this->pi_linkTP($row['name'],
 														array (	
 															$this->extKey.'[survey]' => $this->survey,
@@ -215,90 +215,35 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 														)).'</td>';
 			$content .= '<td align="left">'.$lecturerUID['name'].'</td>';
 			$content .= '<td align="center">'.$row['participants'].'</td>';
-			$content .= '<td align="left" style="border-right:4px solid black">'.$row['comment'].'</td>';
+			$content .= '<td align="left">'.$row['comment'].'</td>';
 	
-	   				
-			if ($this->edit) {
-//TODO delete next lines
-	  			
-	   			$content .= '<td align="center" style="border-left:4px solid black"><select style="background-color:';
-	  			if ($row['weight'] == 0) $content .= '#FFFFFF'; 
-	  			else $content .= $rowcol[$old][$count % 2];
-	  			
-	  			if ($row['godfather']== '') $content .= '#FFFFFF'; 
-	  			else $content .= $rowcol[$old][$count % 2];
-	
-	  			// selection for helper
-	  			$content .=  ';" name="godfather'.$row->id.'" size="1">';
-	   			$content .= '<option value="0"></option>';
-				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_helper 
-													WHERE deleted=0 AND hidden=0
-													ORDER BY name');
-	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
-	   						// TODO change submit value
-	   						$content .= '<option value="'.$rowHelper['uid'].'" '.$selected[$t[1] == $row->pate].' >'.$rowHelper['name'].'</option>';
-	   					}
-	   			$content .= '</select></td>';
-	   					
-	   			// weight
-	   			$content .= '<td align="center"><input style="background-color:';
-	   			if ($row->gewicht == 0) $content .= '#fff'; 
-	   			else $content .= $rowcol[$old][$count % 2];
-	   			$content .= ';" type="text" name="weight'.$row['uid'].'" value="'.ohnenull($row['weight']).'" size="5" maxlength="4"></td>';
-	   			
-	   			// number of pictures		
-	   			$content .= '<td style="border-left:4px solid black" align="center"><input style="background-color:';
-	   			if ($row->bilder == 0) $content .= '#FFFFFF'; else $content .= $rowcol[$old][$count % 2];
-	   			$content .= ';" type="text" name="bilder'.$row['uid'].'" value="'.ohnenull($row['pictures']).'" size="5" maxlength="4"></td>';
-	   				
-	  			// selection for tipper
-	  			$content .=  ';" name="tipper'.$row->id.'" size="1">';
-	   			$content .= '<option value="0"></option>';
-				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_helper 
-													WHERE deleted=0 AND hidden=0
-													ORDER BY name');
-	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
-	   						// TODO change submit value
-	   						$content .= '<option value="'.$rowHelper['uid'].'" '.$selected[$t[1] == $row->pate].' >'.$rowHelper['name'].'</option>';
-	   					}
-	   			$content .= '</select></td>';
-	
-	   			//TODO needs to recrteate		
-	   			$content .= '<td style="border-left:4px solid black" align="center"><input type="checkbox" name="getippt'.$row->id.'" value="1" '.$checked[$row->getippt == 1].' ></td>';
-	   	
-			}
-			// no edit
-			else {
-				trim($row['kritter_1'])=='' ? 
-					$content .= '<td bgcolor="red"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
-					$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
-	  			for ($i = 1; $i < 5; $i++) {
-	  				if ($row['kritter_'.$i]!='' )
-						$content .= '<li style="padding:0px">'.$this->nix($row['kritter_'.$i]).'</li>';
-					else if ($i==1)
-						$content .= '<li><strong>fehlt</strong></li>';
-	  			}
-				$content .= '</ol></td>';
-					
-				$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
-				$content .= '<td align="center" style="border-left:4px solid black">'.$godfatherUID['name'].'</td>';
-				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
-//				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
-				$tipperUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['tipper']);
-				$content .= '<td align="center">'.$tipperUID['name'].'</td>';
-				// TODO check by state!
-//				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
-	  			$content .= '<td align="left">'.$this->pi_linkTP('editieren',
-														array (	
-															$this->extKey.'[survey]' => $this->survey,
-															$this->extKey.'[lecture]' => $row['uid'],
-															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
-														)).'</td>';
-				$content .= '</tr>';
-			}		
-		}	
+	   		trim($row['kritter_1'])=='' ? 
+				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
+				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
+	  		for ($i = 1; $i < 5; $i++) {
+	  			if ($row['kritter_'.$i]!='' )
+					$content .= '<li style="padding:0px">'.$this->nix($row['kritter_'.$i]).'</li>';
+				else if ($i==1)
+					$content .= '<li><strong>fehlt</strong></li>';
+	  		}
+			$content .= '</ol></td>';
+				
+			$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
+			$content .= '<td align="center">'.$godfatherUID['name'].'</td>';
+			$content .= '<td align="center">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
+//			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
+			$tipperUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['tipper']);
+			$content .= '<td align="center">'.$tipperUID['name'].'</td>';
+			// TODO check by state!
+//			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
+	  		$content .= '<td align="left">'.$this->pi_linkTP('editieren',
+													array (	
+														$this->extKey.'[survey]' => $this->survey,
+														$this->extKey.'[lecture]' => $row['uid'],
+														$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
+													)).'</td>';
+			$content .= '</tr>';
+		}
 		
 		$content .= '</table>';
 		
