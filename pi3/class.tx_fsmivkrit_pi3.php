@@ -127,10 +127,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '	<td align="center" style="color:white"><b>Dozent</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>#</b></td>';
 		$content .= '	<td align="center" style="color:white; border-right:4px solid black"><b>Kommentar</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Kritter&nbsp;1</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Kritter&nbsp;2</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Kritter&nbsp;3</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Kriter&nbsp;4</b></td>';
+		$content .= '	<td align="center" style="color:white"><b>Kritter</b></td>';
 		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>PATE</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
 //		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
@@ -161,6 +158,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND no_eval=0 
 												ORDER BY eval_date_fixed');
 
+		// counter for lectures
 		$count = 0;
 
 		$rowcol = array(true => array(0 => '#ff9e9e', 1 => '#ffcbcb'), 
@@ -172,7 +170,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= $this->printTableHead();
 		
 		while ($res && $row = mysql_fetch_assoc($res)) {
-	
+			$count++;
+			
 			//TODO überarbeiten!
 			if ($row['eval_date_fixed'] < $vor15minuten) $old = true; else $old = false;
 	
@@ -188,7 +187,12 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	  		// set row color
 	   		switch ($row['eval_state']) {
 	   			case tx_fsmivkrit_pi2::kEVAL_STATE_APPROVED: {
-	   				$content .= '<tr bgcolor="#FFE500">'; break; // yellow not correct one
+	   				// set line color
+	   				$count%2 == 0 ? 
+	   					$content .= '<tr bgcolor="#ff9e9e">':
+	   					$content .= '<tr bgcolor="#ffcbcb">'; 
+	   					
+	   					break; // yellow not correct one
 	   				//TODO colorize each second row by ... light/dark red
 	   			}
 	   			case tx_fsmivkrit_pi2::kEVAL_STATE_EVALUATED: $content .= '<tr bgcolor="#99FF99">'; break; // light green
@@ -215,15 +219,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	
 	   				
 			if ($this->edit) {
-				// kritter
-				for ($i = 1; $i < 5; $i++) {
-					$content .= '<td align="center"><input style="background-color:';
-	   				if (trim($row['kritter_'.$i]) == '') 
-	   					$content .= '#FFFFFF'; else echo $rowcol[$old][$count % 2];
-	   					//TODO not valid style
-	   				$content .= ';" type="text" name="kritter_'.$row['uid'].'_'.$i.'" value="'.$row['kritter_'.$i].'" size="8" maxlength="32"></td>';
-	   			}
-	   			
+//TODO delete next lines
 	  			
 	   			$content .= '<td align="center" style="border-left:4px solid black"><select style="background-color:';
 	  			if ($row['weight'] == 0) $content .= '#FFFFFF'; 
@@ -247,7 +243,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   					
 	   			// weight
 	   			$content .= '<td align="center"><input style="background-color:';
-	   			if ($row->gewicht == 0) $content .= '#FFFFFf'; 
+	   			if ($row->gewicht == 0) $content .= '#fff'; 
 	   			else $content .= $rowcol[$old][$count % 2];
 	   			$content .= ';" type="text" name="weight'.$row['uid'].'" value="'.ohnenull($row['weight']).'" size="5" maxlength="4"></td>';
 	   			
@@ -275,9 +271,17 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			}
 			// no edit
 			else {
-	  			for ($i = 1; $i < 5; $i++)
-					$content .= '<td align="center">'.$this->nix($row['kritter_'.$i]).'</td>';
-	
+				trim($row['kritter_1'])=='' ? 
+					$content .= '<td bgcolor="red"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
+					$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
+	  			for ($i = 1; $i < 5; $i++) {
+	  				if ($row['kritter_'.$i]!='' )
+						$content .= '<li style="padding:0px">'.$this->nix($row['kritter_'.$i]).'</li>';
+					else if ($i==1)
+						$content .= '<li><strong>fehlt</strong></li>';
+	  			}
+				$content .= '</ol></td>';
+					
 				$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
 				$content .= '<td align="center" style="border-left:4px solid black">'.$godfatherUID['name'].'</td>';
 				$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
@@ -292,6 +296,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 															$this->extKey.'[lecture]' => $row['uid'],
 															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
 														)).'</td>';
+				$content .= '</tr>';
 			}		
 		}	
 		

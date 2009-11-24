@@ -35,6 +35,7 @@
 		table.fsmivkrit {
 
 		}
+		/* red */
 		tr.fsmivkrit_state_0 {
 			background-color: #ffc7c7;
 		}
