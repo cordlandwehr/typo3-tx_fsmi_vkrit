@@ -364,6 +364,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	function createOutputDOM($survey) {
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $survey);
 		
+		// TODO set Teilbereich by Config
+		$orgroot = 'FSMI';
+		
 		// we expect data
 		if (!$surveyUID)
 			return false;
@@ -398,13 +401,13 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid,
 													tx_fsmivkrit_lecturer.name as name, 
 													tx_fsmivkrit_lecturer.forename as forename, 
-													tx_fsmivkrit_lecturer.email as email,
-													tx_fsmivkrit_lecturer.title as title
+													tx_fsmivkrit_lecturer.email as email
 												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_lecturer 
 												WHERE tx_fsmivkrit_lecturer.deleted=0
-												AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
-												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-												AND tx_fsmivkrit_lecture.hidden=0');
+													AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
+													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
+													AND tx_fsmivkrit_lecture.hidden=0
+												GROUP BY tx_fsmivkrit_lecturer.uid, tx_fsmivkrit_lecturer.name, tx_fsmivkrit_lecturer.forename, tx_fsmivkrit_lecturer.email');
 			
 		while ($res && $lecturer = mysql_fetch_assoc($res)) {
 			$newLecturer = $evasysDOM->appendChild(
@@ -513,6 +516,18 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					htmlspecialchars($surveyUID['semester'])
 				)
 			);
+			$newLecture->appendChild(
+				$document->createElement(
+					'short',
+					htmlspecialchars($lecture['name'])
+				)
+			);
+			$newLecture->appendChild(
+				$document->createElement(
+					'orgroot',
+					htmlspecialchars($orgroot)
+				)
+			);
 			
 			// set tutors
 			// each tutorial is one "lecture" for its own with lecturer as "Sekundärdozent"
@@ -565,6 +580,19 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 						htmlspecialchars($surveyUID['semester'])
 					)
 				);
+				$newLecture->appendChild(
+					$document->createElement(
+						'short',
+						htmlspecialchars('Ü '.$lecture['name'])
+					)
+				);
+				$newLecture->appendChild(
+					$document->createElement(
+						'orgroot',
+						htmlspecialchars($orgroot)
+					)
+				);				
+				
 			}
 		}
 		
