@@ -736,7 +736,7 @@ mit.</textarea></div>
 		// this means: the organizer sets his own wish
 		if ($evalDateChoice == 4) {
 			// compute date
-			$evalDate = strtotime( htmlspecialchars($POSTdata['eval_date']).' '.htmlspecialchars($POSTdata['eval_time']).':00');
+			$evalDate = strtotime( htmlspecialchars($GETcommands['eval_date']).' '.htmlspecialchars($GETcommands['eval_time']).':00');
 			
 			// update Lecture
 			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
@@ -760,7 +760,7 @@ mit.</textarea></div>
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
 								'Evaluationstermin für '.$lectureUID['name'].' wurde auf den <strong>'.
-								date('j.m. H:i', $lectureUID['eval_date_'.$evalDateChoice]).
+								date('j.m. H:i', $evalDate).
 								'</strong> festgelegt.');
 			}
 								
@@ -772,7 +772,7 @@ mit.</textarea></div>
 		// this means: no evaluation for this lecture
 		if ($evalDateChoice == 5) {
 			// compute date
-			$evalDate = strtotime( htmlspecialchars($POSTdata['eval_date']).' '.htmlspecialchars($POSTdata['eval_time']).':00');
+			$evalDate = strtotime( htmlspecialchars($GETcommands['eval_date']).' '.htmlspecialchars($GETcommands['eval_time']).':00');
 			
 			// update Lecture
 			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	

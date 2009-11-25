@@ -131,10 +131,10 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				break;
 			}
 			case self::kEXPORT: {
-				$content .= tx_fsmivkrit_div::printSystemMessage(
-													tx_fsmivkrit_div::kSTATUS_INFO,
-													'Noch nicht validiert!');
-				// TODO not hardcoded!
+//				$content .= tx_fsmivkrit_div::printSystemMessage(
+//													tx_fsmivkrit_div::kSTATUS_INFO,
+//													'Noch nicht validiert!');
+
 				$content .= $this->storeOutputDataXML($this->createOutputDOM(1));
 				break;
 			}
@@ -365,7 +365,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $survey);
 		
 		// TODO set Teilbereich by Config
-		$orgroot = 'FSMI';
+		$orgroot = 'Test Evasys 4.0';
 		
 		// we expect data
 		if (!$surveyUID)
@@ -382,15 +382,15 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		 * Frist Step:
 		 * Create Survey
 		 */
-		$surveyDOM = $evasysDOM->appendChild(
-			$document->createElement('Survey')
-		);
-		$surveyDOM->setAttribute('key', $this->getKeyForSurvey($surveyUID['uid']));
-		$surveyDOM->appendChild(
-			$document->createElement(
-				'survey_period',
-				$surveyUID['semester'])
-			);
+//		$surveyDOM = $evasysDOM->appendChild(
+//			$document->createElement('Survey')
+//		);
+//		$surveyDOM->setAttribute('key', $this->getKeyForSurvey($surveyUID['uid']));
+//		$surveyDOM->appendChild(
+//			$document->createElement(
+//				'survey_period',
+//				$surveyUID['semester'])
+//			);
 		//TODO type? no idea if mandatory, ask SVK team!
 		
 			
@@ -401,7 +401,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid,
 													tx_fsmivkrit_lecturer.name as name, 
 													tx_fsmivkrit_lecturer.forename as forename, 
-													tx_fsmivkrit_lecturer.email as email
+													tx_fsmivkrit_lecturer.email as email,
+													tx_fsmivkrit_lecturer.sex as sex
 												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_lecturer 
 												WHERE tx_fsmivkrit_lecturer.deleted=0
 													AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
@@ -433,6 +434,20 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$document->createElement(
 					'email',
 					$lecturer['email']
+				)
+			);
+			// TODO hack for username
+			$newLecturer->appendChild(
+				$document->createElement(
+					'username',
+					$lecturer['email']
+				)
+			);
+			// set gender
+			$newLecturer->appendChild(
+				$document->createElement(
+					'gender',
+					($lecturer['sex']==self::kDB_SEX_MALE ? 'm' : 'f')
 				)
 			);
 		}
@@ -471,6 +486,28 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				)
 			);
 			// TODO here: mail
+			// set email
+			$newTutor->appendChild(
+				$document->createElement(
+					'email',
+					'criticus@upb.de'
+				)
+			);
+			// TODO hack for username
+			$newTutor->appendChild(
+				$document->createElement(
+					'username',
+					$this->getKeyForTutor($tutor['uid'])
+				)
+			);
+			// set gender
+			// TODO is hack!
+			$newTutor->appendChild(
+				$document->createElement(
+					'gender',
+					'm'
+				)
+			);
 		}
 		
 		/*
@@ -526,6 +563,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$document->createElement(
 					'orgroot',
 					htmlspecialchars($orgroot)
+				)
+			);
+			$newLecture->appendChild(
+				$document->createElement(
+					'type',
+					'Vorlesung'
 				)
 			);
 			
@@ -592,7 +635,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 						htmlspecialchars($orgroot)
 					)
 				);				
-				
+				$newLecture->appendChild(
+					$document->createElement(
+						'type',
+						'Übung'
+					)
+				);
 			}
 		}
 		

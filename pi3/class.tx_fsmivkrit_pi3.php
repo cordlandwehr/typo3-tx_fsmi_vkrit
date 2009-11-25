@@ -167,7 +167,6 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
    		$vor15minuten = mktime()-15*60;
 			
 		$content .= '<table cellpadding="3">';
-		$content .= $this->printTableHead();
 		
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$count++;
@@ -181,7 +180,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   			$newdate = '&nbsp;<br />&nbsp;';
 	  		else {
 	   			$olddate = $newdate;
-	   			$this->printTableHead();
+	   			$content .= $this->printTableHead();
 	  		}	
 	   				
 	  		// set row color
