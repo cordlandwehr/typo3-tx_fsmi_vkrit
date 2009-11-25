@@ -500,22 +500,6 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newEvaRef->setAttribute('type', 'Person');
 			$newEvaRef->setAttribute('key',$this->getKeyForLecturer($lecture['lecturer']));
 			
-			// include tutors
-			$resTutors = $GLOBALS['TYPO3_DB']->sql_query('SELECT uid
-												FROM tx_fsmivkrit_tutorial 
-												WHERE deleted=0
-												AND lecture=\''.$lecture['uid'].'\'');
-			while ($resTutors && $tutor = mysql_fetch_assoc($resTutors)) {
-				$newSingleDoz = $newDozs->appendChild(
-					$document->createElement('doz')
-				);
-				$newEvaRef = $newSingleDoz->appendChild(
-					$document->createElement('EvaSysRef')
-				);
-				$newEvaRef->setAttribute('type', 'Person');
-				$newEvaRef->setAttribute('key',$this->getKeyForTutor($tutor['uid']));
-			}
-			
 			// lecture information (name, term...)
 			$newLecture->appendChild(
 				$document->createElement(
@@ -530,6 +514,58 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				)
 			);
 			
+			// set tutors
+			// each tutorial is one "lecture" for its own with lecturer as "Sekundärdozent"
+			$resTutors = $GLOBALS['TYPO3_DB']->sql_query('SELECT uid
+												FROM tx_fsmivkrit_tutorial 
+												WHERE deleted=0
+												AND lecture=\''.$lecture['uid'].'\'');
+			while ($resTutors && $tutor = mysql_fetch_assoc($resTutors)) {
+				// create new tutorial
+				$newLecture = $evasysDOM->appendChild(
+					$document->createElement('Lecture')
+				);
+				// use key: lectureUID.tutorUID
+				$newLecture->setAttribute('key', $this->getKeyForLecture($lecture['uid']).$this->getKeyForTutor($tutor['uid']));
+	
+				// container for lecturer and tutors
+				$newDozs = $newLecture->appendChild(
+					$document->createElement('dozs')
+				);
+				
+				$newSingleDoz = $newDozs->appendChild(
+					$document->createElement('doz')
+				);
+				$newEvaRef = $newSingleDoz->appendChild(
+					$document->createElement('EvaSysRef')
+				);
+				$newEvaRef->setAttribute('type', 'Person');
+				$newEvaRef->setAttribute('key',$this->getKeyForTutor($tutor['uid']));
+				
+				// include lecturer
+				$newSingleDoz = $newDozs->appendChild(
+					$document->createElement('doz')
+				);
+				$newEvaRef = $newSingleDoz->appendChild(
+					$document->createElement('EvaSysRef')
+				);
+				$newEvaRef->setAttribute('type', 'Person');
+				$newEvaRef->setAttribute('key',$this->getKeyForLecturer($lecture['lecturer']));
+				
+				// lecture information (name, term...)
+				$newLecture->appendChild(
+					$document->createElement(
+						'name',
+						htmlspecialchars('Übung '.$lecture['name'])
+					)
+				);
+				$newLecture->appendChild(
+					$document->createElement(
+						'period',
+						htmlspecialchars($surveyUID['semester'])
+					)
+				);
+			}
 		}
 		
 		return $document->saveXML();
