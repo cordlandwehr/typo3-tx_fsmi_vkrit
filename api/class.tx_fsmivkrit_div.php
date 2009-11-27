@@ -44,12 +44,15 @@ class tx_fsmivkrit_div {
 	const kSTATUS_OK 		= 3;
 	const imgPath			= 'typo3conf/ext/fsmi_vkrit/gfx/'; // absolute path to images
 
-	const kEVAL_STATE_CREATED	= 0;
-	const kEVAL_STATE_NOTIFIED	= 1;
-	const kEVAL_STATE_COMPLETED	= 2;
-	const kEVAL_STATE_APPROVED	= 3;
-	const kEVAL_STATE_EVALUATED	= 4;
-	const kEVAL_STATE_FINISHED	= 5;
+	const kEVAL_STATE_CREATED		= 0;
+	const kEVAL_STATE_NOTIFIED		= 1;
+	const kEVAL_STATE_COMPLETED		= 2;	// lecturer input completed
+	const kEVAL_STATE_APPROVED		= 3;
+	const kEVAL_STATE_EVALUATED		= 4;	// lecture was evaluated
+	const kEVAL_STATE_SORTED		= 5;	// sorted by godfather and brought to scanning office
+	const kEVAL_STATE_SCANNED		= 6;	// the scanning office did its work
+	const kEVAL_STATE_ANONYMIZED	= 7;	// 
+	const kEVAL_STATE_FINISHED		= 8;
 	
 	/**
 	 *

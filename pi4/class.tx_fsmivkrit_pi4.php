@@ -364,8 +364,11 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	function createOutputDOM($survey) {
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $survey);
 		
-		// TODO set Teilbereich by Config
-		$orgroot = 'Test Evasys 4.0';
+		// set organization root
+		if ($surveyUID['orgroot']=='')
+			$orgroot = 'notSet';
+		else
+			$orgroot = $surveyUID['orgroot'];
 		
 		// we expect data
 		if (!$surveyUID)
@@ -392,6 +395,17 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 //				$surveyUID['semester'])
 //			);
 		//TODO type? no idea if mandatory, ask SVK team!
+
+		//TODO testroom
+		$roomDOM = $evasysDOM->appendChild(
+			$document->createElement('Room')
+		);
+		$roomDOM->setAttribute('key', 'Raum1');
+		$roomDOM->appendChild(
+			$document->createElement(
+				'name',
+				'SVK Büro')
+			);
 		
 			
 		/*
@@ -433,14 +447,15 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newLecturer->appendChild(
 				$document->createElement(
 					'email',
-					$lecturer['email']
+				//TODO	$lecturer['email']
+					'criticus@upb.de'
 				)
 			);
-			// TODO hack for username
+			// TODO hack for username, should be PAUL username
 			$newLecturer->appendChild(
 				$document->createElement(
 					'username',
-					$lecturer['email']
+					$this->getKeyForLecturer($lecturer['uid'])
 				)
 			);
 			// set gender
@@ -547,12 +562,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					htmlspecialchars($lecture['name'])
 				)
 			);
-			$newLecture->appendChild(
-				$document->createElement(
-					'period',
-					htmlspecialchars($surveyUID['semester'])
-				)
-			);
+//			$newLecture->appendChild(
+//				$document->createElement(
+//					'period',
+//					htmlspecialchars($surveyUID['semester'])
+//				)
+//			);
 			$newLecture->appendChild(
 				$document->createElement(
 					'short',
@@ -571,6 +586,16 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					'Vorlesung'
 				)
 			);
+			// TODO HACK to fix missing room
+			$newRoom = $newLecture->appendChild(
+				$document->createElement('room')
+			);
+			$newEvaRef = $newRoom->appendChild(
+				$document->createElement('EvaSysRef')
+			);
+			$newEvaRef->setAttribute('type', 'Room');
+			$newEvaRef->setAttribute('key','Raum1');
+			
 			
 			// set tutors
 			// each tutorial is one "lecture" for its own with lecturer as "Sekundärdozent"
@@ -617,12 +642,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 						htmlspecialchars('Übung '.$lecture['name'])
 					)
 				);
-				$newLecture->appendChild(
-					$document->createElement(
-						'period',
-						htmlspecialchars($surveyUID['semester'])
-					)
-				);
+//				$newLecture->appendChild(
+//					$document->createElement(
+//						'period',
+//						htmlspecialchars($surveyUID['semester'])
+//					)
+//				);
 				$newLecture->appendChild(
 					$document->createElement(
 						'short',
@@ -641,6 +666,15 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 						'Übung'
 					)
 				);
+				// TODO HACK to fix missing room
+				$newRoom = $newLecture->appendChild(
+					$document->createElement('room')
+				);
+				$newEvaRef = $newRoom->appendChild(
+					$document->createElement('EvaSysRef')
+				);
+				$newEvaRef->setAttribute('type', 'Room');
+				$newEvaRef->setAttribute('key','Raum1');
 			}
 		}
 		

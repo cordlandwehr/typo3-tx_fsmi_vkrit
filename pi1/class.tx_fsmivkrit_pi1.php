@@ -49,13 +49,6 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 	const kVERIFY	= 1;
 	const kSAVE		= 2;
 	
-	const kEVAL_STATE_CREATED	= 0;
-	const kEVAL_STATE_NOTIFIED	= 1;
-	const kEVAL_STATE_COMPLETED	= 2;
-	const kEVAL_STATE_APPROVED	= 3;
-	const kEVAL_STATE_EVALUATED	= 4;
-	const kEVAL_STATE_FINISHED	= 5;
-	
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -134,15 +127,15 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 				
 				switch ($lectureUID['eval_state']) {
-					case self::kEVAL_STATE_NOTIFIED: {
+					case tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED: {
 						$content .= $this->printInputForm($lecture, $hash);
 						break;
 					}
-					case self::kEVAL_STATE_CREATED: {
+					case tx_fsmivkrit_div::kEVAL_STATE_CREATED: {
 						$content .= $this->printInputForm($lecture, $hash);
 						break;
 						}
-					case self::kEVAL_STATE_COMPLETED: {
+					case tx_fsmivkrit_div::kEVAL_STATE_COMPLETED: {
 						$content .= tx_fsmivkrit_div::printSystemMessage(
 										tx_fsmivkrit_div::kSTATUS_WARNING,
 										'Für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurden bereits Daten eingegeben.');
@@ -152,7 +145,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 						$content .= $this->printInputForm($lecture, $hash);
 						break;
 					}
-					case self::kEVAL_STATE_APPROVED: {
+					case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
 						$content .= tx_fsmivkrit_div::printSystemMessage(
 										tx_fsmivkrit_div::kSTATUS_ERROR,
 										'Die Eintragung für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurde gesperrt.');
@@ -372,7 +365,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			if ($inputData['eval_'.$i]['date']=='' || $inputData['eval_'.$i]['date']==0)
 				continue;
 				
-			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y h:i', $inputData['eval_'.$i]['date']).', 
+			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y H:i', $inputData['eval_'.$i]['date']).', 
 						<strong>Raum:</strong> '.$inputData['eval_'.$i]['room'].'</li>';
 			if ($inputData['eval_'.$i]['date']<$surveyUID['eval_start'] || ($surveyUID['eval_end']!=0 && $inputData['eval_'.$i]['date']>$surveyUID['eval_end']))
 				$content .= tx_fsmivkrit_div::printSystemMessage(
@@ -491,7 +484,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 											'eval_room_1'	=> $inputData['eval_1']['room'],
 											'eval_room_2'	=> $inputData['eval_2']['room'],
 											'eval_room_3'	=> $inputData['eval_3']['room'],
-											'eval_state'	=> self::kEVAL_STATE_COMPLETED,
+											'eval_state'	=> tx_fsmivkrit_div::kEVAL_STATE_COMPLETED,
 											'comment'		=> $inputData['comment']
 									));
 		if (!$res)
@@ -539,8 +532,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0 AND hidden=0
 												AND survey=\''.$surveyUID['uid'].'\'
-												AND (eval_state='.self::kEVAL_STATE_CREATED.'
-													OR eval_state='.self::kEVAL_STATE_NOTIFIED.')
+												AND (eval_state='.tx_fsmivkrit_div::kEVAL_STATE_CREATED.'
+													OR eval_state='.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.')
 												AND lecturer=\''.$lecturerUID['uid'].'\'');
 		$lectureArr = array();
 		

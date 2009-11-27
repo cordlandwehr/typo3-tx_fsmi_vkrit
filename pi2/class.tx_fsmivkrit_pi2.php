@@ -56,14 +56,6 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	// value if 01.01.1970 - 7 am. (this is default value) 
 	const kLOWER_BOUND_DATE			= 21600;
 	
-	// states for lecture by 'eval_state' from table
-	const kEVAL_STATE_CREATED	= 0;
-	const kEVAL_STATE_NOTIFIED	= 1;
-	const kEVAL_STATE_COMPLETED	= 2;
-	const kEVAL_STATE_APPROVED	= 3;
-	const kEVAL_STATE_EVALUATED	= 4;
-	const kEVAL_STATE_FINISHED	= 5;
-	
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -250,7 +242,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 									
 									
 				// if no lecturer input, yet: notification option
-				if ($row['eval_state']<self::kEVAL_STATE_COMPLETED)
+				if ($row['eval_state']<tx_fsmivkrit_div::kEVAL_STATE_COMPLETED)
 					$content .= '<td width="200">'.$this->pi_linkTP('erinnern', 
 									array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 											$this->extKey.'[survey]' => $this->survey,
@@ -271,7 +263,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants) 
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0
-												AND eval_state BETWEEN 0 AND 2
+												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_CREATED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'
 												AND survey=\''.$this->survey.'\'');
 			if ($res && $row = mysql_fetch_assoc($res)) {
 				$content .= '<tr><td></td>
@@ -285,14 +277,14 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$content .= '</table>';
 		}
 		
-		// lectures in process 3-5
+		// lectures in process APPROVED and FINISHED
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0
-												AND eval_state BETWEEN 3 AND 5
+												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
 												AND survey=\''.$this->survey.'\'
 												ORDER BY no_eval, eval_date_fixed, name');
-		// lectures within process 0-2
+		// lectures within process APPROVED and FINISHED
 		// print head
 		if ($GLOBALS['TYPO3_DB']->sql_num_rows($res)>0) {
 			$content .= '<h3>Vorlesungen in Evaluation</h3>';
@@ -312,8 +304,15 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$lectureActivation = array ();
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
 				$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
-				$content .= '	<td width="50">'.($row['eval_state']).'</td>
-								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
+				$content .= '	<td width="50">'.($row['eval_state']).'</td>';
+				// pariticipants
+				$content .= '	<td width="10">';
+				if ($row['no_eval]']==1)
+					$content .= '<s>'.( $row['participants']==0? '': $row['participants'] ).'</s>';
+				else 
+					$content .= ( $row['participants']==0? '': $row['participants'] );
+				$content .= '</td>';
+				$content .= '
 								<td width="200">'.
 									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
 									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
@@ -331,7 +330,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 					$content .= '	<td width="100">keine Evaluation</td>';
 					
 				//TODO this does not work: change to check if there is such a lecture!
-				if ($row['eval_state']<self::kEVAL_STATE_COMPLETED)
+				if ($row['eval_state']<tx_fsmivkrit_div::kEVAL_STATE_COMPLETED)
 					$content .= '<td width="100">'.$this->pi_linkTP('erinnern', 
 									array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 											$this->extKey.'[survey]' => $this->survey,
@@ -352,8 +351,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants) 
 												FROM tx_fsmivkrit_lecture 
 												WHERE deleted=0
-												AND eval_state BETWEEN 3 AND 5
-												AND no_eval = 0
+												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
+												AND no_eval=0
 												AND survey=\''.$this->survey.'\'');
 			if ($res && $row = mysql_fetch_assoc($res)) {
 				$content .= '<tr><td></td>
@@ -463,8 +462,8 @@ mit.</textarea></div>
 												WHERE deleted=0 AND hidden=0
 												AND survey=\''.$this->survey.'\'
 												AND (
-													eval_state='.self::kEVAL_STATE_CREATED.'
-													OR eval_state='.self::kEVAL_STATE_NOTIFIED.')
+													eval_state='.tx_fsmivkrit_div::kEVAL_STATE_CREATED.'
+													OR eval_state='.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.')
 												AND lecturer=\''.$lecturer.'\'');
 		$lectureArr = array();
 		while ($res && $row = mysql_fetch_assoc($res)) {
@@ -516,7 +515,7 @@ mit.</textarea></div>
 													AND tx_fsmivkrit_lecture.hidden=0
 													AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
 													AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
-													AND tx_fsmivkrit_lecture.eval_state BETWEEN 0 AND 1 
+													AND tx_fsmivkrit_lecture.eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_CREATED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.' 
 												GROUP BY tx_fsmivkrit_lecturer.uid');
 			while ($res && $row = mysql_fetch_assoc($res))
 				array_push($lecturerInputArr,$row['uid']);
@@ -529,8 +528,8 @@ mit.</textarea></div>
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
 													FROM tx_fsmivkrit_lecture 
 													WHERE deleted=0 AND hidden=0
-													AND survey=\''.$this->survey.'\'
-													AND lecturer=\''.$lecturer.'\'');
+														AND survey=\''.$this->survey.'\'
+														AND lecturer=\''.$lecturer.'\'');
 
 			// if no lectures that need input: go to next one
 			if ($GLOBALS['TYPO3_DB']->sql_num_rows($res)==0) {
@@ -563,9 +562,9 @@ mit.</textarea></div>
 				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery  ( 'tx_fsmivkrit_lecture',
 											'lecturer=\''.$lecturerUID['uid'].'\' 
 											AND survey=\''.$this->survey.'\'
-											AND eval_state=\''.self::kEVAL_STATE_CREATED.'\'',
+											AND eval_state=\''.tx_fsmivkrit_div::kEVAL_STATE_CREATED.'\'',
 											array(
-												'eval_state' => self::kEVAL_STATE_NOTIFIED)
+												'eval_state' => tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED)
 											);
 				t3lib_div::sysLog (
 					'Sent notification mail to '.$lecturerUID['name'].'.',
@@ -716,7 +715,7 @@ mit.</textarea></div>
 												'eval_date_fixed' 	=> $lectureUID['eval_date_'.$evalDateChoice],
 												'eval_room_fixed'	=> $lectureUID['eval_room_'.$evalDateChoice],
 												'no_eval'		=> 0,
-												'eval_state'	=> self::kEVAL_STATE_APPROVED,
+												'eval_state'	=> tx_fsmivkrit_div::kEVAL_STATE_APPROVED,
 										));
 			if (!$res) {
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
@@ -747,7 +746,7 @@ mit.</textarea></div>
 												'eval_date_fixed' 	=> $evalDate,
 												'eval_room_fixed'	=> strip_tags($GETcommands['eval_room']),
 												'no_eval'			=> 0,
-												'eval_state'		=> self::kEVAL_STATE_APPROVED,
+												'eval_state'		=> tx_fsmivkrit_div::kEVAL_STATE_APPROVED,
 										));
 			if (!$res) {
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
@@ -781,7 +780,7 @@ mit.</textarea></div>
 										array (	'crdate'		=> time(),
 												'tstamp' 		=> time(),
 												'no_eval' 		=> 1,
-												'eval_state'	=> self::kEVAL_STATE_APPROVED,
+												'eval_state'	=> tx_fsmivkrit_div::kEVAL_STATE_APPROVED,
 										));
 			if (!$res)
 				return $content .= tx_fsmivkrit_div::printSystemMessage(

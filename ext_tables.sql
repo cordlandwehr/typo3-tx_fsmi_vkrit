@@ -102,6 +102,7 @@ CREATE TABLE tx_fsmivkrit_survey (
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	name tinytext,
 	semester tinytext,
+	orgroot tinytext,
 	storage text,
 	importdata_origin int(11) DEFAULT '0' NOT NULL,
 	eval_start int(11) DEFAULT '0' NOT NULL,

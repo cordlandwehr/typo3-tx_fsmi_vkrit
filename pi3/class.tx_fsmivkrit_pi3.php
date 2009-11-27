@@ -88,15 +88,18 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$content .= '<h2>Koordination - Übersicht</h2>';
 				$content .= $this->saveKritterData(intval($GETcommands['lecture']));
 				$content .= $this->printTable($this->survey);
+				$content .= $this->helperRanking($this->survey);
 				break;
 			}
 			default: {	// could also be kLIST
 				$content .= '<h2>Koordination - Übersicht</h2>';
 				$content .= $this->printTable($this->survey);
+				$content .= $this->helperRanking($this->survey);
 				break;
 			}
 		}
 
+		
 		return $this->pi_wrapInBaseClass($content);
 	}
 	
@@ -117,6 +120,29 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		return str_replace(' ', '&nbsp;', $s);
 	}
 	
+	function helperRanking ($survey) {
+		
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
+												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_helper.deleted=0
+													AND tx_fsmivkrit_lecture.deleted=0
+													AND tx_fsmivkrit_helper.hidden=0
+													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
+													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid
+												GROUP BY tx_fsmivkrit_helper.uid,tx_fsmivkrit_lecture.weight
+												ORDER BY name');
+		
+		$content .= '<table>';
+		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th>Gesamtgewicht</th></tr>';
+		while ($res && $row = mysql_fetch_assoc($res))
+			$content .= '<tr><td width="150">'.$row['name'].'</td><td>'.$row['weight'].'</td></tr>';
+		
+		$content .= '</table>';
+			
+		return $content;
+	}
+	
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
 		$content .= '<tr bgcolor="#526feb">';
@@ -131,7 +157,6 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Pate</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
 //		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
-  	
 		$content .= '	<td align="center" style="color:white; width:100px;"><b>Tipper</b></td>';
 //		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
 //		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
@@ -161,8 +186,6 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		// counter for lectures
 		$count = 0;
 
-		$rowcol = array(true => array(0 => '#ff9e9e', 1 => '#ffcbcb'), 
-  						false => array(0 => '#d9e2ec', 1 => '#eaedf4'));
    		$olddate = '';
    		$vor15minuten = mktime()-15*60;
 			
@@ -185,17 +208,37 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   				
 	  		// set row color
 	   		switch ($row['eval_state']) {
-	   			case tx_fsmivkrit_pi2::kEVAL_STATE_APPROVED: {
-	   				// set line color
+				case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
+	   				// light red
 	   				$count%2 == 0 ? 
 	   					$content .= '<tr bgcolor="#ff9e9e">':
 	   					$content .= '<tr bgcolor="#ffcbcb">'; 
-	   					
 	   					break; // yellow not correct one
 	   				//TODO colorize each second row by ... light/dark red
 	   			}
-	   			case tx_fsmivkrit_pi2::kEVAL_STATE_EVALUATED: $content .= '<tr bgcolor="#99FF99">'; break; // light green
-	   			case tx_fsmivkrit_pi2::kEVAL_STATE_FINISHED: $content .= '<tr bgcolor="#00B233">'; break; // dark green: finished
+				case tx_fsmivkrit_div::kEVAL_STATE_EVALUATED: {
+	   				// light grey
+	   				$count%2 == 0 ? 
+	   					$content .= '<tr bgcolor="#d9e2ec">':
+	   					$content .= '<tr bgcolor="#eaedf4">'; 
+	   					break;
+	   			}
+				case tx_fsmivkrit_div::kEVAL_STATE_SORTED: {
+	   				// light yellow
+	   				$count%2 == 0 ? 
+	   					$content .= '<tr bgcolor="#fffe8c">':
+	   					$content .= '<tr bgcolor="#fffe8c">'; 
+	   					break;
+	   			}
+	   			case tx_fsmivkrit_div::kEVAL_STATE_SCANNED: {
+	   				// light blue
+	   				$count%2 == 0 ? 
+	   					$content .= '<tr bgcolor="#abb3ea">':
+	   					$content .= '<tr bgcolor="#abb3ea">'; 
+	   					break;
+	   			}
+	   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: $content .= '<tr bgcolor="#99ff99">'; break; // light green
+	   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: $content .= '<tr bgcolor="#00b233">'; break; // dark green: finished
 	   			default: $content .= '<tr>';
 	   		}
 				
@@ -335,7 +378,35 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 							<input type="text" name="'.$this->extKey.'[weight]" id="'.$this->extKey.'_weight"  	
 								value="'.($lectureUID["weight"]>0 ? $lectureUID["weight"]:'').'" size="10" />
 						</td></tr>';
-	   			
+	   	// state
+	   	$content .= '<tr><td>Status</td><td>';
+		// created
+	   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_APPROVED) $content .= ' checked="checked" ';
+	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'" />'.
+	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'">Termin zugewiesen</label><br />';
+		// evaluated
+		$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_EVALUATED) $content .= ' checked="checked" ';
+	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'" />'.
+	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'">gekrittet</label><br />';
+		// sorted
+		$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SORTED) $content .= ' checked="checked" ';
+	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'" />'.
+	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'">sortiert</label><br />';
+	   	// scanned
+		$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SCANNED) $content .= ' checked="checked" ';
+	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'" />'.
+	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'">gescanned</label><br />';
+	   	// anonymized
+		$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED) $content .= ' checked="checked" ';
+	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" />'.
+	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'">alle Bilder getippt</label><br />';
+	   	
+	   	$content .= '</td></tr>';
 		$content .= '</table>';
 	   	$content .= '</fieldset>';
 	   			
@@ -362,7 +433,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 											'kritter_4' 	=> htmlspecialchars($GETcommands['kritter_4']),
 											'godfather'		=> intval($GETcommands['godfather']),
 											'tipper'		=> intval($GETcommands['tipper']),
-											'weight'		=> intval($GETcommands['weight'])
+											'weight'		=> intval($GETcommands['weight']),
+											'eval_state'	=> intval($GETcommands['eval_state'])
 									));
 		if (!$res) {
 			return $content .= tx_fsmivkrit_div::printSystemMessage(
