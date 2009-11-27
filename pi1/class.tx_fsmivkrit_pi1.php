@@ -202,7 +202,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<fieldset><legend>Vorlesung</legend><table>';
 		// participants
 		$content .= '<tr>
-						<td><label for="'.$this->extKey.'_participants">Teilnehmer:</label></td>
+						<td><label for="'.$this->extKey.'_participants">Vorlesungsteilnehmer:</label></td>
 						<td><input type="text" name="'.$this->extKey.'[participants]" size="3" id="'.$this->extKey.'_participants"  	
 								value="'.htmlspecialchars($this->piVars["participants"]).'" /></td>
 					</tr>'; //TODO make selector
@@ -307,7 +307,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				
 		// submit button
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
-				value="'.htmlspecialchars('Daten überprüfen').'">';
+				value="'.htmlspecialchars('weiter zum Daten überprüfen').'">';
 		
 		$content .= '</form>';
 

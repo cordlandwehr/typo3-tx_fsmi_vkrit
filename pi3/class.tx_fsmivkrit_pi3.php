@@ -88,12 +88,14 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$content .= '<h2>Koordination - Übersicht</h2>';
 				$content .= $this->saveKritterData(intval($GETcommands['lecture']));
 				$content .= $this->printTable($this->survey);
+				$content .= '<h3>Tipper-Ranking</h3>';
 				$content .= $this->helperRanking($this->survey);
 				break;
 			}
 			default: {	// could also be kLIST
 				$content .= '<h2>Koordination - Übersicht</h2>';
 				$content .= $this->printTable($this->survey);
+				$content .= '<h3>Tipper-Ranking</h3>';
 				$content .= $this->helperRanking($this->survey);
 				break;
 			}
@@ -122,6 +124,20 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	
 	function helperRanking ($survey) {
 		
+		// get sum
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(weight) as total_weight
+												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_helper.deleted=0
+													AND tx_fsmivkrit_lecture.deleted=0
+													AND tx_fsmivkrit_helper.hidden=0
+													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
+													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid');
+		if ($res && $row = mysql_fetch_assoc($res))
+			$total_weight = $row['total_weight'];
+		else
+			$total_weight = 1; // 0 would be 'division by zero' ;)
+		
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
 												WHERE tx_fsmivkrit_helper.deleted=0
@@ -134,9 +150,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 												ORDER BY name');
 		
 		$content .= '<table>';
-		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th>Gesamtgewicht</th></tr>';
+		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th style="width:200px">Gewicht</th></tr>';
 		while ($res && $row = mysql_fetch_assoc($res))
-			$content .= '<tr><td width="150">'.$row['name'].'</td><td>'.$row['weight'].'</td></tr>';
+			$content .= '<tr><td width="150">'.$row['name'].'</td>
+				<td><div style="background-color: blue; color: #fff; padding-left: 3px; font-weight: bold; width:'.intval($row['weight']/$total_weight*200).'px;">'.$row['weight'].'g</div></td></tr>';
 		
 		$content .= '</table>';
 			
