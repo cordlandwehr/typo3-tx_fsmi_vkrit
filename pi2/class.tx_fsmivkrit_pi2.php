@@ -52,6 +52,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	const kCHANGE_ENABLE_LECTURE	= 4;
 	const kASSIGN_EVAL_DATE_FORM	= 5;
 	const kASSIGN_EVAL_DATE_SAVE	= 6;
+	const kEDIT_LECTURE_FORM		= 7;
+	const kEDIT_LECTURE_SAVE		= 8;
 	
 	// value if 01.01.1970 - 7 am. (this is default value) 
 	const kLOWER_BOUND_DATE			= 21600;
@@ -121,6 +123,15 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			}
 			case self::kASSIGN_EVAL_DATE_SAVE: {
 				$content .= $this->saveLectureEvaldataAssignment(intval($GETcommands['lecture']));
+				$content .= $this->printLectureList();
+				break;
+			}
+			case self::kEDIT_LECTURE_FORM: {
+				$content .= $this->printLectureEditForm(intval($GETcommands['lecture']));
+				break;
+			}
+			case self::kEDIT_LECTURE_SAVE: {
+				$content .= $this->saveLectureEdit(intval($GETcommands['lecture']));
 				$content .= $this->printLectureList();
 				break;
 			}
@@ -215,19 +226,33 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
 				$content .= '	<td width="50">'.($row['eval_state']).'</td>
 								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
-								<td width="200">'.
-									// is there any comment?
-									($row['comment']!='' ? 
-										'<span style="float:right;"><img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" /></span>':
-										'' ).
-									// lectcure name and link
-									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
-									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
+							<td width="250">'.
+								// notify if there is any comment
+								($row['comment']!='' ? 
+									'<span style="float:right;">'.
+									$this->pi_linkTP(
+										'<img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" />',
+										array (	$this->extKey.'[type]' => self::kEDIT_LECTURE_FORM,
 											$this->extKey.'[survey]' => $this->survey,
-											$this->extKey.'[lecture]' => $row['uid'])
-								).
-								' '.$row['name'].'</td>
-								<td width="200"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
+											$this->extKey.'[lecture]' => $row['uid']
+										)
+									).'</span>':
+									'' ).
+								// lecture activate link
+								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
+								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
+										$this->extKey.'[survey]' => $this->survey,
+										$this->extKey.'[lecture]' => $row['uid']
+									)
+								).' '.
+								// lecture edit link
+								$this->pi_linkTP($row['name'],
+									array (	$this->extKey.'[type]' => self::kEDIT_LECTURE_FORM,
+										$this->extKey.'[survey]' => $this->survey,
+										$this->extKey.'[lecture]' => $row['uid']
+									)
+								).'</td>
+								<td width="150"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 				// show first eval date
 				$content .= '	<td width="100">'.(
@@ -318,19 +343,33 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 					$content .= ( $row['participants']==0? '': $row['participants'] );
 				$content .= '</td>';
 				$content .= '
-								<td width="200">'.
-									// is there any comment?
-									($row['comment']!='' ? 
-										'<span style="float:right;"><img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" /></span>':
-										'' ).
-									// lectcure name and link.
-									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
-									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
+							<td width="250">'.
+								// notify if there is any comment
+								($row['comment']!='' ? 
+									'<span style="float:right;">'.
+									$this->pi_linkTP(
+										'<img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" />',
+										array (	$this->extKey.'[type]' => self::kEDIT_LECTURE_FORM,
 											$this->extKey.'[survey]' => $this->survey,
-											$this->extKey.'[lecture]' => $row['uid'])
-								).
-								' '.$row['name'].'</td>
-								<td width="200"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
+											$this->extKey.'[lecture]' => $row['uid']
+										)
+									).'</span>':
+									'' ).
+								// lecture activate link
+								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
+								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
+										$this->extKey.'[survey]' => $this->survey,
+										$this->extKey.'[lecture]' => $row['uid']
+									)
+								).' '.
+								// lecture edit link
+								$this->pi_linkTP($row['name'],
+									array (	$this->extKey.'[type]' => self::kEDIT_LECTURE_FORM,
+										$this->extKey.'[survey]' => $this->survey,
+										$this->extKey.'[lecture]' => $row['uid']
+									)
+								).'</td>
+							<td width="150"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
 									
 				// eval date
@@ -835,6 +874,83 @@ mit.</textarea></div>
 		return tx_fsmivkrit_div::printSystemMessage(
 						tx_fsmivkrit_div::kSTATUS_INFO,
 						'Info Mail wurde an Dozenten versandt.');
+	}
+	
+	function printLectureEditForm ($lecture) {
+		$content = '';
+
+		// the user probably wants to have a way out:
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
+						array (	
+							$this->extKey.'[type]' => self::kLIST,
+							$this->extKey.'[survey]' => $this->survey
+						)).'</strong></div>';
+		
+		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
+		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
+
+		// head information
+		$content .= '<h3>Vorlesung editieren</h3>';
+		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
+
+		// hidden field to tell system, that IMPORT data is coming
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kEDIT_LECTURE_SAVE.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
+		
+		$content .= '<fieldset>';
+		$content .= '<table>'.
+					'<tr>
+						<td><strong>Veranstaltung:</strong></td>
+						<td><input type="text" name="'.$this->extKey.'[name]" id="'.$this->extKey.'_name"  	
+								value="'.htmlspecialchars($lectureUID["name"]).'" /></td>
+					</tr>'.
+					'<tr>
+						<td><strong>Teilnehmer:</strong></td>
+						<td><input type="text" name="'.$this->extKey.'[participants]" id="'.$this->extKey.'_participants"  	
+								value="'.htmlspecialchars($lectureUID["participants"]).'" /></td>
+					</tr>'.
+					'<tr>
+						<td><strong>Kommentar:</strong></td>
+						<td><textarea rows="10" cols="40" name="'.$this->extKey.'[comment]" id="'.$this->extKey.'_comment">'.
+							htmlspecialchars($lectureUID["comment"]).
+						'</textarea></td>
+					</tr>'.
+					'</table>';
+
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+				value="'.htmlspecialchars('Speichern').'">';
+		$content .= '</form>';
+
+		return $content;
+	}
+	
+	function saveLectureEdit($lecture) {
+		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		
+		// check if mail shall really be sent
+		$inputData = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+
+		// update Lecture
+		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+									'tx_fsmivkrit_lecture',
+									'uid=\''.$lecture.'\'',
+									array (	'crdate' => time(),
+											'tstamp' => time(),
+											'participants' 	=> 	intval($inputData['participants']),
+											'name' 	=> 			htmlspecialchars($inputData['name']),
+											'comment'		=> 	htmlspecialchars($inputData['comment'])
+									));
+		if (!$res)
+			return tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_ERROR,
+							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.'); 
+		
+		// else
+		return tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_INFO,
+							'Änderungen bei Veranstaltung <strong>'.$lectureUID['name'].'</strong> wurden gespeichert.'); 
 	}
 	
 }
