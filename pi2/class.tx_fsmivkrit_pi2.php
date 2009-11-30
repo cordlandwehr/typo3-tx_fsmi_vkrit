@@ -216,6 +216,11 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= '	<td width="50">'.($row['eval_state']).'</td>
 								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
 								<td width="200">'.
+									// is there any comment?
+									($row['comment']!='' ? 
+										'<span style="float:right;"><img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" /></span>':
+										'' ).
+									// lectcure name and link
 									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
 									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
 											$this->extKey.'[survey]' => $this->survey,
@@ -314,6 +319,11 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= '</td>';
 				$content .= '
 								<td width="200">'.
+									// is there any comment?
+									($row['comment']!='' ? 
+										'<span style="float:right;"><img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" /></span>':
+										'' ).
+									// lectcure name and link.
 									$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
 									array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
 											$this->extKey.'[survey]' => $this->survey,
