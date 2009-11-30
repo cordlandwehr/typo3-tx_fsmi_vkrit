@@ -94,6 +94,35 @@ class tx_fsmivkrit_div {
 		
 		return $content;
 	}
+	
+	function print8State($state) {
+		if ($state>8)
+			return $state;
+			
+		switch ($state) {
+			case self::kEVAL_STATE_CREATED: 
+				$title = 'Vorlesung angelegt.'; break;
+			case self::kEVAL_STATE_NOTIFIED: 
+				$title = 'Dozent wurde benachrichtigt.'; break;
+			case self::kEVAL_STATE_COMPLETED: 
+				$title = 'Daten wurden vom Dozenten eingetragen.'; break;
+			case self::kEVAL_STATE_APPROVED: 
+				$title = 'Evaluationstermin wurde zugewiesen'; break;
+			case self::kEVAL_STATE_EVALUATED: 
+				$title = 'Evaluation wurde durchgeführt.'; break;
+			case self::kEVAL_STATE_SORTED: 
+				$title = 'Evaluationsbögen wurden sortiert.'; break;
+			case self::kEVAL_STATE_SCANNED: 
+				$title = 'Bögen wurden gescannt.'; break;
+			case self::kEVAL_STATE_ANONYMIZED: 
+				$title = 'Anonymisierung abgeschlossen.'; break;
+			case self::kEVAL_STATE_FINISHED: 
+				$title = 'Evaluation abgeschlossen.'; break;
+			default: $title = 'Kein Titel angegeben.';
+		}
+		
+		return '<img src="'.tx_fsmivkrit_div::imgPath.'state_'.$state.'.png" title="'.$title.'" alt="Status '.$state.'" />';
+	}
 
 	/**
 	 * Creates a list of time steps from 7am to 8pm in steps of a quarter.

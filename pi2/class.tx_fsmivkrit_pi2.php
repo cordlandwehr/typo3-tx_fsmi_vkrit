@@ -224,7 +224,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$lectureActivation = array ();
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
 				$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
-				$content .= '	<td width="50">'.($row['eval_state']).'</td>
+				$content .= '	<td width="20">'.tx_fsmivkrit_div::print8State($row['eval_state']).'</td>
 								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
 							<td width="250">'.
 								// notify if there is any comment
@@ -334,7 +334,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$lectureActivation = array ();
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
 				$lectureActivation[1] = tx_fsmivkrit_div::imgPath.'disabled.png';
-				$content .= '	<td width="50">'.($row['eval_state']).'</td>';
+				$content .= '	<td width="20">'.tx_fsmivkrit_div::print8State($row['eval_state']).'</td>';
 				// pariticipants
 				$content .= '	<td width="10">';
 				if ($row['no_eval]']==1)

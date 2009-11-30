@@ -163,6 +163,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
 		$content .= '<tr bgcolor="#526feb">';
+		$content .= '	<td align="center" style="color:white; width: 20px;"></td>';
 		$content .= '	<td align="center" style="color:white; width: 40px;"><b>Tag</b></td>';
 		$content .= '	<td align="center" style="color:white; width: 35px;"><b>Zeit</b></td>';
 		$content .= '	<td align="center" style="color:white;"><b>Raum</b></td>';
@@ -263,6 +264,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
 	   		
 	   		// print row
+	   		$content .= '<td>'.tx_fsmivkrit_div::print8State($row['eval_state']).'</td>';
 			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
 	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
 			$content .= '<td align="center">'.$row['eval_room_fixed'].'</td>';
