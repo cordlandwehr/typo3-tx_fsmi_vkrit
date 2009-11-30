@@ -653,7 +653,7 @@ mit.</textarea></div>
 			if ($i==1) //TODO change this to something dynamically
 				$content .= 'checked="checked" ';
 			$content .= '				id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
-			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).'</label>'."<br />\n";
+			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).' (Raum: '.$lectureUID['eval_room_'-$i].'</label>'."<br />\n";
 		}
 
 		tx_rlmpdateselectlib::includeLib();		// invoke calender frontend library
