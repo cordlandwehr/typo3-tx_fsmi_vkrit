@@ -52,8 +52,8 @@
 			<label index="tx_fsmivkrit_lecture.inputform_verify">Input-Form Verification</label>
 			<label index="tx_fsmivkrit_lecture.comment">Comment</label>
 			<label index="tx_fsmivkrit_tutorial">Tutorial</label>
-			<label index="tx_fsmivkrit_tutorial.assistant_name">Assistant Name</label>
-			<label index="tx_fsmivkrit_tutorial.assistant_forename">Input Authentication (for Lecturer)</label>
+			<label index="tx_fsmivkrit_tutorial.assistant_name">Assistant's Name</label>
+			<label index="tx_fsmivkrit_tutorial.assistant_forename">Assistant's Forename</label>
 			<label index="tx_fsmivkrit_tutorial.lecture">Lecture</label>
 			<label index="tx_fsmivkrit_tutorial.foreign_id">Foreign ID</label>
 			<label index="tx_fsmivkrit_survey">Survey</label>
