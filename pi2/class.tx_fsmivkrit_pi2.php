@@ -916,8 +916,42 @@ mit.</textarea></div>
 						<td><textarea rows="10" cols="40" name="'.$this->extKey.'[comment]" id="'.$this->extKey.'_comment">'.
 							htmlspecialchars($lectureUID["comment"]).
 						'</textarea></td>
-					</tr>'.
-					'</table>';
+					</tr>';
+							
+					$content .= '<tr><td><strong>Status:</strong></td><td>';
+					// created
+				   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_APPROVED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.'">Termin zugewiesen</label><br />';
+					// evaluated
+					$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_EVALUATED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_EVALUATED.'">gekrittet</label><br />';
+					// sorted
+					$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SORTED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SORTED.'">sortiert</label><br />';
+				   	// scanned
+					$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SCANNED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_SCANNED.'">gescanned</label><br />';
+				   	// anonymized
+					$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'">alle Bilder getippt</label><br />';
+					// finished
+					$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_FINISHED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'">verschickt</label><br />';
+				   	
+				   	$content .= '</td></tr>';
+					$content .= '</table>';
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Speichern').'">';
@@ -940,7 +974,8 @@ mit.</textarea></div>
 											'tstamp' => time(),
 											'participants' 	=> 	intval($inputData['participants']),
 											'name' 	=> 			htmlspecialchars($inputData['name']),
-											'comment'		=> 	htmlspecialchars($inputData['comment'])
+											'comment'		=> 	htmlspecialchars($inputData['comment']),
+											'eval_state'	=> 	intval($inputData['eval_state'])
 									));
 		if (!$res)
 			return tx_fsmivkrit_div::printSystemMessage(

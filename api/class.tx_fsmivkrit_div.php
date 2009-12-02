@@ -54,6 +54,14 @@ class tx_fsmivkrit_div {
 	const kEVAL_STATE_ANONYMIZED	= 7;	// 
 	const kEVAL_STATE_FINISHED		= 8;
 	
+	// define state colors
+	const kCOLOR_COORDINATION_APPROVED		= '#ff9e9e';	// light red
+	const kCOLOR_COORDINATION_EVALUATED		= '#ffcbcb';	// lighter red
+	const kCOLOR_COORDINATION_SORTED		= '#ffe5a7';	// light orange
+	const kCOLOR_COORDINATION_SCANNED		= '#f3f0f0';	// light grey
+	const kCOLOR_COORDINATION_ANONYMIZED	= '#b7ffab';	// light green
+	const kCOLOR_COORDINATION_FINISHED		= '#81ff6c';	// green
+	
 	/**
 	 *
 	 * @param integer $status from constants

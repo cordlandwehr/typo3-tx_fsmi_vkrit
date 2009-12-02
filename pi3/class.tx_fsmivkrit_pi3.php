@@ -217,13 +217,9 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '	<td align="center" style="color:white"><b>#</b></td>';
 		$content .= '	<td align="center" style="color:white; width:100px;"><b>Kommentar</b></td>';
 		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Kritter</b></td>';
-		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Pate</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Sortierer</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
-//		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Bilder</b></td>';
 		$content .= '	<td align="center" style="color:white; width:100px;"><b>Tipper</b></td>';
-//		$content .= '	<td align="center" style="color:white; border-left:4px solid black"><b>Getippt</b></td>';
-//		$content .= '	<td align="center" style="color:white"><b>am korrigieren</b></td>';
-//		$content .= '	<td align="center" style="color:white"><b>bereit zum verschicken</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>EDIT</b></td>';
 		$content .= '</tr>';
 		
@@ -272,36 +268,29 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	  		// set row color
 	   		switch ($row['eval_state']) {
 				case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
-	   				// light red
-	   				$count%2 == 0 ? 
-	   					$content .= '<tr bgcolor="#ff9e9e">':
-	   					$content .= '<tr bgcolor="#ffcbcb">'; 
-	   					break; // yellow not correct one
-	   				//TODO colorize each second row by ... light/dark red
+	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_APPROVED.'">';
+	   				break;
 	   			}
 				case tx_fsmivkrit_div::kEVAL_STATE_EVALUATED: {
-	   				// light grey
-	   				$count%2 == 0 ? 
-	   					$content .= '<tr bgcolor="#d9e2ec">':
-	   					$content .= '<tr bgcolor="#eaedf4">'; 
-	   					break;
-	   			}
+	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_EVALUATED.'">';
+	   				break;
+				}
 				case tx_fsmivkrit_div::kEVAL_STATE_SORTED: {
-	   				// light yellow
-	   				$count%2 == 0 ? 
-	   					$content .= '<tr bgcolor="#fffe8c">':
-	   					$content .= '<tr bgcolor="#fffe8c">'; 
-	   					break;
-	   			}
+					$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SORTED.'">';
+	   				break;
+				}
 	   			case tx_fsmivkrit_div::kEVAL_STATE_SCANNED: {
-	   				// light blue
-	   				$count%2 == 0 ? 
-	   					$content .= '<tr bgcolor="#abb3ea">':
-	   					$content .= '<tr bgcolor="#abb3ea">'; 
-	   					break;
+	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SCANNED.'">';
+	   				break;
 	   			}
-	   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: $content .= '<tr bgcolor="#99ff99">'; break; // light green
-	   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: $content .= '<tr bgcolor="#00b233">'; break; // dark green: finished
+	   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: { 
+	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_ANONYMIZED.'">';
+	   				break;
+	   			}
+	   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: {
+	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_FINISHED.'">';
+	   				break;
+	   			}
 	   			default: $content .= '<tr>';
 	   		}
 				
@@ -335,11 +324,21 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$content .= '</ol></td>';
 				
 			$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
-			$content .= '<td align="center">'.$godfatherUID['name'].'</td>';
+			$content .= (
+				($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_EVALUATED && $row['godfather']==0) ?
+					'<td align="center;" bgcolor="red">':
+					'<td align="center">'.$godfatherUID['name']
+				)
+				.'</td>';
 			$content .= '<td align="center">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
 //			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
 			$tipperUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['tipper']);
-			$content .= '<td align="center">'.$tipperUID['name'].'</td>';
+			$content .= (
+				($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SCANNED && $row['tipper']==0) ?
+					'<td align="center;" bgcolor="red">':
+					'<td align="center">'.$tipperUID['name']
+				)
+				.'</td>';
 			// TODO check by state!
 //			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
 	  		$content .= '<td align="left">'.$this->pi_linkTP('editieren',
@@ -348,7 +347,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 														$this->extKey.'[lecture]' => $row['uid'],
 														$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
 													)).'</td>';
-			$content .= '</tr>';
+			$content .= '</tr>'."\n";
 		}
 		
 		$content .= '</table>';
@@ -356,7 +355,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		return $content;
 	}
 	
-	function printLectureEditForm($lecture) {
+	function printLectureEditForm ($lecture) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
@@ -401,7 +400,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		}
 		
 		// Godfather
-	   	$content .= '<tr><td><label for="'.$this->extKey.'_godfather">Pate</label></td><td>
+	   	$content .= '<tr><td><label for="'.$this->extKey.'_godfather">Sortierer</label></td><td>
 	   		<select name="'.$this->extKey.'[godfather]" id="'.$this->extKey.'_godfather" size="1">';
 	   			$content .= '<option value="0"></option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
