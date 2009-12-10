@@ -900,6 +900,7 @@ mit.</textarea></div>
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
 		
 		$content .= '<fieldset>';
+		$content .= '<h3>Veranstaltungsdaten</h3>';
 		$content .= '<table>'.
 					'<tr>
 						<td><strong>Veranstaltung:</strong></td>
@@ -952,6 +953,20 @@ mit.</textarea></div>
 				   	
 				   	$content .= '</td></tr>';
 					$content .= '</table>';
+					
+					// information about assistants 
+					// TODO make editable
+					$content .= '<h3>Tutoren</h3>';
+					$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
+												FROM tx_fsmivkrit_tutorial 
+												WHERE deleted=0
+													AND lecture = \''.$lectureUID['uid'].'\'
+												ORDER BY assistant_name');
+					$content .= '<ol>';
+					while ($res && $row = mysql_fetch_assoc($res)) {
+						$content .= '<li>'.$row['assistant_name'].', '.$row['assistant_forename'].'</li>';
+					}
+					$content .= '</ol>';
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
 				value="'.htmlspecialchars('Speichern').'">';
