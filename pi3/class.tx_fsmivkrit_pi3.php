@@ -141,7 +141,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$total_weight = $row['total_weight'];
 		else
 			$total_weight = 1; // 0 would be 'division by zero' ;)
-		
+			
 		// select total-weight
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -155,11 +155,17 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 												ORDER BY name');
 		
 		$ranking = array ();
+		$maxWeight = 0;
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$ranking[$row['uid']]['weight'] = $row['weight'];
+			if ($maxWeight < $row['weight'])
+				$maxWeight = $row['weight'];
 			$ranking[$row['uid']]['name'] = $row['name'];
 		}
 		
+		if ($maxWeight == 0)
+			$maxWeight = $total_weight;
+			
 		// select unfinished weight
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -183,32 +189,11 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$content .= '<tr><td width="150">'.$tipper['name'].'</td>
 				<td><span style="width:50px; font-weight: bold;">'.$tipper['weight'].'g</span><br />';
 			if ($tipper['weight']-$tipper['todo_weight'] > 0)
-				$content .= '<div style="background-color: blue; padding-left: 3px; width:'.intval(($tipper['weight']-$tipper['todo_weight'])/$total_weight*200).'px;">&nbsp;</div>';
+				$content .= '<div style="background-color: blue; float:left; padding-left: 3px; width:'.intval(($tipper['weight']-$tipper['todo_weight'])/$maxWeight*200).'px;">&nbsp;</div>';
 			if ($tipper['todo_weight'] > 0)
-				$content .= '<div style="background-color: yellow; width:'.intval($tipper['todo_weight']/$total_weight*200).'px;">&nbsp;</div>';	
-			$content .= '</td></tr>';
+				$content .= '<div style="background-color: yellow; float:left; width:'.intval($tipper['todo_weight']/$maxWeight*200).'px;">&nbsp;</div>';	
+			$content .= '&nbsp;</div></td></tr>';
 		}
-//		
-//			
-//		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
-//												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-//												WHERE tx_fsmivkrit_helper.deleted=0
-//													AND tx_fsmivkrit_lecture.deleted=0
-//													AND tx_fsmivkrit_helper.hidden=0
-//													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
-//													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-//													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid
-//												GROUP BY tx_fsmivkrit_helper.uid
-//												ORDER BY name');
-//		
-//		$content .= '<table>';
-//		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th style="width:250px">Gewicht</th></tr>';
-//		while ($res && $row = mysql_fetch_assoc($res))
-//			$content .= '<tr><td width="150">'.$row['name'].'</td>
-//				<td><span style="width:50px; font-weight: bold;">'.$row['weight'].'g</span>
-//					<div style="background-color: blue; padding-left: 3px; width:'.intval($row['weight']/$total_weight*200).'px;">&nbsp;</div></td></tr>';
-//			
-			
 			
 		$content .= '</table>';
 			
