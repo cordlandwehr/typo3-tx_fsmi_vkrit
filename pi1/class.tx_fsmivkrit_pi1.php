@@ -367,11 +367,17 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 				
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y H:i', $inputData['eval_'.$i]['date']).', 
 						<strong>Raum:</strong> '.$inputData['eval_'.$i]['room'].'</li>';
-			if ($inputData['eval_'.$i]['date']<$surveyUID['eval_start'] || ($surveyUID['eval_end']!=0 && $inputData['eval_'.$i]['date']>$surveyUID['eval_end']))
+			if ( 	($inputData['eval_'.$i]['date']<$surveyUID['eval_start'])
+						|| 
+					($surveyUID['eval_end']!=0 && $inputData['eval_'.$i]['date']> $surveyUID['eval_end'] + 24*60*60)	// addition is one additional day
+				)
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_WARNING,
 									'Der vorgeschlagene Termin liegt außerhalb des Evaluationszeitraumes. 
 									Der Zeitraum ist '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'.');
+		
+			debug ($inputData['eval_'.$i]['date'], 'INPUT');
+			debug ($surveyUID['eval_end'], 'SET');
 		}
 		$content .= '</ol>';
 		
@@ -429,11 +435,12 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// vkrit dates
 		for ($i=1; $i<=3; $i++) {
-			if ($POSTdata['eval_date_'.$i]=='')
+			$inputData['eval_'.$i]['room'] = htmlspecialchars($POSTdata['eval_room_'.$i]);
+			
+			if ($POSTdata['eval_date_'.$i]=='' || $POSTdata['eval_date_'.$i] <= 24*60*60)
 				continue;
 			$inputData['eval_'.$i]['date'] = strtotime(
 						htmlspecialchars($POSTdata['eval_date_'.$i]).' '.htmlspecialchars($POSTdata['eval_time_'.$i]).':00');
-			$inputData['eval_'.$i]['room'] = htmlspecialchars($POSTdata['eval_room_'.$i]);
 		}
 		
 		$inputData['comment'] = htmlspecialchars($POSTdata['comment']);
@@ -570,7 +577,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			
 		// set dates
 		for ($i=1; $i<=3; $i++) {
-			if ($this->piVars["eval_date_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
+			if ($this->piVars["eval_date_".$i]=='' && $lectureUID['eval_date_'.$i] > 24*60*60)
 				$this->piVars["eval_date_".$i] = date('d.m.Y',$lectureUID['eval_date_'.$i]);
 				
 			if ($this->piVars["eval_time_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
@@ -597,7 +604,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$this->piVars["assistants"]=strip_tags($data['assistants']);
 			// set dates
 		for ($i=1; $i<=3; $i++) {
-			$this->piVars["eval_date_".$i] = strip_tags($data['eval_date_'.$i]);
+			if ($data['eval_date_'.$i] && $data['eval_date_'.$i]!='01.01.1970')	 // is greater one day?
+				$this->piVars["eval_date_".$i] = strip_tags($data['eval_date_'.$i]);
 			$this->piVars["eval_time_".$i] = strip_tags($data['eval_time_'.$i]);
 			$this->piVars["eval_room_".$i] = strip_tags($data['eval_room_'.$i]);
 		}
