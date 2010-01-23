@@ -280,16 +280,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		// counter for lectures
 		$count = 0;
 
-   		$olddate = '';
-   		$vor15minuten = mktime()-15*60;
-			
 		$content .= '<table cellpadding="3">';
 		
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$count++;
-			
-			//TODO überarbeiten!
-			if ($row['eval_date_fixed'] < $vor15minuten) $old = true; else $old = false;
 	
 			// this tests if date is new and should be displayed (only disply once)
 			$newdate = date('D d.m.',$row['eval_date_fixed']);
@@ -323,7 +317,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   				break;
 	   			}
 	   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: {
-	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_FINISHED.'">';
+	   				continue;	// TODO we do not want to see finished evaluations at coordination page by default, maybe some extensible JavaScript...
+	   				//$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_FINISHED.'">';
 	   				break;
 	   			}
 	   			default: $content .= '<tr>';
