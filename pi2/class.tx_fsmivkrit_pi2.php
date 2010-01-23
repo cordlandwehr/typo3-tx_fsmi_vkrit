@@ -325,10 +325,36 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				// get lecturer name
 				$resLecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
 				
-				if ($row['hidden']==0)
-					$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">';
 				if ($row['hidden']==1 || $row['no_eval'] == 1)
 					$content .= '<tr style="background-color: #ddd; font-style: italic;">';
+				else {	
+					switch ($row['eval_state']) {	
+						case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
+			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_APPROVED.'">';
+			   				break;
+			   			}
+						case tx_fsmivkrit_div::kEVAL_STATE_EVALUATED: {
+			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_EVALUATED.'">';
+			   				break;
+						}
+						case tx_fsmivkrit_div::kEVAL_STATE_SORTED: {
+							$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SORTED.'">';
+			   				break;
+						}
+			   			case tx_fsmivkrit_div::kEVAL_STATE_SCANNED: {
+			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SCANNED.'">';
+			   				break;
+			   			}
+			   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: { 
+			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_ANONYMIZED.'">';
+			   				break;
+			   			}
+			   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: {
+			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_FINISHED.'">';
+			   				break;
+			   			}
+					}
+				}					
 					
 				// lecture and lecture activation state
 				$lectureActivation = array ();
