@@ -515,14 +515,6 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 					$this->getKeyForTutor($tutor['uid'])
 				)
 			);
-			// set gender
-			// TODO is hack!
-			$newTutor->appendChild(
-				$document->createElement(
-					'gender',
-					'm'
-				)
-			);
 		}
 		
 		/*
