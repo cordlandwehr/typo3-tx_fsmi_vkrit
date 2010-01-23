@@ -980,6 +980,12 @@ mit.</textarea></div>
 				   	$content .= '</td></tr>';
 					$content .= '</table>';
 					
+					$content .= '<h3>Dozent</h3>';
+					$content .= '<div>'.
+									$lecturerUID['name'].', '.$lecturerUID['forename'].
+									htmlspecialchars(' <'.$lecturerUID['email'].'>').'</div>';
+					
+					
 					// information about assistants 
 					// TODO make editable
 					$content .= '<h3>Tutoren</h3>';
