@@ -321,6 +321,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		
 		$inputData = $this->getInputValuesToArray ();
 		
+		debug($inputData);
+		
 		$content = '';
 		
 		$content .= tx_fsmivkrit_div::printSystemMessage(
@@ -363,7 +365,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<ol>';
 		for($i=1; $i<=3; $i++) {
 			if ($inputData['eval_'.$i]['date']=='' || $inputData['eval_'.$i]['date']==0)
-				continue;
+				continue;				
 				
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y H:i', $inputData['eval_'.$i]['date']).', 
 						<strong>Raum:</strong> '.$inputData['eval_'.$i]['room'].'</li>';
@@ -436,9 +438,10 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// vkrit dates
 		for ($i=1; $i<=3; $i++) {
 			$inputData['eval_'.$i]['room'] = htmlspecialchars($POSTdata['eval_room_'.$i]);
-			
-			if ($POSTdata['eval_date_'.$i]=='' || $POSTdata['eval_date_'.$i] <= 24*60*60)
+
+			if ($POSTdata['eval_date_'.$i]=='')
 				continue;
+				
 			$inputData['eval_'.$i]['date'] = strtotime(
 						htmlspecialchars($POSTdata['eval_date_'.$i]).' '.htmlspecialchars($POSTdata['eval_time_'.$i]).':00');
 		}
