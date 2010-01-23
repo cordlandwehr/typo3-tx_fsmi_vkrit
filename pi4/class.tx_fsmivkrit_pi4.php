@@ -563,7 +563,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newLecture->appendChild(
 				$document->createElement(
 					'short',
-					htmlspecialchars($lecture['name'])
+					$lecture['foreign_id']
 				)
 			);
 			$newLecture->appendChild(
@@ -643,7 +643,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$newLecture->appendChild(
 					$document->createElement(
 						'short',
-						htmlspecialchars('Ü '.$lecture['name'])
+						$lecture['foreign_id'].'_tutorial'
 					)
 				);
 				$newLecture->appendChild(
