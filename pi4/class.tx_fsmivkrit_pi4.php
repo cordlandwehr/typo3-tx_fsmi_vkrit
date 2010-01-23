@@ -631,7 +631,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$newLecture->appendChild(
 					$document->createElement(
 						'name',
-						htmlspecialchars('Übung '.$lecture['name'])
+						htmlspecialchars($lecture['name'].' (Übung)')
 					)
 				);
 //				$newLecture->appendChild(
