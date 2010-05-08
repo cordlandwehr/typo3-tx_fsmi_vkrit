@@ -33,7 +33,7 @@ Import of CampusNet data and export of EvaSys data is provided.',
 	'version' => '0.1.993',
 	'constraints' => array(
 		'depends' => array(
-			'date2cal' => '7.3.1-',
+			'date2cal' => '7.1.0-',
 		),
 		'conflicts' => array(
 		),

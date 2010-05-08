@@ -984,7 +984,7 @@ mit.</textarea></div>
 					</tr>';
 
 					$content .= '<tr><td><strong>Status:</strong></td><td>';
-debug($lectureUID['eval_state']);
+
 				   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
 				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_COMPLETED) $content .= ' checked="checked" ';
 				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'" />'.

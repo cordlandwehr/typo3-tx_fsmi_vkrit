@@ -41,22 +41,22 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	var $prefixId      = 'tx_fsmivkrit_pi3';		// Same as class name
 	var $scriptRelPath = 'pi3/class.tx_fsmivkrit_pi3.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'fsmi_vkrit';	// The extension key.
-	
+
 	//TODO check if the followin is really needed
 	var $checked = array(false => '', true => 'checked');
 	var $selected = array(false => '', true => 'selected');
 	var $xxx = array(0 => '', 1 => 'X');
 	var $nulleins = array(true => 1, false => 0);
 	var $editMode = false;
-	
+
 	var $survey;
-	
+
 	const kLOCKTIME		= 300;	// system locking time in seconds
-	
+
 	const kLIST					= 1;	// mode: assign kritter form
 	const kASSIGN_KRITTER_FORM	= 2;	// mode: assign kritter form
 	const kASSIGN_KRITTER_SAVE	= 3;	// mode: assign kritter form
-	
+
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -69,15 +69,15 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
-	
 
-		
+
+
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$this->survey = intval($GETcommands['survey']);
-		
-		//TODO 
+
+		//TODO
 		$this->survey = 1;
-		
+
 		switch(intval($GETcommands['type'])) {
 			case self::kASSIGN_KRITTER_FORM: {
 				$content .= '<h2>Kritter-Daten ändern</h2>';
@@ -105,29 +105,29 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			}
 		}
 
-		
+
 		return $this->pi_wrapInBaseClass($content);
 	}
-	
-    
+
+
 	function nix($s) {	//TODO rework
 		if (trim($s) == '') return '&nbsp;'; else return $s;
 	}
-    		
+
 	function null($s) { //TODO rework
 		if (trim($s) == '') return '0'; else return $s;
 	}
-    		
+
 	function ohnenull($s) { // TODO rework
 		if ($s == 0) return ''; else return $s;
 	}
-    		
+
 	function nospace($s) { //TODO rework
 		return str_replace(' ', '&nbsp;', $s);
 	}
-	
+
 	function printTipperRanking ($survey) {
-		
+
 		// get sum
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(weight) as total_weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -141,7 +141,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$total_weight = $row['total_weight'];
 		else
 			$total_weight = 1; // 0 would be 'division by zero' ;)
-			
+
 		// select total-weight
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -153,7 +153,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid
 												GROUP BY tx_fsmivkrit_helper.uid
 												ORDER BY name');
-		
+
 		$ranking = array ();
 		$maxWeight = 0;
 		while ($res && $row = mysql_fetch_assoc($res)) {
@@ -162,10 +162,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$maxWeight = $row['weight'];
 			$ranking[$row['uid']]['name'] = $row['name'];
 		}
-		
+
 		if ($maxWeight == 0)
 			$maxWeight = $total_weight;
-			
+
 		// select unfinished weight
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -178,11 +178,11 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND tx_fsmivkrit_lecture.eval_state < \''.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'\'
 												GROUP BY tx_fsmivkrit_helper.uid
 												ORDER BY name');
-		
+
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$ranking[$row['uid']]['todo_weight'] = $row['weight'];
 		}
-		
+
 		$content .= '<table>';
 		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th style="width:250px">Gewicht</th></tr>';
 		foreach ($ranking as $tipper) {
@@ -191,17 +191,17 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			if ($tipper['weight']-$tipper['todo_weight'] > 0)
 				$content .= '<div style="background-color: blue; float:left; padding-left: 3px; width:'.intval(($tipper['weight']-$tipper['todo_weight'])/$maxWeight*200).'px;">&nbsp;</div>';
 			if ($tipper['todo_weight'] > 0)
-				$content .= '<div style="background-color: yellow; float:left; width:'.intval($tipper['todo_weight']/$maxWeight*200).'px;">&nbsp;</div>';	
+				$content .= '<div style="background-color: yellow; float:left; width:'.intval($tipper['todo_weight']/$maxWeight*200).'px;">&nbsp;</div>';
 			$content .= '&nbsp;</div></td></tr>';
 		}
-			
+
 		$content .= '</table>';
-			
+
 		return $content;
 	}
-	
+
 	function printGodfatherRanking ($survey) {
-		
+
 		// get sum
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(weight) as total_weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
@@ -215,7 +215,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$total_weight = $row['total_weight'];
 		else
 			$total_weight = 1; // 0 would be 'division by zero' ;)
-		
+
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
 												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
 												WHERE tx_fsmivkrit_helper.deleted=0
@@ -226,20 +226,20 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND tx_fsmivkrit_lecture.godfather = tx_fsmivkrit_helper.uid
 												GROUP BY tx_fsmivkrit_helper.uid
 												ORDER BY name');
-		
+
 		$content .= '<table>';
 		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th style="width:250px">Gewicht</th></tr>';
 		while ($res && $row = mysql_fetch_assoc($res))
 			$content .= '<tr><td width="150">'.$row['name'].'</td>
 							<td><span style="width:50px; font-weight: bold;">'.$row['weight'].'g</span>
 								<div style="background-color: green; padding-left: 3px; width:'.intval($row['weight']/$total_weight*200).'px;">&nbsp;</div></td></tr>';
-		
+
 		$content .= '</table>';
-			
+
 		return $content;
 	}
-	
-	
+
+
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
 		$content .= '<tr bgcolor="#526feb">';
@@ -257,43 +257,47 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '	<td align="center" style="color:white; width:100px;"><b>Tipper</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>EDIT</b></td>';
 		$content .= '</tr>';
-		
+
 		return $content ;
    	}
-   	 		
+
 
 	function printTable ($survey) {
- 		// table head
+ 		$content = '';
 
    		//TODO here we need the current number of pictures per evaluater
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_lecture 
-												WHERE deleted=0 
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0
 													AND hidden=0
 													AND survey= \''.$survey.'\'
 													AND eval_state BETWEEN '.
 														tx_fsmivkrit_div::kEVAL_STATE_APPROVED.
 														' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
-													AND no_eval=0 
+													AND no_eval=0
 												ORDER BY eval_date_fixed');
 
 		// counter for lectures
 		$count = 0;
 
 		$content .= '<table cellpadding="3">';
-		
+
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$count++;
-	
+
+			// we do not want to see finished evaluations at coordination page by default, maybe some extensible JavaScript..
+	   		if ($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_FINISHED)
+				continue;
+
 			// this tests if date is new and should be displayed (only disply once)
 			$newdate = date('D d.m.',$row['eval_date_fixed']);
-	   		if ($olddate == $newdate) 
+	   		if ($olddate == $newdate)
 	   			$newdate = '&nbsp;<br />&nbsp;';
 	  		else {
 	   			$olddate = $newdate;
 	   			$content .= $this->printTableHead();
-	  		}	
-	   				
+	  		}
+
 	  		// set row color
 	   		switch ($row['eval_state']) {
 				case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
@@ -312,28 +316,23 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SCANNED.'">';
 	   				break;
 	   			}
-	   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: { 
+	   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: {
 	   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_ANONYMIZED.'">';
-	   				break;
-	   			}
-	   			case tx_fsmivkrit_div::kEVAL_STATE_FINISHED: {
-	   				continue;	// TODO we do not want to see finished evaluations at coordination page by default, maybe some extensible JavaScript...
-	   				//$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_FINISHED.'">';
 	   				break;
 	   			}
 	   			default: $content .= '<tr>';
 	   		}
-				
+
 	   		// get lecturer
 	   		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
-	   		
+
 	   		// print row
 	   		$content .= '<td>'.tx_fsmivkrit_div::print8State($row['eval_state']).'</td>';
 			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
 	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
 			$content .= '<td align="center">'.$row['eval_room_fixed'].'</td>';
 	  		$content .= '<td align="left">'.$this->pi_linkTP($row['name'],
-														array (	
+														array (
 															$this->extKey.'[survey]' => $this->survey,
 															$this->extKey.'[lecture]' => $row['uid'],
 															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
@@ -341,8 +340,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$content .= '<td align="left">'.$lecturerUID['name'].'</td>';
 			$content .= '<td align="center">'.$row['participants'].'</td>';
 			$content .= '<td align="left">'.$row['comment'].'</td>';
-	
-	   		trim($row['kritter_1'])=='' ? 
+
+	   		trim($row['kritter_1'])=='' ?
 				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
 				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
 	  		for ($i = 1; $i < 5; $i++) {
@@ -352,7 +351,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 					$content .= '<li><strong>fehlt</strong></li>';
 	  		}
 			$content .= '</ol></td>';
-				
+
 			$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
 			$content .= (
 				($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_EVALUATED && $row['godfather']==0) ?
@@ -372,29 +371,31 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			// TODO check by state!
 //			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
 	  		$content .= '<td align="left">'.$this->pi_linkTP('editieren',
-													array (	
+													array (
 														$this->extKey.'[survey]' => $this->survey,
 														$this->extKey.'[lecture]' => $row['uid'],
 														$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
 													)).'</td>';
 			$content .= '</tr>'."\n";
 		}
-		
+
 		$content .= '</table>';
-		
+
+		$content .= '<p>Insgesamt sind '.$count.' Veranstaltungen in dieser V-Krit enthalten.</p>';
+
 		return $content;
 	}
-	
+
 	function printLectureEditForm ($lecture) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
-		
+
 		$content = '';
-		
+
 		// the user probably wants to have a way out:
-		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
-						array (	
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!',
+						array (
 							$this->extKey.'[type]' => self::kLIST,
 							$this->extKey.'[survey]' => $this->survey
 						)).'</strong></div>';
@@ -410,7 +411,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 					'<li><strong>Raum:</strong> '.$lectureUID['eval_room_fixed'].'</li>'.
 					'</ul>';
 		$content .= '<pre>'.$lectureUID['comment'].'</pre>';
-		
+
 		$content .= '<h3>Kritter- und Krit-Daten</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
@@ -418,48 +419,48 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kASSIGN_KRITTER_SAVE.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
-		
+
 		$content .= '<fieldset>';
 		$content .= '<table>';
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=4; $i++) {
 			$content .= '<tr><td><label for="'.$this->extKey.'_kritter_'.$i.'">Kritter '.$i.'</label></td><td>
-							<input type="text" name="'.$this->extKey.'[kritter_'.$i.']" id="'.$this->extKey.'_kritter_'.$i.'"  	
+							<input type="text" name="'.$this->extKey.'[kritter_'.$i.']" id="'.$this->extKey.'_kritter_'.$i.'"
 								value="'.$lectureUID["kritter_".$i].'" size="20" />
 							</td></tr>';
 		}
-		
+
 		// Godfather
 	   	$content .= '<tr><td><label for="'.$this->extKey.'_godfather">Sortierer</label></td><td>
 	   		<select name="'.$this->extKey.'[godfather]" id="'.$this->extKey.'_godfather" size="1">';
 	   			$content .= '<option value="0"></option>';
-				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_helper 
+				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM tx_fsmivkrit_helper
 													WHERE deleted=0 AND hidden=0
 														AND survey='.$lectureUID['survey'].'
 													ORDER BY name');
 	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
 	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
-	   							$rowHelper['uid']==$lectureUID['godfather'] ? 
+	   							$rowHelper['uid']==$lectureUID['godfather'] ?
 	   								'selected="selected"':
 	   								''
 	   						).' >'.$rowHelper['name'].'</option>';
 	   					}
 	   			$content .= '</select></td></tr>';
-	   			
+
 		// Tipper
 	   	$content .= '<tr><td><label for="'.$this->extKey.'_tipper">Tipper</label></td>
 	   		<td><select name="'.$this->extKey.'[tipper]" id="'.$this->extKey.'_tipper" size="1">';
 	   			$content .= '<option value="0"></option>';
-				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_helper 
+				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM tx_fsmivkrit_helper
 													WHERE deleted=0 AND hidden=0
 														AND survey='.$lectureUID['survey'].'
 													ORDER BY name');
 	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
 	   						// TODO change submit value
 	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
-	   							$rowHelper['uid']==$lectureUID['tipper'] ? 
+	   							$rowHelper['uid']==$lectureUID['tipper'] ?
 	   								'selected="selected"':
 	   								''
 	   						).' >'.$rowHelper['name'].'</option>';
@@ -468,7 +469,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 	   	// weight
 	   	$content .= '<tr><td><label for="'.$this->extKey.'_weight">Gewicht</label></td><td>
-							<input type="text" name="'.$this->extKey.'[weight]" id="'.$this->extKey.'_weight"  	
+							<input type="text" name="'.$this->extKey.'[weight]" id="'.$this->extKey.'_weight"
 								value="'.($lectureUID["weight"]>0 ? $lectureUID["weight"]:'').'" size="10" />
 						</td></tr>';
 	   	// state
@@ -498,24 +499,24 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED) $content .= ' checked="checked" ';
 	   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'" />'.
 	   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'">alle Bilder getippt</label><br />';
-	   	
+
 	   	$content .= '</td></tr>';
 		$content .= '</table>';
 	   	$content .= '</fieldset>';
-	   			
-		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Speichern').'">';
 		$content .= '</form>';
 
 		return $content;
 	}
-	
+
 	function saveKritterData ($lecture) {
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-		
+
 		// update Lecture
-		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 									'tx_fsmivkrit_lecture',
 									'uid=\''.$lecture.'\'',
 									array (	'crdate' => time(),
