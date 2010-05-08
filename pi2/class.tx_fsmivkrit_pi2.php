@@ -736,7 +736,7 @@ mit.</textarea></div>
 					'</ul>';
 		$content .= '<pre>'.wordwrap($lectureUID['comment']).'</pre>';
 
-		$content .= '<h3>Evaluationstermin</h3>';
+		$content .= '<h3>Evaluationstermin festlegen</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// hidden field to tell system, that IMPORT data is coming
@@ -798,8 +798,15 @@ mit.</textarea></div>
 		$content .= '<label for="'.$this->extKey.'_eval_date_choice_5">Keine Evaluation</label>'."<br />\n";
 		$content .= '</fieldset>';
 
+		$content .= '<h3>Bestätigungsmail für Dozenten</h3>';
+		$content .= '<fieldset>';
 		$content .= '<input type="checkbox" name="'.$this->extKey.'[notify_lecturer]" id="'.$this->extKey.'_notify_lecturer" checked="checked" />'."\n";
-		$content .= '<label for="'.$this->extKey.'_notify_lecturer">Dozenten informieren (Dozent erhält beim Speichern E-mail)</label><br />'."\n";
+		$content .= '<label for="'.$this->extKey.'_notify_lecturer">Dozenten informieren (Dozent erhält beim Speichern E-mail)</label><br /><br />'."\n";
+		$content .= '<strong>Optional:</strong> Folgender Text wird mit Überschrift &quot;Hinweis&quot; in die Mail aufgenommen:<br />';
+		$content .= '<textarea cols="76" name="'.$this->extKey.'[notify_lecturer_mailbody]"></textarea>';
+		$content .= '</fieldset>';
+
+
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Speichern').'">';
 		$content .= '</form>';
@@ -816,6 +823,8 @@ mit.</textarea></div>
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$evalDateChoice = intval($GETcommands['eval_date_choice']);
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+
+		$mailBody = strip_tags($GETcommands['notify_lecturer_mailbody']);
 
 		// this means: we have any of the preset dates from the lecturers
 		if ($evalDateChoice < 4 && $evalDateChoice >= 0) {
@@ -836,7 +845,7 @@ mit.</textarea></div>
 								'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
 			}
 			else {
-				$content .= $this->sendEvaldateSetMail($lecture);
+				$content .= $this->sendEvaldateSetMail($lecture, $mailBody);
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
 								'Evaluationstermin für '.$lectureUID['name'].' wurde auf den <strong>'.
@@ -867,7 +876,7 @@ mit.</textarea></div>
 								'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
 			}
 			else {
-				$content .= $this->sendEvaldateSetMail($lecture);
+				$content .= $this->sendEvaldateSetMail($lecture, $mailBody);
 
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
@@ -908,7 +917,13 @@ mit.</textarea></div>
 
 	}
 
-	function sendEvaldateSetMail ($lecture) {
+	/**
+	 * This function sends a mail to the lecturer after the organizer selected a date for evaluation.
+	 * @param $lecture UID for lecture
+	 * @param $mailBody text, can be ''
+	 * @return HTML infotext to display at FE
+	 **/
+	function sendEvaldateSetMail ($lecture, $mailBody='') {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 
@@ -924,6 +939,13 @@ mit.</textarea></div>
 						'   '.$lectureUID['name']."\n".
 						'wurde folgender Termin festgelegt:'."\n".
 						'   '.date('d.m.y - H:i',$lectureUID['eval_date_fixed']);
+
+		if ($mailBody!='')
+			$mailContent .= "\n\n".
+							"Hinweis:\n".
+							"--------\n".
+							wordwrap($mailBody)."\n\n";
+
 		$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team der Fachschaft Mathematik/Informatik";
 
 		$send = $this->cObj->sendNotifyEmail(
