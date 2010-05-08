@@ -959,7 +959,7 @@ mit.</textarea></div>
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kEDIT_LECTURE_SAVE.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kEDIT_LECTURE_SAVE.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
 
@@ -984,6 +984,11 @@ mit.</textarea></div>
 					</tr>';
 
 					$content .= '<tr><td><strong>Status:</strong></td><td>';
+debug($lectureUID['eval_state']);
+				   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
+				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_COMPLETED) $content .= ' checked="checked" ';
+				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'" />'.
+				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'">Dozent hat Daten eingetragen</label><br />';
 					// created
 				   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
 				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_APPROVED) $content .= ' checked="checked" ';
@@ -1041,8 +1046,8 @@ mit.</textarea></div>
 					}
 					$content .= '</ol>';
 
-		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
-				value="'.htmlspecialchars('Speichern').'">';
+		$content .= '</fieldset><input type="submit" name="'.$this->extKey.'[submit_button]"
+				value="'.htmlspecialchars('Speichern').'" />';
 		$content .= '</form>';
 
 		return $content;
