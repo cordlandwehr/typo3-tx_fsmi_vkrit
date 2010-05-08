@@ -30,7 +30,7 @@
 require_once(PATH_tslib.'class.tslib_pibase.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'pi2/class.tx_fsmivkrit_pi2.php');
-require_once(t3lib_extMgm::extPath('rlmp_dateselectlib').'class.tx_rlmpdateselectlib.php');
+include_once(t3lib_extMgm::siteRelPath('date2cal').'/src/class.jscalendar.php');
 
 
 /**
@@ -61,14 +61,6 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
-
-		// take care to use german
-		//TODO switch on typo3-language
-		// BUT THIS IS NOT WORKING!
-		setlocale(LC_ALL, 'de_DE.utf8');
-
-		// invoke calender frontend library
-		tx_rlmpdateselectlib::includeLib();
 
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$lecture = intval($GETcommands['lecture']);
@@ -220,26 +212,30 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		$content .= '</table></fieldset>';
 
-		// configure Date Selector
-		$dateSelectorConf = array (
-   			'calConf.' => array (
-     		'dateTimeFormat' => 'dd.mm.y',
-    		'inputFieldDateTimeFormat' => '%d.%m.%Y'
-			)
-		);
+		// init jscalendar class
+		$JSCalendar = JSCalendar::getInstance();
+		$JSCalendar->setDateFormat(false);		// do not display time
+		$JSCalendar->setNLP($this->extConfig['natLangParser']);
+		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
+		$JSCalendar->setLanguage($this->extConfig['lang']);
 
 		//TODO think about what to display if only one value is selected
 		if ($surveyUID['eval_start']!=0 && $surveyUID['eval_end']!=0)
 			$content .= '<h3>Evaluation findet statt vom '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'</h3>';
 
 		// Vkrit suggestion 1
+		if ($this->piVars['eval_date_1']==0)
+			$this->piVars['eval_date_1'] = time();
+		$JSCalendar->setInputField($this->extKey.'_eval_time_1');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 1:</legend>';
 		$content .= '<table><tr>
 						<td><label for="'.$this->extKey.'_eval_date_1">Datum:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[eval_date_1]" id="'.$this->extKey.'_eval_date_1"
-								value="'.htmlspecialchars($this->piVars["eval_date_1"]).'" size="10" />'.
-								tx_rlmpdateselectlib::getInputButton ($this->extKey.'_eval_date_1',$dateSelectorConf).
+						<td>'.
+						$JSCalendar->render(
+							$this->piVars['eval_date_1'],
+							$this->extKey.'[eval_date_1]'
+						).
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_1">Uhrzeit:</label></td>
@@ -259,13 +255,18 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 
 		// Vkrit suggestion 2
+		if ($this->piVars['eval_date_2']==0)
+			$this->piVars['eval_date_2'] = time();
+		$JSCalendar->setInputField($this->extKey.'_eval_time_2');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 2 (optional):</legend>';
 		$content .= '<table><tr>
 						<td><label for="'.$this->extKey.'_eval_date_2">Datum:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[eval_date_2]" id="'.$this->extKey.'_eval_date_2"
-								value="'.htmlspecialchars($this->piVars["eval_date_2"]).'" size="10" />'.
-								tx_rlmpdateselectlib::getInputButton ($this->extKey.'_eval_date_2',$dateSelectorConf).
+						<td>'.
+						$JSCalendar->render(
+							$this->piVars['eval_date_2'],
+							$this->extKey.'[eval_date_2]'
+						).
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_2">Uhrzeit:</label></td>
@@ -280,13 +281,18 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					</td></tr></table></fieldset>';
 
 		// Vkrit suggestion 3
+		if ($this->piVars['eval_date_3']==0)
+			$this->piVars['eval_date_3'] = time();
+		$JSCalendar->setInputField($this->extKey.'_eval_time_3');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 3 (optional):</legend>';
 		$content .= '<table><tr>
 						<td><label for="'.$this->extKey.'_eval_date_3">Datum:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[eval_date_3]" id="'.$this->extKey.'_eval_date_3"
-								value="'.htmlspecialchars($this->piVars["eval_date_3"]).'" size="10" />'.
-								tx_rlmpdateselectlib::getInputButton ($this->extKey.'_eval_date_3',$dateSelectorConf).
+						<td>'.
+						$JSCalendar->render(
+							$this->piVars['eval_date_3'],
+							$this->extKey.'[eval_date_3]'
+						).
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time_3">Uhrzeit:</label></td>
@@ -303,13 +309,19 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		// comment input
 		$content .= '<fieldset>';
 		$content .= '<legend>Ergänzende Informationen:</legend>';
-		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment">'.$this->piVars["comment"].'</textarea></fieldset>';
+		$content .= '<textarea name="'.$this->extKey.'[comment]" cols="74" id="'.$this->extKey.'_comment">'.
+			$this->piVars["comment"].'</textarea></fieldset>';
 
 		// submit button
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('weiter zum Daten überprüfen').'">';
 
 		$content .= '</form>';
+
+		// get initialisation code of the calendar
+		if (($jsCode = $JSCalendar->getMainJS()) != '') {
+			$GLOBALS['TSFE']->additionalHeaderData['fsmivkrit_date2cal'] = $jsCode;
+		}
 
 		return $content;
 	}
@@ -348,12 +360,12 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<div><strong>Tutoren:</strong></div>';
 		$content .= '<ol>';
 		foreach ($inputData['assistants'] as $tutor) {
+			if ($tutor[0]=='' && $tutor[1]=='')
+				continue;
 			if (!isset($tutor[2]))
 				$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).'</li>'."\n";
 			else
 				$content .= '<li>'.trim($tutor[0]).', '.trim($tutor[1]).', '.trim($tutor[2]).'</li>'."\n";
-			if ($tutor[0]=='' && $tutor[1]=='')
-				continue;
 
 			// check for comma count
 			if (count($tutor)>3)
@@ -408,14 +420,14 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[assistants]'.'" value="'.implode("\n",$assistants).'" />';
 
 		for ($i=1; $i<=3; $i++) {
-			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_date_'.$i.']" value="'.date('d.m.Y',$inputData["eval_".$i]['date']).'" />';
+			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_date_'.$i.']" value="'.date('d-m-Y',$inputData["eval_".$i]['date']).'" />';
 			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_time_'.$i.']" value="'.date('H:i',$inputData["eval_".$i]['date']).'" />';
 			$content .= '<input type="hidden" name="'.$this->extKey.'[eval_room_'.$i.']" value="'.$inputData["eval_".$i]['room'].'" />';
 		}
 
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[back_button]"
-				value="'.htmlspecialchars('Eingaben ändern').'">  ';
+				value="'.htmlspecialchars('Eingaben ändern').'"> ';
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Daten speichern').'">';
 

@@ -30,7 +30,7 @@
 require_once(PATH_tslib.'class.tslib_pibase.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'pi4/class.tx_fsmivkrit_pi4.php');
-require_once(t3lib_extMgm::extPath('rlmp_dateselectlib').'class.tx_rlmpdateselectlib.php');
+include_once(t3lib_extMgm::siteRelPath('date2cal').'/src/class.jscalendar.php');
 
 /**
  * Plugin 'Organization Tool' for the 'fsmi_vkrit' extension.
@@ -44,7 +44,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	var $scriptRelPath = 'pi2/class.tx_fsmivkrit_pi2.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'fsmi_vkrit';	// The extension key.
 	var $survey;
-	
+
 	// global const
 	const kLIST						= 1;
 	const kNOTIFY_FORM 				= 2;
@@ -54,10 +54,10 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	const kASSIGN_EVAL_DATE_SAVE	= 6;
 	const kEDIT_LECTURE_FORM		= 7;
 	const kEDIT_LECTURE_SAVE		= 8;
-	
-	// value if 01.01.1970 - 7 am. (this is default value) 
+
+	// value if 01.01.1970 - 7 am. (this is default value)
 	const kLOWER_BOUND_DATE			= 21600;
-	
+
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -71,18 +71,18 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
 		$this->pi_initPIflexForm(); // Init and get the flexform data of the plugin
-		
+
 		$content = '';
 
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$this->survey = intval($GETcommands['survey']);
-		
+
 		// type selection head
 		$content .= $this->createTypeSelector();
-		
+
 		// subselecter head
 		$content .= $this->createSurveySelector();
-		
+
 		// select input type
 		switch (intval($GETcommands['type'])) {
 			case self::kLIST: {
@@ -96,13 +96,13 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			}
 			case self::kNOTIFY_SEND: {
 				$content .= $this->sendLecturerNotification(
-								intval($GETcommands['lecturer']), 
+								intval($GETcommands['lecturer']),
 								htmlspecialchars($GETcommands['comment']));
 				break;
 			}
 			case self::kCHANGE_ENABLE_LECTURE: {
 				$resLecture = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', intval($GETcommands['lecture']));
-				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 									'tx_fsmivkrit_lecture',
 									'uid=\''.intval($GETcommands['lecture']).'\'',
 									array (	'crdate' => time(),
@@ -113,7 +113,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 					$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_ERROR,
 									'Fehler bei Datenbankzugriff.');
-									
+
 				$content .= $this->printLectureList();
 				break;
 			}
@@ -135,36 +135,36 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= $this->printLectureList();
 				break;
 			}
-			default: 
+			default:
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_INFO,
 									'Diese Ansicht dient zur Organisation der Eintragung, Information der Dozenten und Bearbeitung der Eintragungen.');
 				$content .= $this->printLectureList();
 				break;
 		}
-		
+
 		return $this->pi_wrapInBaseClass($content);
 	}
-	
+
 	function createSurveySelector () {
-		
+
 		// no survey selected, yet
 		if ($this->survey==0) {
 			$content = '<div><h3>Wähle eine Umfrage</h3><ul>';
-			
-			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_survey 
+
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM tx_fsmivkrit_survey
 													WHERE deleted=0 AND hidden=0');
 			while ($res && $row = mysql_fetch_assoc($res))
 				$content .= '<li>'.$this->pi_linkTP($row['name'].' - '.$row['semester'],
 														array (	$this->extKey.'[survey]' => $row['uid'])).
 							'</li>';
-			
+
 			$content .= '</div>';
 		}
 		else {
-			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_survey 
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM tx_fsmivkrit_survey
 													WHERE deleted=0 AND hidden=0
 													AND uid=\''.$this->survey.'\'');
 			while ($res && $row = mysql_fetch_assoc($res))
@@ -176,30 +176,30 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		}
 		return $content;
 	}
-	
+
 	function createTypeSelector () {
 		$content = '<div>';
-		$content .= $this->pi_linkTP('Listenansicht', 
+		$content .= $this->pi_linkTP('Listenansicht',
 								array (	$this->extKey.'[type]' => self::kLIST,
 										$this->extKey.'[survey]' => $this->survey));
 		$content .= ' | ';
-		$content .= $this->pi_linkTP('Eintragung anfordern (alle unbearbeitete)', 
+		$content .= $this->pi_linkTP('Eintragung anfordern (alle unbearbeitete)',
 								array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecturer]' => 0));
 		$content .= '</div>';
 
-		return $content;							
+		return $content;
 	}
-	
-	
+
+
 	function printLectureList() {
 		$content = '';
 		if ($this->survey==0)
 			return '';
-		
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_lecture 
+
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0
 													AND eval_state BETWEEN 0 AND 2
 													AND survey=\''.$this->survey.'\'
@@ -210,16 +210,16 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$content .= '<h3>Vorlesungen in Vorbereitung</h3>';
 			$content .= '<table cellpadding="5" cellspacing="2" class="fsmivkrit">';
 			$content .= '<tr><th>Status</th><th>Anz.</th><th>Veranstaltung</th><th>Dozent</th><th>Wunschtermin</th><th>Erinnerungsmail</th>';
-				
+
 			while ($res && $row = mysql_fetch_assoc($res)) {
 				// get lecturer name
 				$resLecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
-				
+
 				if ($row['hidden']==0)
 					$content .= '<tr class="fsmivkrit_state_'.$row['eval_state'].'">';
 				if ($row['hidden']==1)
 					$content .= '<tr style="background-color: #ddd; font-style: italic;">';
-					
+
 				// lecture and lecture activation state
 				$lectureActivation = array ();
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
@@ -228,7 +228,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 								<td width="10">'.( $row['participants']==0? '': $row['participants'] ).'</td>
 							<td width="250">'.
 								// notify if there is any comment
-								($row['comment']!='' ? 
+								($row['comment']!='' ?
 									'<span style="float:right;">'.
 									$this->pi_linkTP(
 										'<img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" />',
@@ -239,7 +239,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 									).'</span>':
 									'' ).
 								// lecture activate link
-								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
+								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />',
 								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecture]' => $row['uid']
@@ -257,8 +257,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				// show first eval date
 				$content .= '	<td width="100">'.(
 									// first eval date
-									$row['eval_date_1']>self::kLOWER_BOUND_DATE ? 
-										date('d.m. (H:i)', $row['eval_date_1']) : 
+									$row['eval_date_1']>self::kLOWER_BOUND_DATE ?
+										date('d.m. (H:i)', $row['eval_date_1']) :
 										'').
 									// second eval date
 									($row['eval_date_2']>self::kLOWER_BOUND_DATE ?
@@ -269,11 +269,11 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 										'<br />'.date('d.m. (H:i)', $row['eval_date_3']) :
 										'').
 									'</td>';
-									
-									
+
+
 				// if no lecturer input, yet: notification option
 				if ($row['eval_state']<tx_fsmivkrit_div::kEVAL_STATE_COMPLETED)
-					$content .= '<td width="200">'.$this->pi_linkTP('erinnern', 
+					$content .= '<td width="200">'.$this->pi_linkTP('erinnern',
 									array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 											$this->extKey.'[survey]' => $this->survey,
 											$this->extKey.'[lecturer]' => $resLecturer['uid'])).
@@ -286,12 +286,12 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 											$this->extKey.'[lecture]' => $row['uid'])).
 								'</td>';
 				$content .= '</tr>';
-				
+
 			}
-			
+
 			// some statistics data:
-			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants) 
-												FROM tx_fsmivkrit_lecture 
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
+												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0
 												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_CREATED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'
 												AND survey=\''.$this->survey.'\'');
@@ -303,13 +303,13 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 							'<td></td>'.
 							'<td></td>';
 			}
-			
+
 			$content .= '</table>';
 		}
-		
+
 		// lectures in process APPROVED and FINISHED
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_lecture 
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0
 												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_APPROVED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
 												AND survey=\''.$this->survey.'\'
@@ -320,15 +320,15 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$content .= '<h3>Vorlesungen in Evaluation</h3>';
 			$content .= '<table cellpadding="5" cellspacing="2" class="fsmivkrit">';
 			$content .= '<tr><th>Status</th><th>Anz.</th><th>Veranstaltung</th><th>Dozent</th><th>VKrit Termin</th><th>Bearbeiten</th>';
-				
+
 			while ($res && $row = mysql_fetch_assoc($res)) {
 				// get lecturer name
 				$resLecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $row['lecturer']);
-				
+
 				if ($row['hidden']==1 || $row['no_eval'] == 1)
 					$content .= '<tr style="background-color: #ddd; font-style: italic;">';
-				else {	
-					switch ($row['eval_state']) {	
+				else {
+					switch ($row['eval_state']) {
 						case tx_fsmivkrit_div::kEVAL_STATE_APPROVED: {
 			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_APPROVED.'">';
 			   				break;
@@ -345,7 +345,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_SCANNED.'">';
 			   				break;
 			   			}
-			   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: { 
+			   			case tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED: {
 			   				$content .= '<tr bgcolor="'.tx_fsmivkrit_div::kCOLOR_COORDINATION_ANONYMIZED.'">';
 			   				break;
 			   			}
@@ -354,8 +354,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			   				break;
 			   			}
 					}
-				}					
-					
+				}
+
 				// lecture and lecture activation state
 				$lectureActivation = array ();
 				$lectureActivation[0] = tx_fsmivkrit_div::imgPath.'enabled.png';
@@ -365,13 +365,13 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				$content .= '	<td width="10">';
 				if ($row['no_eval]']==1)
 					$content .= '<s>'.( $row['participants']==0? '': $row['participants'] ).'</s>';
-				else 
+				else
 					$content .= ( $row['participants']==0? '': $row['participants'] );
 				$content .= '</td>';
 				$content .= '
 							<td width="250">'.
 								// notify if there is any comment
-								($row['comment']!='' ? 
+								($row['comment']!='' ?
 									'<span style="float:right;">'.
 									$this->pi_linkTP(
 										'<img src="'.tx_fsmivkrit_div::imgPath.'comment.png" title="Es gibt einen Kommentar!" />',
@@ -382,7 +382,7 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 									).'</span>':
 									'' ).
 								// lecture activate link
-								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />', 
+								$this->pi_linkTP('<img src="'.$lectureActivation[$row['hidden']].'" />',
 								array (	$this->extKey.'[type]' => self::kCHANGE_ENABLE_LECTURE,
 										$this->extKey.'[survey]' => $this->survey,
 										$this->extKey.'[lecture]' => $row['uid']
@@ -397,16 +397,16 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 								).'</td>
 							<td width="150"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
 									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
-									
+
 				// eval date
 				if ($row['no_eval']==0)
 					$content .= '	<td width="100">'.date('d.m.y - H:i',$row['eval_date_fixed']).'</td>';
 				else
 					$content .= '	<td width="100">keine Evaluation</td>';
-					
+
 				//TODO this does not work: change to check if there is such a lecture!
 				if ($row['eval_state']<tx_fsmivkrit_div::kEVAL_STATE_COMPLETED)
-					$content .= '<td width="100">'.$this->pi_linkTP('erinnern', 
+					$content .= '<td width="100">'.$this->pi_linkTP('erinnern',
 									array (	$this->extKey.'[type]' => self::kNOTIFY_FORM,
 											$this->extKey.'[survey]' => $this->survey,
 											$this->extKey.'[lecturer]' => $resLecturer['uid'])).
@@ -418,13 +418,13 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 											$this->extKey.'[lecture]' => $row['uid'])).
 								'</td>';
 				$content .= '</tr>';
-				
+
 			}
-			
-					
+
+
 			// some statistics data:
-			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants) 
-												FROM tx_fsmivkrit_lecture 
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
+												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0
 												AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
 												AND no_eval=0
@@ -437,31 +437,31 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 							'<td></td>'.
 							'<td></td>';
 			}
-			
+
 			$content .= '</table>';
 		}
-		
+
 		return $content;
 	}
-	
+
 	/**
-	 * This function is a form to send notification mails to lecturers. 
+	 * This function is a form to send notification mails to lecturers.
 	 * Note that $lecturer=0 means that mail is send to all lecturers without information inserted
 	 * @param integer $lecturer
 	 * @return text HTML for input form
 	 */
 	function printLecturerNotifyForm ($lecturer) {
 		$content = '';
-		
+
 		// the user probably wants to have a way out:
-		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
-						array (	
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!',
+						array (
 							$this->extKey.'[type]' => self::kLIST,
 							$this->extKey.'[survey]' => $this->survey
 						)).'</strong></div>';
-		
+
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecturer);
-		
+
 		// recall, that mail is send to everybody
 		if ($lecturer==0)
 			$content .= tx_fsmivkrit_div::printSystemMessage(
@@ -471,35 +471,35 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_INFO,
 							'Erinnerungsmail wird an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> geschickt.');
-		
-		if ($lecturer!=0) {			
+
+		if ($lecturer!=0) {
 			$content .= '<h3>E-mail Kopf</h3>'.
 						'<pre style="margin-left:20px">'.$this->printLecturerNotificationHead($lecturerUID['uid']).'</pre>';
-		}					
-		
+		}
+
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
-		
+
 		// hidden field to tell system, that IMPORT data is coming
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kNOTIFY_SEND.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecturer]'.'" value="'.$lecturer.'" />';
-		
+
 		$content .= '
 			<h3>E-mail Body</h3>
 			<div style="margin-left:20px;">
 			<textarea name="'.$this->extKey.'[comment]" cols="74" rows="15" id="'.$this->extKey.'_comment">
-bitte verwenden Sie die angefügten Links um für Ihre diesjährigen 
-Veranstaltungen Termine zur Vorlesungs-Evaluation (V-Krit) anzugeben. 
+bitte verwenden Sie die angefügten Links um für Ihre diesjährigen
+Veranstaltungen Termine zur Vorlesungs-Evaluation (V-Krit) anzugeben.
 Sollte Ihre Veranstaltung unter 10 Teilnehmer haben und die Veranstaltung
 soll dennoch evaluiert werden, so tragen Sie dieses bitte als Kommentar
 ein.
 
-Bei Rückfragen melden Sie sich bitte bei criticus@uni-paderborn.de. 
+Bei Rückfragen melden Sie sich bitte bei criticus@uni-paderborn.de.
 Dieses Jahr verwenden wir erstmals einen Datenimport aus PAUL. Dieser
-ist jedoch noch nicht automatisiert zu verarbeiten und erfordert einen 
-hohen manuellen Aufwand. Sollten bei dieser Verarbeitung Fehler 
-aufgetreten sein, was sich insbesondere in nicht aufgeführten 
-Veranstaltungen widerspiegelt, so teilen Sie uns dieses bitte umgehend 
+ist jedoch noch nicht automatisiert zu verarbeiten und erfordert einen
+hohen manuellen Aufwand. Sollten bei dieser Verarbeitung Fehler
+aufgetreten sein, was sich insbesondere in nicht aufgeführten
+Veranstaltungen widerspiegelt, so teilen Sie uns dieses bitte umgehend
 mit.</textarea></div>
 		';
 		if ($lecturer!=0) {
@@ -508,32 +508,32 @@ mit.</textarea></div>
 						htmlspecialchars($this->printLecturerNotificationInputlinks($lecturer)).
 						'</pre>';
 		}
-					
-		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Mail absenden').'">';
 		$content .= '</form>';
-		
+
 		return $content;
 	}
-	
+
 	function printLecturerNotificationHead ($lecturer) {
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecturer);
-		
+
 		$content = '';
 		switch ($lecturerUID['sex']) {
 			case tx_fsmivkrit_pi4::kDB_SEX_FEMALE: 	$content .= 'Sehr geehrte Frau '; break;
 			case tx_fsmivkrit_pi4::kDB_SEX_MALE:	$content .= 'Sehr geehrter Herr '; break;
-			default: $content .= 'Sehr geehrte/r '.$lecturerUID['title'];
+			default: $content .= 'Sehr geehrte/r '.$lecturerUID['title'].' ';
 		}
 		$content .= $lecturerUID['name'].','.
 					"\n\n";
 		return $content;
-		
+
 	}
-	
+
 	function printLecturerNotificationInputlinks ($lecturer) {
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_lecture 
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0 AND hidden=0
 												AND survey=\''.$this->survey.'\'
 												AND (
@@ -547,19 +547,19 @@ mit.</textarea></div>
 				$hash = $this->createLectureAuthenticationHash($row['uid']);
 			else
 				$hash = $row['inputform_verify'];
-				
+
 			// '<' and '>' is needed to process links correctly in Thunderbird
 			$baseLink = htmlspecialchars($this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'baseUrl')).
 				'index.php?id='.
 				intval($this->pi_getFFvalue($this->cObj->data['pi_flexform'], 'pidInputform'));
-				
+
 			$link = '<'.$baseLink.
 					'&'.
 					$this->extKey.'[auth]='.$hash.
 					'&'.
 					$this->extKey.'[lecture]='.$row['uid'].'>';
-			
-			
+
+
 			// create links
 			array_push	(	$lectureArr,
 							$row['name'].":\n".$link."\n"
@@ -567,11 +567,11 @@ mit.</textarea></div>
 		}
 		return implode("\n",$lectureArr);
 	}
-	
+
 	/**
 	 * Function requires a lecturer ID as target for notification mail. Also the mail body is needed.
 	 * While sending this function creates a hash value (if not yet existing) that
-	 * will be used as identification for lecturer. 
+	 * will be used as identification for lecturer.
 	 * @param $lecturer integer
 	 * @param $mailBody text
 	 * @return answer if mail was sent or not
@@ -579,18 +579,18 @@ mit.</textarea></div>
 	function sendLecturerNotification ($lecturer, $mailBody) {
 		$content = '';
 		$lecturerInputArr = array ();
-		
+
 		if ($lecturer==0) {
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_lecturer.uid as uid
 												FROM tx_fsmivkrit_lecturer, tx_fsmivkrit_lecture
-												WHERE 
-													tx_fsmivkrit_lecturer.deleted=0 
+												WHERE
+													tx_fsmivkrit_lecturer.deleted=0
 													AND tx_fsmivkrit_lecturer.hidden=0
-													AND tx_fsmivkrit_lecture.deleted=0 
+													AND tx_fsmivkrit_lecture.deleted=0
 													AND tx_fsmivkrit_lecture.hidden=0
 													AND tx_fsmivkrit_lecture.survey=\''.$this->survey.'\'
 													AND tx_fsmivkrit_lecture.lecturer=tx_fsmivkrit_lecturer.uid
-													AND tx_fsmivkrit_lecture.eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_CREATED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.' 
+													AND tx_fsmivkrit_lecture.eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_CREATED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.'
 												GROUP BY tx_fsmivkrit_lecturer.uid');
 			while ($res && $row = mysql_fetch_assoc($res))
 				array_push($lecturerInputArr,$row['uid']);
@@ -600,8 +600,8 @@ mit.</textarea></div>
 
 		foreach($lecturerInputArr as $lecturer) {
 			$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecturer);
-			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-													FROM tx_fsmivkrit_lecture 
+			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM tx_fsmivkrit_lecture
 													WHERE deleted=0 AND hidden=0
 														AND survey=\''.$this->survey.'\'
 														AND lecturer=\''.$lecturer.'\'');
@@ -613,7 +613,7 @@ mit.</textarea></div>
 								'Keine zu benachrichtigen Vorlesungen für <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> vorhanden.');
 				continue;
 			}
-			
+
 			// now start writing mail
 			$mailContent = '';
 			$mailContent .= $this->printLecturerNotificationHead($lecturer);
@@ -623,19 +623,19 @@ mit.</textarea></div>
 
 			$send = $this->cObj->sendNotifyEmail(
 				$msg='Eintragung Veranstaltungskritik'."\n". // first line is subject
-						$mailContent, 
-				$recipients=$lecturerUID['email'], 
-				$cc='criticus@upb.de', 
-				$email_from='criticus@uni-paderborn.de', 
-				$email_fromName='', 
+						$mailContent,
+				$recipients=$lecturerUID['email'],
+				$cc='criticus@upb.de',
+				$email_from='criticus@uni-paderborn.de',
+				$email_fromName='',
 				$replyTo='');
-				
+
 			if ($send) {
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_OK,
 							'Senden der E-mail an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> erfolgreich.');
 				$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery  ( 'tx_fsmivkrit_lecture',
-											'lecturer=\''.$lecturerUID['uid'].'\' 
+											'lecturer=\''.$lecturerUID['uid'].'\'
 											AND survey=\''.$this->survey.'\'
 											AND eval_state=\''.tx_fsmivkrit_div::kEVAL_STATE_CREATED.'\'',
 											array(
@@ -644,15 +644,15 @@ mit.</textarea></div>
 				t3lib_div::sysLog (
 					'Sent notification mail to '.$lecturerUID['name'].'.',
 					$this->extKey);
-							
+
 			} else
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_ERROR,
 							'Senden der E-mail an <b>'.$lecturerUID['forename'].' '.$lecturerUID['name'].'</b> fehlgeschlagen.');
 		}
-		return($content);	
+		return($content);
 	}
-	
+
 	/**
 	 * To prevent unauthorized modification of lecture contents, we put a secred hash value on each lecture.
 	 * Function returns hash value if there is any set.
@@ -662,14 +662,14 @@ mit.</textarea></div>
 	 */
 	function createLectureAuthenticationHash ($lecture) {
 		$lecture = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-				
+
 		// check if already hash value set: if yes, break
 		if ($lecture['inputform_verify']!=0)
 			return $lecture['inputform_verify'];
-			
+
 		$data = $lecture['name'].$lecture['lecturer'].time();
 		$hash = hash('md5',$data);
-		
+
 		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery  ( 'tx_fsmivkrit_lecture',
 											'uid=\''.$lecture['uid'].'\'',
 											array(
@@ -678,22 +678,22 @@ mit.</textarea></div>
 
 		if (!$res)
 			debug('pi2: Update of hash value failed');
-		
+
 		return $hash;
 	}
-	
+
 	function printLectureEvaldateAssignmentForm ($lecture) {
 		$content = '';
-		
+
 		// TODO preset selection
-		
+
 		// the user probably wants to have a way out:
-		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
-						array (	
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!',
+						array (
 							$this->extKey.'[type]' => self::kLIST,
 							$this->extKey.'[survey]' => $this->survey
 						)).'</strong></div>';
-		
+
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
@@ -707,7 +707,7 @@ mit.</textarea></div>
 					'<li><strong>Teilnehmer:</strong> '.$lectureUID['participants'].'</li>'.
 					'</ul>';
 		$content .= '<pre>'.wordwrap($lectureUID['comment']).'</pre>';
-		
+
 		$content .= '<h3>Evaluationstermin</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
@@ -715,14 +715,14 @@ mit.</textarea></div>
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kASSIGN_EVAL_DATE_SAVE.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
-		
+
 		$content .= '<fieldset>';
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=3; $i++) {
 			// do not select non-set dates
 			if ($lectureUID['eval_date_'.$i] < self::kLOWER_BOUND_DATE)
 				continue;
-			
+
 			// radio button
 			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" ';
 			if ($i==1) //TODO change this to something dynamically
@@ -731,58 +731,64 @@ mit.</textarea></div>
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).' (Raum: '.$lectureUID['eval_room_'.$i].')</label>'."<br />\n";
 		}
 
-		tx_rlmpdateselectlib::includeLib();		// invoke calender frontend library
-		// configure Date Selector
-		$dateSelectorConf = array (
-   			'calConf.' => array (
-     		'dateTimeFormat' => 'dd.mm.y',
-    		'inputFieldDateTimeFormat' => '%d.%m.%Y'
-			)
-		);
-		
+		// init jscalendar class
+		$JSCalendar = JSCalendar::getInstance();
+		$JSCalendar->setDateFormat(false);		// do not display time
+		$JSCalendar->setNLP($this->extConfig['natLangParser']);
+		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
+		$JSCalendar->setLanguage($this->extConfig['lang']);
+
 		$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" id="'.$this->extKey.'_eval_date_choice" value="4" />'."\n";
 		$content .= '<label for="'.$this->extKey.'_eval_date_choice_4">Anderes Datum:</label>'."\n";
 		$content .= '<div style="margin-left:20px"><table><tr>
 						<td><label for="'.$this->extKey.'_eval_date">Datum:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[eval_date]" id="'.$this->extKey.'_eval_date"  	
-								value="'.htmlspecialchars($this->piVars["eval_date"]).'" size="10" />'.
-								tx_rlmpdateselectlib::getInputButton ($this->extKey.'_eval_date',$dateSelectorConf).
+						<td>'.
+						// render calendar stuff
+						$JSCalendar->render(
+							date('d-m-Y', $this->piVars["eval_date"]),
+							$this->extKey.'_eval_date'
+						).
 					'</td></tr>
 					<tr><td>'.
 						'<label for="'.$this->extKey.'_eval_time">Uhrzeit:</label></td>
 						<td><select type="text" name="'.$this->extKey.'[eval_time]" id="'.$this->extKey.'_eval_time">'.
 								tx_fsmivkrit_div::printOptionListTime($this->piVars["eval_time"]).
-						'</select>	
+						'</select>
 					</td></tr>
 					<tr><td>
 						 <label for="'.$this->extKey.'_eval_room">Raum:</label></td>
-						<td><input type="text" name="'.$this->extKey.'[eval_room]" id="'.$this->extKey.'_eval_room"  	
-								value="'.htmlspecialchars($this->piVars["eval_room"]).'" />			
+						<td><input type="text" name="'.$this->extKey.'[eval_room]" id="'.$this->extKey.'_eval_room"
+								value="'.htmlspecialchars($this->piVars["eval_room"]).'" />
 					</td></tr></table></div>';
-								
-		$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" 
+
+		$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]"
 							id="'.$this->extKey.'_eval_date_choice_5" value="5" />'."\n";
 		$content .= '<label for="'.$this->extKey.'_eval_date_choice_5">Keine Evaluation</label>'."<br />\n";
 		$content .= '</fieldset>';
-								
+
 		$content .= '<input type="checkbox" name="'.$this->extKey.'[notify_lecturer]" id="'.$this->extKey.'_notify_lecturer" checked="checked" />'."\n";
-		$content .= '<label for="'.$this->extKey.'_notify_lecturer">Dozenten informieren (Dozent erhält beim Speichern E-mail)</label><br />'."\n";	
-		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+		$content .= '<label for="'.$this->extKey.'_notify_lecturer">Dozenten informieren (Dozent erhält beim Speichern E-mail)</label><br />'."\n";
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Speichern').'">';
 		$content .= '</form>';
 
+		// get initialisation code of the calendar
+		if (($jsCode = $JSCalendar->getMainJS()) != '') {
+			$GLOBALS['TSFE']->additionalHeaderData['fsmivkrit_date2cal'] = $jsCode;
+		}
+
 		return $content;
 	}
-	
+
 	function saveLectureEvaldataAssignment($lecture) {
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$evalDateChoice = intval($GETcommands['eval_date_choice']);
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-		
+
 		// this means: we have any of the preset dates from the lecturers
 		if ($evalDateChoice < 4 && $evalDateChoice >= 0) {
 			// update Lecture
-			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 										'tx_fsmivkrit_lecture',
 										'uid=\''.$lecture.'\'',
 										array (	'crdate' => time(),
@@ -806,14 +812,14 @@ mit.</textarea></div>
 								'</strong> festgelegt.');
 			}
 		}
-		
+
 		// this means: the organizer sets his own wish
 		if ($evalDateChoice == 4) {
 			// compute date
 			$evalDate = strtotime( htmlspecialchars($GETcommands['eval_date']).' '.htmlspecialchars($GETcommands['eval_time']).':00');
-			
+
 			// update Lecture
-			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 										'tx_fsmivkrit_lecture',
 										'uid=\''.$lecture.'\'',
 										array (	'crdate' => time(),
@@ -830,26 +836,26 @@ mit.</textarea></div>
 			}
 			else {
 				$content .= $this->sendEvaldateSetMail($lecture);
-				
+
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
 								'Evaluationstermin für '.$lectureUID['name'].' wurde auf den <strong>'.
 								date('j.m. H:i', $evalDate).
 								'</strong> festgelegt.');
 			}
-								
+
 			return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_ERROR,
 								'Fehlerhafte Auswahl bei Evaluationstermin. Konnte Termin nicht speichern.');
 		}
-		
+
 		// this means: no evaluation for this lecture
 		if ($evalDateChoice == 5) {
 			// compute date
 			$evalDate = strtotime( htmlspecialchars($GETcommands['eval_date']).' '.htmlspecialchars($GETcommands['eval_time']).':00');
-			
+
 			// update Lecture
-			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+			$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 										'tx_fsmivkrit_lecture',
 										'uid=\''.$lecture.'\'',
 										array (	'crdate'		=> time(),
@@ -861,57 +867,57 @@ mit.</textarea></div>
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_ERROR,
 								'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
-			else 
+			else
 				return $content .= tx_fsmivkrit_div::printSystemMessage(
 								tx_fsmivkrit_div::kSTATUS_INFO,
 								'Vorlesung wurde mit <strong>"keine Evaluation durchführen"</strong> gekennzeichnet.');
 		}
-	
-		
+
+
 	}
-	
+
 	function sendEvaldateSetMail ($lecture) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
-		
+
 		// check if mail shall really be sent
 		$GPcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		if (!$GPcommands['notify_lecturer'])
 			return;
-		
+
 		// now start writing mail
 		$mailContent = '';
 		$mailContent .= $this->printLecturerNotificationHead($lecturerUID['uid']);
 		$mailContent .= 'als Termin für die Evaluation Ihrer Veranstaltung '."\n".
 						'   '.$lectureUID['name']."\n".
-						'wurde folgender Termin festgelegt:'."\n". 
+						'wurde folgender Termin festgelegt:'."\n".
 						'   '.date('d.m.y - H:i',$lectureUID['eval_date_fixed']);
 		$mailContent .= "\n\nVielen Dank,\n   das V-Krit Team der Fachschaft Mathematik/Informatik";
 
 		$send = $this->cObj->sendNotifyEmail(
 				$msg='Termin für Veranstaltungskritik wurde festgelegt'."\n". // first line is subject
-					$mailContent, 
-				$recipients=$lecturerUID['email'], 
-				$cc='criticus@upb.de', 
-				$email_from='criticus@uni-paderborn.de', 
-				$email_fromName='', 
+					$mailContent,
+				$recipients=$lecturerUID['email'],
+				$cc='criticus@upb.de',
+				$email_from='criticus@uni-paderborn.de',
+				$email_fromName='',
 				$replyTo='');
-				
+
 		return tx_fsmivkrit_div::printSystemMessage(
 						tx_fsmivkrit_div::kSTATUS_INFO,
 						'Info Mail wurde an Dozenten versandt.');
 	}
-	
+
 	function printLectureEditForm ($lecture) {
 		$content = '';
 
 		// the user probably wants to have a way out:
-		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!', 
-						array (	
+		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!',
+						array (
 							$this->extKey.'[type]' => self::kLIST,
 							$this->extKey.'[survey]' => $this->survey
 						)).'</strong></div>';
-		
+
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
@@ -924,18 +930,18 @@ mit.</textarea></div>
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kEDIT_LECTURE_SAVE.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
-		
+
 		$content .= '<fieldset>';
 		$content .= '<h3>Veranstaltungsdaten</h3>';
 		$content .= '<table>'.
 					'<tr>
 						<td><strong>Veranstaltung:</strong></td>
-						<td><input type="text" name="'.$this->extKey.'[name]" id="'.$this->extKey.'_name"  	
+						<td><input type="text" name="'.$this->extKey.'[name]" id="'.$this->extKey.'_name"
 								value="'.htmlspecialchars($lectureUID["name"]).'" /></td>
 					</tr>'.
 					'<tr>
 						<td><strong>Teilnehmer:</strong></td>
-						<td><input type="text" name="'.$this->extKey.'[participants]" id="'.$this->extKey.'_participants"  	
+						<td><input type="text" name="'.$this->extKey.'[participants]" id="'.$this->extKey.'_participants"
 								value="'.htmlspecialchars($lectureUID["participants"]).'" /></td>
 					</tr>'.
 					'<tr>
@@ -944,7 +950,7 @@ mit.</textarea></div>
 							htmlspecialchars($lectureUID["comment"]).
 						'</textarea></td>
 					</tr>';
-							
+
 					$content .= '<tr><td><strong>Status:</strong></td><td>';
 					// created
 				   	$content .= '<input type="radio" name="'.$this->extKey.'[eval_state]" ';
@@ -976,45 +982,48 @@ mit.</textarea></div>
 				   	if ($lectureUID['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_FINISHED) $content .= ' checked="checked" ';
 				   	$content .= '				id="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'" value="'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'" />'.
 				   				'<label for ="'.$this->extKey.'_eval_state_'.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'">verschickt</label><br />';
-				   	
+
 				   	$content .= '</td></tr>';
 					$content .= '</table>';
-					
+
 					$content .= '<h3>Dozent</h3>';
 					$content .= '<div>'.
 									$lecturerUID['name'].', '.$lecturerUID['forename'].
 									htmlspecialchars(' <'.$lecturerUID['email'].'>').'</div>';
-					
-					
-					// information about assistants 
+
+
+					// information about assistants
 					// TODO make editable
 					$content .= '<h3>Tutoren</h3>';
-					$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT * 
-												FROM tx_fsmivkrit_tutorial 
+					$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_tutorial
 												WHERE deleted=0
 													AND lecture = \''.$lectureUID['uid'].'\'
 												ORDER BY assistant_name');
 					$content .= '<ol>';
 					while ($res && $row = mysql_fetch_assoc($res)) {
-						$content .= '<li>'.$row['assistant_name'].', '.$row['assistant_forename'].'</li>';
+						$content .= '<li>'.$row['assistant_name'].', '.$row['assistant_forename'];
+						if ($row['assistant_title'])
+							$content .= ', '.$row['assistant_title'];
+						$content .= '</li>';
 					}
 					$content .= '</ol>';
 
-		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]" 
+		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Speichern').'">';
 		$content .= '</form>';
 
 		return $content;
 	}
-	
+
 	function saveLectureEdit($lecture) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-		
+
 		// check if mail shall really be sent
 		$inputData = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 
 		// update Lecture
-		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(	
+		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 									'tx_fsmivkrit_lecture',
 									'uid=\''.$lecture.'\'',
 									array (	'crdate' => time(),
@@ -1027,14 +1036,14 @@ mit.</textarea></div>
 		if (!$res)
 			return tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_ERROR,
-							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.'); 
-		
+							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
+
 		// else
 		return tx_fsmivkrit_div::printSystemMessage(
 							tx_fsmivkrit_div::kSTATUS_INFO,
-							'Änderungen bei Veranstaltung <strong>'.$lectureUID['name'].'</strong> wurden gespeichert.'); 
+							'Änderungen bei Veranstaltung <strong>'.$lectureUID['name'].'</strong> wurden gespeichert.');
 	}
-	
+
 }
 
 
