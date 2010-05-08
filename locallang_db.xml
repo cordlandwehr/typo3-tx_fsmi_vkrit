@@ -54,6 +54,7 @@
 			<label index="tx_fsmivkrit_tutorial">Tutorial</label>
 			<label index="tx_fsmivkrit_tutorial.assistant_name">Assistant's Name</label>
 			<label index="tx_fsmivkrit_tutorial.assistant_forename">Assistant's Forename</label>
+			<label index="tx_fsmivkrit_tutorial.assistant_title">Assistant's Title</label>
 			<label index="tx_fsmivkrit_tutorial.lecture">Lecture</label>
 			<label index="tx_fsmivkrit_tutorial.foreign_id">Foreign ID</label>
 			<label index="tx_fsmivkrit_survey">Survey</label>
@@ -123,6 +124,7 @@
 			<label index="tx_fsmivkrit_tutorial">Übung</label>
 			<label index="tx_fsmivkrit_tutorial.assistant_name">Tutor Name</label>
 			<label index="tx_fsmivkrit_tutorial.assistant_forename">Tutor Vorname</label>
+			<label index="tx_fsmivkrit_tutorial.assistant_title">Tutor Titel</label>
 			<label index="tx_fsmivkrit_tutorial.lecture">Vorlesung</label>
 			<label index="tx_fsmivkrit_tutorial.foreign_id">Externe ID</label>
 			<label index="tx_fsmivkrit_survey">Umfrage</label>

@@ -16,7 +16,7 @@ CREATE TABLE tx_fsmivkrit_lecturer (
 	email tinytext,
 	reshipment tinyint(3) DEFAULT '0' NOT NULL,
 	foreign_id tinytext,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
@@ -60,7 +60,7 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	eval_state tinyint(3) DEFAULT '0' NOT NULL,
 	inputform_verify tinytext,
 	comment text,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
@@ -80,9 +80,10 @@ CREATE TABLE tx_fsmivkrit_tutorial (
 	hidden tinyint(4) DEFAULT '0' NOT NULL,
 	assistant_name tinytext,
 	assistant_forename tinytext,
+	assistant_title tinytext,
 	lecture text,
 	foreign_id tinytext,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
@@ -107,7 +108,7 @@ CREATE TABLE tx_fsmivkrit_survey (
 	importdata_origin int(11) DEFAULT '0' NOT NULL,
 	eval_start int(11) DEFAULT '0' NOT NULL,
 	eval_end int(11) DEFAULT '0' NOT NULL,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
@@ -128,7 +129,7 @@ CREATE TABLE tx_fsmivkrit_helper (
 	name tinytext,
 	email tinytext,
 	survey text,
-	
+
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
