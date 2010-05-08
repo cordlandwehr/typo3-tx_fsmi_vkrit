@@ -257,16 +257,43 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 				// show first eval date
 				$content .= '	<td width="100">'.(
 									// first eval date
-									$row['eval_date_1']>self::kLOWER_BOUND_DATE ?
-										date('d.m. (H:i)', $row['eval_date_1']) :
+									$row['eval_date_1']>self::kLOWER_BOUND_DATE
+										?
+										$this->pi_linkTP(
+											date('d.m.y / H:i', $row['eval_date_1']),
+											array (
+												$this->extKey.'[type]' => self::kASSIGN_EVAL_DATE_FORM,
+												$this->extKey.'[survey]' => $this->survey,
+												$this->extKey.'[lecture]' => $row['uid'],
+												$this->extKey.'[date_selected]' => 1
+											) ).'<br />'
+										:
 										'').
 									// second eval date
-									($row['eval_date_2']>self::kLOWER_BOUND_DATE ?
-										'<br />'.date('d.m. (H:i)', $row['eval_date_2']) :
+									($row['eval_date_2']>self::kLOWER_BOUND_DATE
+										?
+										$this->pi_linkTP(
+											date('d.m.y / H:i', $row['eval_date_2']),
+											array (
+												$this->extKey.'[type]' => self::kASSIGN_EVAL_DATE_FORM,
+												$this->extKey.'[survey]' => $this->survey,
+												$this->extKey.'[lecture]' => $row['uid'],
+												$this->extKey.'[date_selected]' => 2
+											) ).'<br />'
+										:
 										'').
 									// third eval date
-									($row['eval_date_3']>self::kLOWER_BOUND_DATE ?
-										'<br />'.date('d.m. (H:i)', $row['eval_date_3']) :
+									($row['eval_date_3']>self::kLOWER_BOUND_DATE
+										?
+										$this->pi_linkTP(
+											date('d.m.y / H:i', $row['eval_date_3']),
+											array (
+												$this->extKey.'[type]' => self::kASSIGN_EVAL_DATE_FORM,
+												$this->extKey.'[survey]' => $this->survey,
+												$this->extKey.'[lecture]' => $row['uid'],
+												$this->extKey.'[date_selected]' => 3
+											) )
+										:
 										'').
 									'</td>';
 
@@ -418,7 +445,6 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 											$this->extKey.'[lecture]' => $row['uid'])).
 								'</td>';
 				$content .= '</tr>';
-
 			}
 
 
@@ -685,7 +711,9 @@ mit.</textarea></div>
 	function printLectureEvaldateAssignmentForm ($lecture) {
 		$content = '';
 
-		// TODO preset selection
+		// preset selection
+		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		$date_preselection = intval($GETcommands['date_selected']);
 
 		// the user probably wants to have a way out:
 		$content .= '<div style="margin:10px;"><strong>'.$this->pi_linkTP('Eingabe abbrechen!',
@@ -725,7 +753,7 @@ mit.</textarea></div>
 
 			// radio button
 			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" ';
-			if ($i==1) //TODO change this to something dynamically
+			if ($i==$date_preselection)
 				$content .= 'checked="checked" ';
 			$content .= '				id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).' (Raum: '.$lectureUID['eval_room_'.$i].')</label>'."<br />\n";
@@ -737,6 +765,10 @@ mit.</textarea></div>
 		$JSCalendar->setNLP($this->extConfig['natLangParser']);
 		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
 		$JSCalendar->setLanguage($this->extConfig['lang']);
+		if ($this->piVars["eval_date"]==0)
+			$this->piVars["eval_date"] = '';
+		else
+			date('d-m-Y',$this->piVars['eval_date']);
 
 		$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" id="'.$this->extKey.'_eval_date_choice" value="4" />'."\n";
 		$content .= '<label for="'.$this->extKey.'_eval_date_choice_4">Anderes Datum:</label>'."\n";
@@ -745,7 +777,7 @@ mit.</textarea></div>
 						<td>'.
 						// render calendar stuff
 						$JSCalendar->render(
-							date('d-m-Y', $this->piVars["eval_date"]),
+							$this->piVars["eval_date"],
 							$this->extKey.'_eval_date'
 						).
 					'</td></tr>
