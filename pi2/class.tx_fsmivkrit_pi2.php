@@ -777,7 +777,7 @@ mit.</textarea></div>
 						<td>'.
 						// render calendar stuff
 						$JSCalendar->render(
-							$this->piVars["eval_date"],
+							($this->piVars["eval_date"]==0 ? '' : ''),
 							$this->extKey.'_eval_date'
 						).
 					'</td></tr>

@@ -225,7 +225,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// Vkrit suggestion 1
 		if ($this->piVars['eval_date_1']==0)
-			$this->piVars['eval_date_1'] = time();
+			$this->piVars['eval_date_1'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_1');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 1:</legend>';
@@ -256,7 +256,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// Vkrit suggestion 2
 		if ($this->piVars['eval_date_2']==0)
-			$this->piVars['eval_date_2'] = time();
+			$this->piVars['eval_date_2'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_2');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 2 (optional):</legend>';
@@ -282,7 +282,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// Vkrit suggestion 3
 		if ($this->piVars['eval_date_3']==0)
-			$this->piVars['eval_date_3'] = time();
+			$this->piVars['eval_date_3'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_3');
 		$content .= '<fieldset>';
 		$content .= '<legend>V-Krit-Termin Vorschlag 3 (optional):</legend>';
