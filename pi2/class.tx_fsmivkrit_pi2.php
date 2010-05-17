@@ -761,7 +761,7 @@ mit.</textarea></div>
 
 		// init jscalendar class
 		$JSCalendar = JSCalendar::getInstance();
-		$JSCalendar->setDateFormat(false);		// do not display time
+		$JSCalendar->setDateFormat(false, '%d-%m-%Y');		// do not display time
 		$JSCalendar->setNLP($this->extConfig['natLangParser']);
 		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
 		$JSCalendar->setLanguage($this->extConfig['lang']);
