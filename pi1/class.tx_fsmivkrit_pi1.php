@@ -214,7 +214,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// init jscalendar class
 		$JSCalendar = JSCalendar::getInstance();
-		$JSCalendar->setDateFormat(false);		// do not display time
+		$JSCalendar->setDateFormat(false, '%d-%m-%Y');		// do not display time
 		$JSCalendar->setNLP($this->extConfig['natLangParser']);
 		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
 		$JSCalendar->setLanguage($this->extConfig['lang']);
@@ -224,7 +224,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 			$content .= '<h3>Evaluation findet statt vom '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'</h3>';
 
 		// Vkrit suggestion 1
-		if ($this->piVars['eval_date_1']==0)
+		if ($this->piVars['eval_date_1']=='01-01-1970')
 			$this->piVars['eval_date_1'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_1');
 		$content .= '<fieldset>';
@@ -255,7 +255,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 
 		// Vkrit suggestion 2
-		if ($this->piVars['eval_date_2']==0)
+		if ($this->piVars['eval_date_2']=='01-01-1970')
 			$this->piVars['eval_date_2'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_2');
 		$content .= '<fieldset>';
@@ -281,7 +281,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 					</td></tr></table></fieldset>';
 
 		// Vkrit suggestion 3
-		if ($this->piVars['eval_date_3']==0)
+		if ($this->piVars['eval_date_3']=='01-01-1970')
 			$this->piVars['eval_date_3'] = '';
 		$JSCalendar->setInputField($this->extKey.'_eval_time_3');
 		$content .= '<fieldset>';
@@ -378,7 +378,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<div><strong>V-Krit Termine:</strong></div>';
 		$content .= '<ol>';
 		for($i=1; $i<=3; $i++) {
-			if ($inputData['eval_'.$i]['date']=='' || $inputData['eval_'.$i]['date']==0)
+			if ($inputData['eval_'.$i]['date']<=21600)
 				continue;
 
 			$content .= '<li><strong>Termin:</strong> '.date('d.m.Y H:i', $inputData['eval_'.$i]['date']).',

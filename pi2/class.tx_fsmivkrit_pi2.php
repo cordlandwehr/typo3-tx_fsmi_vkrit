@@ -516,13 +516,13 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			<textarea name="'.$this->extKey.'[comment]" cols="74" rows="15" id="'.$this->extKey.'_comment">
 bitte verwenden Sie die angefügten Links um für Ihre diesjährigen
 Veranstaltungen Termine zur Vorlesungs-Evaluation (V-Krit) anzugeben.
-Sollte Ihre Veranstaltung unter 10 Teilnehmer haben und die Veranstaltung
-soll dennoch evaluiert werden, so tragen Sie dieses bitte als Kommentar
+Sollte Ihre Veranstaltung weniger als 10 Teilnehmer haben und die Veranstaltung
+soll dennoch evaluiert werden, dann tragen Sie dieses bitte als Kommentar
 ein.
 
 Bei Rückfragen melden Sie sich bitte bei criticus@uni-paderborn.de.
-Dieses Jahr verwenden wir erstmals einen Datenimport aus PAUL. Dieser
-ist jedoch noch nicht automatisiert zu verarbeiten und erfordert einen
+Dieses Jahr verwenden wir abermals einen Datenimport aus PAUL. Dieser
+ist jedoch immer noch nicht automatisiert zu verarbeiten und erfordert einen
 hohen manuellen Aufwand. Sollten bei dieser Verarbeitung Fehler
 aufgetreten sein, was sich insbesondere in nicht aufgeführten
 Veranstaltungen widerspiegelt, so teilen Sie uns dieses bitte umgehend
