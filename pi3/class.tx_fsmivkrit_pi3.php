@@ -101,6 +101,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$content .= $this->printTipperRanking($this->survey);
 				$content .= '<h3>Paten-Ranking</h3>';
 				$content .= $this->printGodfatherRanking($this->survey);
+				$content .= '<h3>Kritter-Ranking</h3>';
+				$content .= $this->printKritterRanking($this->survey);
 				break;
 			}
 		}
@@ -239,6 +241,34 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		return $content;
 	}
 
+	function printKritterRanking ($survey) {
+		// get sum
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid as kritter,
+													fe_users.name as krittername,
+													fe_users.username as kritterusername,
+													COUNT(tx_fsmivkrit_lecture.uid) as number
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE fe_users.deleted=0
+													AND tx_fsmivkrit_lecture.deleted=0
+													AND tx_fsmivkrit_lecture.hidden=0
+													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
+													AND (
+														fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_1
+														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_2
+														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_3
+														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_4)
+												GROUP BY kritter, fe_users.name, fe_users.username
+												ORDER BY number
+													');
+		// TODO create intersection -> get lectures that are ready and those who are not
+		$content = '<ul>';
+		while ($res && $row = mysql_fetch_assoc($res))
+			$content .= '<li>'.($row['krittername']!=''?$row['krittername']:$row['kritterusername']).': '.$row['number'].'</li>';
+
+		$content .= '</ul>';
+		return $content;
+
+	}
 
 	//TODO change layout, text, LL etc.
 	function printTableHead() {
@@ -341,12 +371,14 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$content .= '<td align="center">'.$row['participants'].'</td>';
 			$content .= '<td align="left">'.$row['comment'].'</td>';
 
-	   		trim($row['kritter_1'])=='' ?
+	   		trim($row['kritter_feuser_1'])==0 ?
 				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
 				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
 	  		for ($i = 1; $i < 5; $i++) {
-	  			if ($row['kritter_'.$i]!='' )
-					$content .= '<li style="padding:0px">'.$this->nix($row['kritter_'.$i]).'</li>';
+	  			if ($row['kritter_feuser_'.$i]!=0 ) {
+					$kritter = t3lib_BEfunc::getRecord('fe_users', $row['kritter_feuser_'.$i]);
+					$content .= '<li style="padding:0px">'.($kritter['name']!=''? $kritter['name'] : $kritter['username']).'</li>';
+				}
 				else if ($i==1)
 					$content .= '<li><strong>fehlt</strong></li>';
 	  		}
@@ -425,8 +457,20 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=4; $i++) {
 			$content .= '<tr><td><label for="'.$this->extKey.'_kritter_'.$i.'">Kritter '.$i.'</label></td><td>
-							<input type="text" name="'.$this->extKey.'[kritter_'.$i.']" id="'.$this->extKey.'_kritter_'.$i.'"
-								value="'.$lectureUID["kritter_".$i].'" size="20" />
+							<select name="'.$this->extKey.'[kritter_feuser_'.$i.']" size="1" id="'.$this->extKey.'_kritter_'.$i.'"'.
+							'<option value="0"></option>';
+				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+													FROM fe_users
+													WHERE disable=0 AND deleted=0
+													ORDER BY name,username');
+	   					while ($res && $rowKritter = mysql_fetch_assoc($res)) {
+	   						$content .= '<option value="'.$rowKritter['uid'].'" '.(
+	   							$rowKritter['uid']==$lectureUID['kritter_feuser_'.$i] ?
+	   								'selected="selected"':
+	   								''
+	   						).' >'.($rowKritter['name']!=''? $rowKritter['name']: $rowKritter['username']).'</option>';
+	   					}
+	   			$content .= '</select>
 							</td></tr>';
 		}
 
@@ -521,10 +565,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 									'uid=\''.$lecture.'\'',
 									array (	'crdate' => time(),
 											'tstamp' => time(),
-											'kritter_1' 	=> htmlspecialchars($GETcommands['kritter_1']),
-											'kritter_2' 	=> htmlspecialchars($GETcommands['kritter_2']),
-											'kritter_3' 	=> htmlspecialchars($GETcommands['kritter_3']),
-											'kritter_4' 	=> htmlspecialchars($GETcommands['kritter_4']),
+											'kritter_feuser_1' 	=> intval($GETcommands['kritter_feuser_1']),
+											'kritter_feuser_2' 	=> intval($GETcommands['kritter_feuser_2']),
+											'kritter_feuser_3' 	=> intval($GETcommands['kritter_feuser_3']),
+											'kritter_feuser_4' 	=> intval($GETcommands['kritter_feuser_4']),
 											'godfather'		=> intval($GETcommands['godfather']),
 											'tipper'		=> intval($GETcommands['tipper']),
 											'weight'		=> intval($GETcommands['weight']),
