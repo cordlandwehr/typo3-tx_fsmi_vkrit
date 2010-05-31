@@ -117,23 +117,9 @@ CREATE TABLE tx_fsmivkrit_survey (
 	KEY parent (pid)
 );
 
-
-
 #
-# Table structure for table 'tx_fsmivkrit_helper'
+# Table structure for extension to table 'fe_users'
 #
-CREATE TABLE tx_fsmivkrit_helper (
-	uid int(11) NOT NULL auto_increment,
-	pid int(11) DEFAULT '0' NOT NULL,
-	tstamp int(11) DEFAULT '0' NOT NULL,
-	crdate int(11) DEFAULT '0' NOT NULL,
-	cruser_id int(11) DEFAULT '0' NOT NULL,
-	deleted tinyint(4) DEFAULT '0' NOT NULL,
-	hidden tinyint(4) DEFAULT '0' NOT NULL,
-	name tinytext,
-	email tinytext,
-	survey text,
-
-	PRIMARY KEY (uid),
-	KEY parent (pid)
+CREATE TABLE fe_users (
+	fsmivkrit_helper_for_survey text,
 );

@@ -70,24 +70,6 @@ $TCA['tx_fsmivkrit_survey'] = array (
 	),
 );
 
-$TCA['tx_fsmivkrit_helper'] = array (
-	'ctrl' => array (
-		'title'     => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_helper',
-		'label'     => 'name',
-		'tstamp'    => 'tstamp',
-		'crdate'    => 'crdate',
-		'cruser_id' => 'cruser_id',
-		'default_sortby' => 'ORDER BY crdate',
-		'delete' => 'deleted',
-		'enablecolumns' => array (
-			'disabled' => 'hidden',
-		),
-		'dynamicConfigFile' => t3lib_extMgm::extPath($_EXTKEY).'tca.php',
-		'iconfile'          => t3lib_extMgm::extRelPath($_EXTKEY).'icon_tx_fsmivkrit_helper.gif',
-	),
-);
-
-
 t3lib_div::loadTCA('tt_content');
 $TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY.'_pi1']='layout,select_key';
 t3lib_extMgm::addPlugin(array('LLL:EXT:fsmi_vkrit/locallang_db.xml:tt_content.list_type_pi1',$_EXTKEY . '_pi1'),'list_type');
@@ -110,6 +92,26 @@ t3lib_extMgm::addPiFlexFormValue($_EXTKEY.'_pi3', 'FILE:EXT:fsmi_vkrit/flexform/
 t3lib_div::loadTCA('tt_content');
 $TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY.'_pi4']='layout,select_key';
 t3lib_extMgm::addPlugin(array('LLL:EXT:fsmi_vkrit/locallang_db.xml:tt_content.list_type_pi4',$_EXTKEY . '_pi4'),'list_type');
+
+// add extension fields to frontend users
+$tempColumns = array (
+    'tx_fsmivkrit_fsmivkrit_helper_for_survey' => array (
+		'exclude' => 0,
+		'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecture.survey',
+		'config' => array (
+			'type' => 'group',
+			'internal_type' => 'db',
+			'allowed' => 'tx_fsmivkrit_survey',
+			'size' => 5,
+			'minitems' => 0,
+			'maxitems' => 30,
+		)
+    ),
+);
+
+t3lib_div::loadTCA('fe_users');
+t3lib_extMgm::addTCAcolumns('fe_users',$tempColumns,1);
+t3lib_extMgm::addToAllTCAtypes('fe_users','tx_fsmivkrit_fsmivkrit_helper_for_survey;;;;1-1-1');
 
 // include statics
 t3lib_extMgm::addStaticFile($_EXTKEY,"static/css/","Vkrit CSS Style");
