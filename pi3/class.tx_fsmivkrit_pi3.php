@@ -384,20 +384,20 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	  		}
 			$content .= '</ol></td>';
 
-			$godfatherUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['godfather']);
+			$godfatherUID = t3lib_BEfunc::getRecord('fe_users', $row['godfather']);
 			$content .= (
 				($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_EVALUATED && $row['godfather']==0) ?
 					'<td align="center;" bgcolor="red">':
-					'<td align="center">'.$godfatherUID['name']
+					'<td align="center">'.($godfatherUID['name']!=''?$godfatherUID['name']:$godfatherUID['username'])
 				)
 				.'</td>';
 			$content .= '<td align="center">'.$this->nix($this->ohnenull($row['weight'])).'</td>';
 //			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($row['pictures'])).'</td>';
-			$tipperUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_helper', $row['tipper']);
+			$tipperUID = t3lib_BEfunc::getRecord('fe_users', $row['tipper']);
 			$content .= (
 				($row['eval_state']==tx_fsmivkrit_div::kEVAL_STATE_SCANNED && $row['tipper']==0) ?
 					'<td align="center;" bgcolor="red">':
-					'<td align="center">'.$tipperUID['name']
+					'<td align="center">'.($tipperUID['name']!=''?$tipperUID['name']:$tipperUID['username'])
 				)
 				.'</td>';
 			// TODO check by state!
@@ -479,16 +479,16 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   		<select name="'.$this->extKey.'[godfather]" id="'.$this->extKey.'_godfather" size="1">';
 	   			$content .= '<option value="0"></option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
-													FROM tx_fsmivkrit_helper
-													WHERE deleted=0 AND hidden=0
-														AND survey='.$lectureUID['survey'].'
+													FROM fe_users
+													WHERE deleted=0 AND disable=0
+														AND FIND_IN_SET('.$lectureUID['survey'].',tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													ORDER BY name');
 	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
 	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
 	   							$rowHelper['uid']==$lectureUID['godfather'] ?
 	   								'selected="selected"':
 	   								''
-	   						).' >'.$rowHelper['name'].'</option>';
+	   						).' >'.($rowHelper['name']!=''?$rowHelper['name']:$rowHelper['username']).'</option>';
 	   					}
 	   			$content .= '</select></td></tr>';
 
@@ -497,9 +497,9 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   		<td><select name="'.$this->extKey.'[tipper]" id="'.$this->extKey.'_tipper" size="1">';
 	   			$content .= '<option value="0"></option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
-													FROM tx_fsmivkrit_helper
-													WHERE deleted=0 AND hidden=0
-														AND survey='.$lectureUID['survey'].'
+													FROM fe_users
+													WHERE deleted=0 AND disable=0
+														AND FIND_IN_SET('.$lectureUID['survey'].',tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													ORDER BY name');
 	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
 	   						// TODO change submit value
@@ -507,7 +507,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   							$rowHelper['uid']==$lectureUID['tipper'] ?
 	   								'selected="selected"':
 	   								''
-	   						).' >'.$rowHelper['name'].'</option>';
+	   						).' >'.($rowHelper['name']!=''?$rowHelper['name']:$rowHelper['username']).'</option>';
 	   					}
 	   			$content .= '</select></td></tr>';
 

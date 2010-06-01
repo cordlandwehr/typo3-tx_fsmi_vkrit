@@ -121,5 +121,5 @@ CREATE TABLE tx_fsmivkrit_survey (
 # Table structure for extension to table 'fe_users'
 #
 CREATE TABLE fe_users (
-	fsmivkrit_helper_for_survey text,
+	tx_fsmivkrit_fsmivkrit_helper_for_survey text,
 );
