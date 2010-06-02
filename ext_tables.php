@@ -113,6 +113,14 @@ t3lib_div::loadTCA('fe_users');
 t3lib_extMgm::addTCAcolumns('fe_users',$tempColumns,1);
 t3lib_extMgm::addToAllTCAtypes('fe_users','tx_fsmivkrit_fsmivkrit_helper_for_survey;;;;1-1-1');
 
+
+// add scheduler jobs
+$TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_organizer_scheduler'] = array(
+	'extension' => 'fsmi_vkrit',
+	'title' => 'Information mails for Organizer',
+	'description' => 'Sends notification mails each evening to tell which tasks are open for current evaluation.'
+);
+
 // include statics
 t3lib_extMgm::addStaticFile($_EXTKEY,"static/css/","Vkrit CSS Style");
 ?>

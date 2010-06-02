@@ -777,8 +777,8 @@ mit.</textarea></div>
 						<td>'.
 						// render calendar stuff
 						$JSCalendar->render(
-							($this->piVars["eval_date"]==0 ? '' : ''),
-							$this->extKey.'_eval_date'
+							($this->piVars["eval_date"]=='01-01-1970' ? '' : $this->piVars["eval_date"]),
+							$this->extKey.'[eval_date]'
 						).
 					'</td></tr>
 					<tr><td>'.
@@ -823,7 +823,6 @@ mit.</textarea></div>
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$evalDateChoice = intval($GETcommands['eval_date_choice']);
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-
 		$mailBody = strip_tags($GETcommands['notify_lecturer_mailbody']);
 
 		// this means: we have any of the preset dates from the lecturers
