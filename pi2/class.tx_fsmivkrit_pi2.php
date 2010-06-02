@@ -753,7 +753,8 @@ mit.</textarea></div>
 
 			// radio button
 			$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" ';
-			if ($i==$date_preselection)
+			// preselection
+			if ($i==$date_preselection || date('d.m.Y',$lectureUID['eval_date_fixed'])==date('d.m.Y',$lectureUID['eval_date_'.$i]))
 				$content .= 'checked="checked" ';
 			$content .= '				id="'.$this->extKey.'_eval_date_choice_'.$i.'" value="'.$i.'" />'."\n";
 			$content .= '<label for="'.$this->extKey.'_eval_date_choice_'.$i.'">'.date('d.m.Y - H:i',$lectureUID['eval_date_'.$i]).' (Raum: '.$lectureUID['eval_room_'.$i].')</label>'."<br />\n";
@@ -765,14 +766,26 @@ mit.</textarea></div>
 		$JSCalendar->setNLP($this->extConfig['natLangParser']);
 		$JSCalendar->setCSS($this->extConfig['calendarCSS']);
 		$JSCalendar->setLanguage($this->extConfig['lang']);
+
+		// if nothing selected yet, use this
+		if ($lectureUID['eval_date_fixed']!=0 &&
+				!($date_preselection>0 & $date_preselection<4) &&
+				date('d.m.Y',$lectureUID['eval_date_fixed'])!=date('d.m.Y',$lectureUID['eval_date_1']) &&
+				date('d.m.Y',$lectureUID['eval_date_fixed'])!=date('d.m.Y',$lectureUID['eval_date_2']) &&
+				date('d.m.Y',$lectureUID['eval_date_fixed'])!=date('d.m.Y',$lectureUID['eval_date_3'])
+			) {
+			$date_preselection = 4;
+			$this->piVars["eval_date"]=date('d-m-Y',$lectureUID['eval_date_fixed']);
+		}
 		if ($this->piVars["eval_date"]==0)
 			$this->piVars["eval_date"] = '';
 		else
 			date('d-m-Y',$this->piVars['eval_date']);
 
-		$content .= '<input type="radio" name="'.$this->extKey.'[eval_date_choice]" id="'.$this->extKey.'_eval_date_choice" value="4" />'."\n";
+		$content .= '<input type="radio" '.($date_preselection==4?'checked="checked"':'').
+			' name="'.$this->extKey.'[eval_date_choice]" id="'.$this->extKey.'_eval_date_choice_4" value="4" />'."\n";
 		$content .= '<label for="'.$this->extKey.'_eval_date_choice_4">Anderes Datum:</label>'."\n";
-		$content .= '<div style="margin-left:20px"><table><tr>
+		$content .= '<div style="margin-left:20px" onClick="document.getElementById(\'fsmi_vkrit_eval_date_choice_4\').checked=true;"><table><tr>
 						<td><label for="'.$this->extKey.'_eval_date">Datum:</label></td>
 						<td>'.
 						// render calendar stuff
