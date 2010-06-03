@@ -33,14 +33,74 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 
 	public function execute() {
 
-		$fullmail = 'ping';
+		// dirty hack
+		$survey = 3;
+
+		$fullMail =
+'Statusinformationen zur V-Krit:'."\n".
+'=============='."\n\n";
+
+		// state problems first
+		$lecturesWithoutKritter = $this->lecturesWithoutKritter($survey,5);//TODO set survey
+		if (count($lecturesWithoutKritter)>0)
+			$fullMail .=
+'Ohne Kritter (kommende 5 Tage):'."\n".
+'--------------'."\n";
+		foreach ($lecturesWithoutKritter as $lecture) {
+			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+			$fullMail .= '* '.$lectureDATA['name']."\n";
+			$fullMail .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
+			$fullMail .= '  '.date('d.m.Y. / H:i',$lectureDATA['eval_date_fixed']).' / '.$lectureDATA['eval_room_fixed']."\n";
+		}
+  		if (count($lecturesWithoutKritter)==0)
+			$fullMail .= ' -- keine --'."\n";
+		$fullMail .= "\n";
+
+		// next the status information
+		// state problems first
+		$lecturesAll = $this->lecturesInNextDays($survey,3);//TODO set survey
+		if (count($lecturesAll)>0)
+			$fullMail .=
+'Veranstaltungen in kommenden 3 Tagen:'."\n".
+'--------------'."\n";
+		foreach ($lecturesAll as $lecture) {
+			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+			$fullMail .= '* '.date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
+				$lectureDATA['name'].
+				' ('.$lectureDATA['eval_room_fixed'].','.$lectureDATA['participants'].'TN)'."\n";
+		}
+		if (count($lecturesAll)==0)
+			$fullMail .= ' -- keine --'."\n";
+		$fullMail .= "\n";
+
+		// statistical/administrative data
+		$fullMail .=
+'Allgemeines'."\n".
+'--------------'."\n";
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+												  AND survey='.$survey.'
+												  AND eval_date_fixed > '.time());
+		if ($res && $row = mysql_fetch_assoc($res))
+			$fullMail .= '* insgesamt noch benötigte Bögen: '.$row['SUM(participants)']."\n";
+
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+												  AND survey='.$survey.'
+												  AND eval_date_fixed > '.time().'
+												  AND eval_date_fixed < '.(time()+3*24*60*60));
+		if ($res && $row = mysql_fetch_assoc($res))
+			$fullMail .= '* benötigte Bögen in kommenden 3 Tagen: '.($row['SUM(participants)']!=''? $row['SUM(participants)'] : 0)."\n";
 
 		$send = $this->sendNotifyEmail (
-			$msg='[TEST] Organizer Notification'."\n". // first line is subject
+			$msg='V-Krit Status'."\n". // first line is subject
 					$fullMail,
-			$recipients='cola@upb.de',
+			$recipients='criticus@uni-paderborn.de',
+			$cc='cola@upb.de',
 			$email_from='criticus@uni-paderborn.de',
-			$email_fromName='Orga V-Krit <criticus@uni-paderborn.de>',
+			$email_fromName='V-Krit Orga',
 			$replyTo='');
 
 		if ($send)
@@ -73,6 +133,67 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 			if ($cc)        t3lib_div::plainMailEncoded($cc, $subject, $plain_message, implode(chr(10),$headers));
 			return true;
 		}
+	}
+
+	/**
+	 * For a given survey, selects UIDs for all lectures without Kritter
+	 * @param $survey UID of survey
+	 * @param $daysInFuture limit this to any number of days in the future, 0 is unlimited
+	 * @return array of UIDs
+	 **/
+	function lecturesWithoutKritter($survey, $daysInFuture=1) {
+		if ($daysInFuture>0) {
+			$dateLimit = time() + $daysInFuture*24*60*60;
+			$dateLimitWhere = ' AND eval_date_fixed < '.$dateLimit.' ';
+		}
+		else $dateLimitWhere = '';
+
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+												  AND survey='.$survey.'
+												  AND (kritter_feuser_1=0 OR kritter_feuser_1 IS NULL)
+												  AND (kritter_feuser_2=0 OR kritter_feuser_2 IS NULL)
+												  AND (kritter_feuser_3=0 OR kritter_feuser_3 IS NULL)
+												  AND (kritter_feuser_4=0 OR kritter_feuser_4 IS NULL) '.
+												  $dateLimitWhere.'
+												  AND eval_date_fixed > '.time().'
+												  ORDER BY eval_date_fixed');
+
+		$lectures = array ();
+		while ($res && $row = mysql_fetch_assoc($res))
+			$lectures[] = $row['uid'];
+
+		return $lectures;
+	}
+
+	/**
+	 * For a given survey, selects UIDs for all lectures in next days for a given kritter
+	 * @param $survey UID of survey
+	 * @param $daysInFuture limit this to any number of days in the future, 0 is unlimited
+	 * @param $kritter UID, if zero then for all kritters
+	 * @return array of UIDs
+	 **/
+	function lecturesInNextDays($survey, $daysInFuture=1,$kritter=0) {
+		if ($daysInFuture>0) {
+			$dateLimit = time() + $daysInFuture*24*60*60;
+			$dateLimitWhere = ' AND eval_date_fixed<'.$dateLimit.' ';
+		}
+		else $dateLimitWhere = '';
+
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+												  AND survey='.$survey.
+												  $dateLimitWhere.'
+												  AND eval_date_fixed > '.time().'
+												  ORDER BY eval_date_fixed');
+
+		$lectures = array ();
+		while ($res && $row = mysql_fetch_assoc($res))
+			$lectures[] = $row['uid'];
+
+		return $lectures;
 	}
 
 }

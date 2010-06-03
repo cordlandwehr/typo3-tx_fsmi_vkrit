@@ -413,7 +413,27 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 		$content .= '</table>';
 
-		$content .= '<p>Insgesamt sind '.$count.' Veranstaltungen in dieser V-Krit enthalten.</p>';
+		$content .= '<p>Insgesamt werden derzeit <strong>'.$count.'</strong> Veranstaltungen evaluiert. ';
+
+		$resNotModerated = $GLOBALS['TYPO3_DB']->sql_query('SELECT COUNT(uid)
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+													AND survey= \''.$survey.'\'
+													AND eval_state='.tx_fsmivkrit_div::kEVAL_STATE_COMPLETED.'
+													AND no_eval=0');
+		$resNoFeedback = $GLOBALS['TYPO3_DB']->sql_query('SELECT COUNT(uid)
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+													AND survey= \''.$survey.'\'
+													AND eval_state='.tx_fsmivkrit_div::kEVAL_STATE_NOTIFIED.'
+													AND no_eval=0');
+
+		if ($resNotModerated && $row = mysql_fetch_assoc($resNotModerated))
+			$content .= ' Weitere <strong>'.$row['COUNT(uid)'].'</strong> Veranstaltungen warten auf einer Moderation. ';
+		if ($resNoFeedback && $row = mysql_fetch_assoc($resNoFeedback))
+			$content .= ' Bei <strong>'.$row['COUNT(uid)'].'</strong> Veranstaltungen gibt es noch keine Rückmeldung der Dozenten.';
+		$content .= '</p>';
+
 
 		return $content;
 	}

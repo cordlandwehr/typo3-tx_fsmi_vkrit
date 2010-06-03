@@ -30,7 +30,7 @@ Import of CampusNet data and export of EvaSys data is provided.',
 	'clearCacheOnLoad' => 0,
 	'lockType' => '',
 	'author_company' => '',
-	'version' => '0.1.994',
+	'version' => '0.1.995',
 	'constraints' => array(
 		'depends' => array(
 			'date2cal' => '7.1.0-',
