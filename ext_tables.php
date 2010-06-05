@@ -120,6 +120,11 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_orga
 	'title' => 'Information mails for Organizer',
 	'description' => 'Sends notification mails each evening to tell which tasks are open for current evaluation.'
 );
+$TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_reminder_scheduler'] = array(
+	'extension' => 'fsmi_vkrit',
+	'title' => 'Emergency Information for Organizer',
+	'description' => 'Sends Email, if something goes really wrong..'
+);
 
 // include statics
 t3lib_extMgm::addStaticFile($_EXTKEY,"static/css/","Vkrit CSS Style");

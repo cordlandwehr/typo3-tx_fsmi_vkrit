@@ -21,7 +21,7 @@
  ***************************************************************/
 
 
-class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
+class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 	var $uid;
 
 	/**
@@ -32,7 +32,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 // 	}
 
 	public function execute() {
-
+		$emergency = false;
 		// dirty hack
 		$survey = 3;
 
@@ -41,10 +41,10 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 '=============='."\n\n";
 
 		// state problems first
-		$lecturesWithoutKritter = $this->lecturesWithoutKritter($survey,7);//TODO set survey
+		$lecturesWithoutKritter = $this->lecturesWithoutKritter($survey,2);//TODO set survey
 		if (count($lecturesWithoutKritter)>0)
 			$fullMail .=
-'Veranstaltungen ohne Kritter (kommende 7 Tage):'."\n".
+'Veranstaltungen ohne Kritter (kommende 2 Tage):'."\n".
 '--------------'."\n";
 		foreach ($lecturesWithoutKritter as $lecture) {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
@@ -54,48 +54,71 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 		}
   		if (count($lecturesWithoutKritter)==0)
 			$fullMail .= ' -- keine --'."\n";
+		else
+			$emergency = true;
 		$fullMail .= "\n";
 
 		// next the status information
 		// state problems first
-		$lecturesAll = $this->lecturesInNextDays($survey,7);//TODO set survey
-		if (count($lecturesAll)>0)
-			$fullMail .=
-'Alle Veranstaltungen (kommende 7 Tage):'."\n".
+		$lecturesAll = $this->lecturesInNextDays($survey,2);//TODO set survey
+		$none=true;
+		$fullMail .=
+'Unterbesetzte Veranstaltungen (kommende 2 Tage):'."\n".
 '--------------'."\n";
 		foreach ($lecturesAll as $lecture) {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-			$fullMail .= '* '.date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
-				$lectureDATA['name'].
-				' ('.$lectureDATA['eval_room_fixed'].','.$lectureDATA['participants'].'TN)'."\n";
+			// count helpers
+			$helper=0;
+			for ($i=1; $i<=4; $i++)
+				if ($lectureDATA['kritter_feuser_'.$i]!=0 && $lectureDATA['kritter_feuser_'.$i]!='')
+					$helper++;
+			// warning for lectures with 1 helper for more then 50 guys
+			if ($helper!=0 && $lectureDATA['participants']/$helper>50) {
+				$fullMail .= '* '.date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
+					$lectureDATA['name'].
+					' ('.$lectureDATA['eval_room_fixed'].','.$lectureDATA['participants'].'TN)'."\n".
+					'  '.$helper.' Kritter'."\n";
+				$none=false;
+			}
 		}
-		if (count($lecturesAll)==0)
+		if ($none==true)
 			$fullMail .= ' -- keine --'."\n";
+		else
+			$emergency = true;
 		$fullMail .= "\n";
 
 		// statistical/administrative data
+		$moderationWarning = false;
 		$fullMail .=
-'Allgemeines'."\n".
+'Moderationswarnung'."\n".
 '--------------'."\n";
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
-												FROM tx_fsmivkrit_lecture
-												WHERE deleted=0 AND hidden=0
-												  AND survey='.$survey.'
-												  AND eval_date_fixed > '.time());
-		if ($res && $row = mysql_fetch_assoc($res))
-			$fullMail .= '* insgesamt noch benötigte Bögen: '.$row['SUM(participants)']."\n";
+		$fullMail .=
+'Veranstaltungen, bei denen letztes vorgeschlagenes Datum innerhalb der nächsten 3 Tage liegt.'."\n";
 
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants)
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0 AND hidden=0
-												  AND survey='.$survey.'
-												  AND eval_date_fixed > '.time().'
-												  AND eval_date_fixed < '.(time()+7*24*60*60));
-		if ($res && $row = mysql_fetch_assoc($res))
-			$fullMail .= '* benötigte Bögen in kommenden 7 Tagen: '.($row['SUM(participants)']!=''? $row['SUM(participants)'] : 0)."\n";
+												  AND eval_date_1 <'.(time()+3*24*60*60).'
+												  AND eval_date_2 <'.(time()+3*24*60*60).'
+												  AND eval_date_3 <'.(time()+3*24*60*60).'
+												  AND NOT eval_date_fixed=0
+												  AND survey='.$survey);
+
+		if ($res && $row = mysql_fetch_assoc($res)) {
+			$moderationWarning = true;
+			$emergency = true;
+			$fullMail .= '* '.$lectureDATA['name'].', '.$lectureDATA['participants'].'TN)'."\n";
+		}
+
+		if ($moderationWarning==true)
+			$fullMail .= ' -- keine --'."\n";
+
+		// if nothing to say, simply keep your mouth shut
+		if ($emergency==false)
+			return true;
 
 		$send = $this->sendNotifyEmail (
-			$msg='V-Krit Status'."\n". // first line is subject
+			$msg='V-Krit Warnung'."\n". // first line is subject
 					$fullMail,
 			$recipients='criticus@uni-paderborn.de',
 			$cc='cola@upb.de',
@@ -198,7 +221,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 
 }
 
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/fsmi_vkrit/cron/class.tx_fsmivkrit_reminder_organizer_scheduler.php'])	{
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/fsmi_vkrit/cron/class.tx_fsmivkrit_reminder_organizer_scheduler.php']);
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/fsmi_vkrit/cron/class.tx_fsmivkrit_emergency_reminder_scheduler.php'])	{
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/fsmi_vkrit/cron/class.tx_fsmivkrit_emergency_reminder_scheduler.php']);
 }
 ?>
