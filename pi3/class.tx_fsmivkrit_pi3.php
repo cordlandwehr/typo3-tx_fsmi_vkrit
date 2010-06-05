@@ -258,7 +258,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_3
 														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_4)
 												GROUP BY kritter, fe_users.name, fe_users.username
-												ORDER BY number
+												ORDER BY number DESC
 													');
 		// TODO create intersection -> get lectures that are ready and those who are not
 		$content = '<ul>';

@@ -108,7 +108,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 		if ($res && $row = mysql_fetch_assoc($res)) {
 			$moderationWarning = true;
 			$emergency = true;
-			$fullMail .= '* '.$lectureDATA['name'].', '.$lectureDATA['participants'].'TN)'."\n";
+			$fullMail .= '* '.$lectureDATA['name'].', '.$lectureDATA['participants'].'TN'."\n";
 		}
 
 		if ($moderationWarning==true)

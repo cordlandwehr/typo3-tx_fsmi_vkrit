@@ -123,7 +123,12 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_orga
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_reminder_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
 	'title' => 'Emergency Information for Organizer',
-	'description' => 'Sends Email, if something goes really wrong..'
+	'description' => 'Sends Email, if something goes really wrong.'
+);
+$TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_helper_scheduler'] = array(
+	'extension' => 'fsmi_vkrit',
+	'title' => 'Remember helpers to be helper',
+	'description' => 'Sends Email to remember of beeing a helper.'
 );
 
 // include statics
