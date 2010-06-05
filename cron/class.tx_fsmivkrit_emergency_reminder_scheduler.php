@@ -98,10 +98,11 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0 AND hidden=0
+												  AND no_eval=0
 												  AND eval_date_1 <'.(time()+3*24*60*60).'
 												  AND eval_date_2 <'.(time()+3*24*60*60).'
 												  AND eval_date_3 <'.(time()+3*24*60*60).'
-												  AND NOT eval_date_fixed=0
+												  AND eval_date_fixed=0
 												  AND survey='.$survey);
 
 		if ($res && $row = mysql_fetch_assoc($res)) {
