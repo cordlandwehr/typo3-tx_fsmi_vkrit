@@ -429,7 +429,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 													AND no_eval=0');
 
 		if ($resNotModerated && $row = mysql_fetch_assoc($resNotModerated))
-			$content .= ' Weitere <strong>'.$row['COUNT(uid)'].'</strong> Veranstaltungen warten auf einer Moderation. ';
+			$content .= ' Weitere <strong>'.$row['COUNT(uid)'].'</strong> Veranstaltungen warten auf eine Moderation. ';
 		if ($resNoFeedback && $row = mysql_fetch_assoc($resNoFeedback))
 			$content .= ' Bei <strong>'.$row['COUNT(uid)'].'</strong> Veranstaltungen gibt es noch keine Rückmeldung der Dozenten.';
 		$content .= '</p>';
@@ -462,13 +462,13 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 					'<li><strong>V-Krit Termin:</strong> '.date('d.m.Y - H:i',$lectureUID['eval_date_fixed']).'</li>'.
 					'<li><strong>Raum:</strong> '.$lectureUID['eval_room_fixed'].'</li>'.
 					'</ul>';
-		$content .= '<pre>'.$lectureUID['comment'].'</pre>';
+		$content .= '<pre>'.wordwrap($lectureUID['comment']).'</pre>';
 
 		$content .= '<h3>Kritter- und Krit-Daten</h3>';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kASSIGN_KRITTER_SAVE.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kASSIGN_KRITTER_SAVE.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$this->survey.'" />';
 
@@ -477,8 +477,8 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		// here all three input fields and one additional ...
 		for ($i=1; $i<=4; $i++) {
 			$content .= '<tr><td><label for="'.$this->extKey.'_kritter_'.$i.'">Kritter '.$i.'</label></td><td>
-							<select name="'.$this->extKey.'[kritter_feuser_'.$i.']" size="1" id="'.$this->extKey.'_kritter_'.$i.'"'.
-							'<option value="0"></option>';
+							<select name="'.$this->extKey.'[kritter_feuser_'.$i.']" size="1" id="'.$this->extKey.'_kritter_'.$i.'">'.
+							'<option value="0">&nbsp;</option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 													FROM fe_users
 													WHERE disable=0 AND deleted=0
@@ -497,7 +497,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 		// Godfather
 	   	$content .= '<tr><td><label for="'.$this->extKey.'_godfather">Sortierer</label></td><td>
 	   		<select name="'.$this->extKey.'[godfather]" id="'.$this->extKey.'_godfather" size="1">';
-	   			$content .= '<option value="0"></option>';
+	   			$content .= '<option value="0">&nbsp;</option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 													FROM fe_users
 													WHERE deleted=0 AND disable=0
@@ -569,7 +569,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   	$content .= '</fieldset>';
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
-				value="'.htmlspecialchars('Speichern').'">';
+				value="'.htmlspecialchars('Speichern').'" />';
 		$content .= '</form>';
 
 		return $content;
