@@ -421,6 +421,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 													AND tx_fsmivkrit_lecture.lecturer =  tx_fsmivkrit_lecturer.uid
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
 													AND tx_fsmivkrit_lecture.hidden=0
+													AND tx_fsmivkrit_lecture.no_eval=0
 												GROUP BY tx_fsmivkrit_lecturer.uid, tx_fsmivkrit_lecturer.name, tx_fsmivkrit_lecturer.forename, tx_fsmivkrit_lecturer.email');
 
 		while ($res && $lecturer = mysql_fetch_assoc($res)) {
@@ -478,6 +479,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												FROM tx_fsmivkrit_lecture, tx_fsmivkrit_tutorial
 												WHERE tx_fsmivkrit_tutorial.deleted=0
 												AND tx_fsmivkrit_lecture.uid =  tx_fsmivkrit_tutorial.lecture
+												AND tx_fsmivkrit_lecture.no_eval=0
+												AND tx_fsmivkrit_lecture.hidden=0
+												AND tx_fsmivkrit_lecture.deleted=0
 												AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'');
 
 		while ($res && $tutor = mysql_fetch_assoc($res)) {
@@ -523,6 +527,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$resLecture = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0 AND hidden=0
+												AND no_eval=0
 												AND survey=\''.$survey.'\'');
 
 		while ($resLecture && $lecture = mysql_fetch_assoc($resLecture)) {

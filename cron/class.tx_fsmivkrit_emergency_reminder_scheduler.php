@@ -73,7 +73,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 				if ($lectureDATA['kritter_feuser_'.$i]!=0 && $lectureDATA['kritter_feuser_'.$i]!='')
 					$helper++;
 			// warning for lectures with 1 helper for more then 50 guys
-			if ($helper!=0 && $lectureDATA['participants']/$helper>50) {
+			if ($helper!=0 && $lectureDATA['participants']/$helper>50 && $helper<4) {
 				$fullMail .= '* '.date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
 					$lectureDATA['name'].
 					' ('.$lectureDATA['eval_room_fixed'].','.$lectureDATA['participants'].'TN)'."\n".
@@ -100,18 +100,21 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 												WHERE deleted=0 AND hidden=0
 												  AND no_eval=0
 												  AND eval_date_1 <'.(time()+3*24*60*60).'
+												  AND NOT eval_date_1 IS NULL
 												  AND eval_date_2 <'.(time()+3*24*60*60).'
+												  AND NOT eval_date_2 IS NULL
 												  AND eval_date_3 <'.(time()+3*24*60*60).'
+												  AND NOT eval_date_3 IS NULL
 												  AND eval_date_fixed=0
 												  AND survey='.$survey);
 
-		if ($res && $row = mysql_fetch_assoc($res)) {
+		while ($res && $row = mysql_fetch_assoc($res)) {
 			$moderationWarning = true;
 			$emergency = true;
 			$fullMail .= '* '.$lectureDATA['name'].', '.$lectureDATA['participants'].'TN'."\n";
 		}
 
-		if ($moderationWarning==true)
+		if ($moderationWarning==false)
 			$fullMail .= ' -- keine --'."\n";
 
 		// if nothing to say, simply keep your mouth shut
