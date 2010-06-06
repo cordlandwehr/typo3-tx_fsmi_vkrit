@@ -36,43 +36,45 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 		// dirty hack
 		$survey = 3;
 
-		$fullMail =
-'Hier einer Erinnerung, denn du hast dich/wurdest
-für morgen zum Kritten eingetragen:'."\n";
+		$mailClosing = "\n\n".'Rückfragen bitte an <criticus@upb.de>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
 
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid as kritter,
-													fe_users.name as krittername,
-													fe_users.username as kritterusername,
-													tx_fsmivkrit_lecture.uid as lectureUid
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid as user,
+													GROUP_CONCAT(DISTINCT tx_fsmivkrit_lecture.uid ORDER BY eval_date_fixed SEPARATOR \',\') as lectures
 												FROM fe_users, tx_fsmivkrit_lecture
 												WHERE fe_users.deleted=0
 													AND tx_fsmivkrit_lecture.deleted=0
 													AND tx_fsmivkrit_lecture.hidden=0
 													AND tx_fsmivkrit_lecture.eval_date_fixed > '.time().'
-												    AND eval_date_fixed < '.(time()+5*24*60*60).'
+												    AND eval_date_fixed < '.(time()+24*60*60).'
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
 													AND (
 														fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_1
 														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_2
 														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_3
 														OR fe_users.uid = tx_fsmivkrit_lecture.kritter_feuser_4)
-												GROUP BY kritter, fe_users.name, fe_users.username
-												ORDER BY number
+												GROUP BY user
 													');
 
 		while ($res && $row = mysql_fetch_assoc($res)) {
+			$fe_user = t3lib_BEfunc::getRecord('fe_users', $row['user']);
+			$fullMail =
+'Hallo '.$fe_user['name'].','."\n".
+'du bist morgen für die folgenden Veranstaltungen zum Kritten eingetragen:'."\n";
+
+			$lectures = explode(',',$row['lectures']);
 			$mailPartIndividual = '';
-			foreach ($row['lectureUid'] as $lecture) {
+			foreach ($lectures as $lecture) {
 				$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 				$mailPartIndividual .= '* '.$lectureDATA['name']."\n";
 				$mailPartIndividual .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
 				$mailPartIndividual .= '  '.date('d.m.Y. / H:i',$lectureDATA['eval_date_fixed']).' / '.$lectureDATA['eval_room_fixed']."\n";
 			}
 
+//TODO check if this is really a mail-address
 			$send = $this->sendNotifyEmail (
-				$msg='V-Krit Kritter Erinnerung'."\n". // first line is subject
-						$fullMail,
-				$recipients='cola@uni-paderborn.de',
+				$msg='V-Krit Kritter Erinnerung '."\n". // first line is subject
+						$fullMail."\n".$mailPartIndividual.$mailClosing,
+				$recipients=$fe_user['email'],
 				$cc='cola@upb.de',
 				$email_from='criticus@uni-paderborn.de',
 				$email_fromName='V-Krit Orga',

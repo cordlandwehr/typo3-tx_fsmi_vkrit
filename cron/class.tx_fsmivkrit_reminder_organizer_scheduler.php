@@ -50,7 +50,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 			$fullMail .= '* '.$lectureDATA['name']."\n";
 			$fullMail .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
-			$fullMail .= '  '.date('d.m.Y. / H:i',$lectureDATA['eval_date_fixed']).' / '.$lectureDATA['eval_room_fixed']."\n";
+			$fullMail .= '  '.date('d.m.Y / H:i',$lectureDATA['eval_date_fixed']).' / '.$lectureDATA['eval_room_fixed']."\n";
 		}
   		if (count($lecturesWithoutKritter)==0)
 			$fullMail .= ' -- keine --'."\n";
@@ -67,7 +67,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 			$fullMail .= '* '.date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
 				$lectureDATA['name'].
-				' ('.$lectureDATA['eval_room_fixed'].','.$lectureDATA['participants'].'TN)'."\n";
+				' ('.$lectureDATA['eval_room_fixed'].' / '.$lectureDATA['participants'].'TN)'."\n";
 		}
 		if (count($lecturesAll)==0)
 			$fullMail .= ' -- keine --'."\n";

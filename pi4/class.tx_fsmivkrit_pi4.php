@@ -81,7 +81,6 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 
 		$content = '';
 
-
 		// type selection head
 		$content .= $this->createTypeSelector();
 
@@ -134,8 +133,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 //				$content .= tx_fsmivkrit_div::printSystemMessage(
 //													tx_fsmivkrit_div::kSTATUS_INFO,
 //													'Noch nicht validiert!');
-
-				$content .= $this->storeOutputDataXML($this->createOutputDOM(1));
+//TODO THIS IS A FIXED VALUE, BAD BAD BAD!
+				$content .= $this->storeOutputDataXML($this->createOutputDOM(3));
 				break;
 			}
 			default:
