@@ -370,15 +370,16 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			//calculate number of kritters
 			$numberOfKritters=0;
 			for ($i=1; $i<=4; $i++)
-				if ($row['kritter_feuser_'.$i]==0)
+				if ($row['kritter_feuser_'.$i]!=0)
 					$numberOfKritters++;
 
-	   		if ($numberOfKritters==0 || $row['kritter_feuser_1']==0)
+	   		if ($numberOfKritters==0) {
 				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Es fehlen Kritter!">';	// red, because kritter needed
-			else if ($row['participants']!=0 && $row['participants']/$row['kritter_feuser_1'] > 50 && $numberOfKritters!=4)
+			} elseif ($row['participants']!=0 && $row['participants']/$numberOfKritters > 50  ) {
 				$content .= '<td bgcolor="orange" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Zu wenige Kritter für die Teilnehmeranzahl!">';	// orange, because still kritter
-			else
+			} else
 				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
+
 	  		for ($i = 1; $i < 5; $i++) {
 	  			if ($row['kritter_feuser_'.$i]!=0 ) {
 					$kritter = t3lib_BEfunc::getRecord('fe_users', $row['kritter_feuser_'.$i]);
