@@ -68,7 +68,7 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 				$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 				$mailPartIndividual .= '* '.$lectureDATA['name']."\n";
 				$mailPartIndividual .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
-				$mailPartIndividual .= '  '.tx_fsmiexams_div::weekdayLong(date('N',$lectureDATA['eval_date_fixed']))." / ".
+				$mailPartIndividual .= '  '.tx_fsmivkrit_div::weekdayLong(date('N',$lectureDATA['eval_date_fixed']))." / ".
 					date('d.m.Y / H:i',$lectureDATA['eval_date_fixed']).' / '.
 					$lectureDATA['eval_room_fixed']."\n";
 			}

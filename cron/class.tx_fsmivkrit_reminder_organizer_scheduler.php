@@ -51,7 +51,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 			$fullMail .= '* '.$lectureDATA['name']."\n";
 			$fullMail .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
-			$fullMail .= '  '.tx_fsmiexams_div::weekdayLong(date('N',$lectureDATA['eval_date_fixed'])).
+			$fullMail .= '  '.tx_fsmivkrit_div::weekdayLong(date('N',$lectureDATA['eval_date_fixed'])).
 				" / ".date('d.m.Y / H:i',$lectureDATA['eval_date_fixed']).
 				' / '.$lectureDATA['eval_room_fixed']."\n";
 		}
@@ -68,7 +68,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 '--------------'."\n";
 		foreach ($lecturesAll as $lecture) {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
-			$fullMail .= '* '.tx_fsmiexams_div::weekdayShort(date('N',$lectureDATA['eval_date_fixed']))."., ".date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
+			$fullMail .= '* '.tx_fsmivkrit_div::weekdayShort(date('N',$lectureDATA['eval_date_fixed']))."., ".date('d.m.-H:i',$lectureDATA['eval_date_fixed']).' '.
 				$lectureDATA['name'].
 				' ('.$lectureDATA['eval_room_fixed'].' / '.$lectureDATA['participants'].'TN)'."\n";
 		}

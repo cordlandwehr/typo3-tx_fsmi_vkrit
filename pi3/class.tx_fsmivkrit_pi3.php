@@ -29,6 +29,7 @@
 
 require_once(PATH_tslib.'class.tslib_pibase.php');
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'pi2/class.tx_fsmivkrit_pi2.php');
+require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 
 /**
  * Plugin 'Coordination' for the 'fsmi_vkrit' extension.
@@ -271,20 +272,18 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	}
 
 	//TODO change layout, text, LL etc.
-	function printTableHead() {
+	function printTableHead($newdate) {
 		$content .= '<tr bgcolor="#526feb">';
-		$content .= '	<td align="center" style="color:white; width: 20px;"></td>';
-		$content .= '	<td align="center" style="color:white; width: 40px;"><b>Tag</b></td>';
-		$content .= '	<td align="center" style="color:white; width: 35px;"><b>Zeit</b></td>';
-		$content .= '	<td align="center" style="color:white;"><b>Raum</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Vorlesung</b></td>';
-		$content .= '	<td align="center" style="color:white"><b>Dozent</b></td>';
+		$content .= '	<td colspan="2" align="center" style="color:white; width: 20px;"><strong>'.
+			tx_fsmivkrit_div::weekdayShort(date('N',$row['eval_date_fixed']))." ".date('d.m.',$row['eval_date_fixed']).'
+			</strong></td>';
+		$content .= '	<td align="center" style="color:white"><b>Vorlesung &amp; Dozent</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>#</b></td>';
-		$content .= '	<td align="center" style="color:white; width:100px;"><b>Kommentar</b></td>';
-		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Kritter</b></td>';
-		$content .= '	<td align="center" style="color:white; width: 100px;"><b>Sortierer</b></td>';
+		$content .= '	<td align="center" style="color:white; width:180px;"><b>Kommentar</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 120px;"><b>Kritter</b></td>';
+		$content .= '	<td align="center" style="color:white; width: 120px;"><b>Sortierer</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>Gewicht</b></td>';
-		$content .= '	<td align="center" style="color:white; width:100px;"><b>Tipper</b></td>';
+		$content .= '	<td align="center" style="color:white; width:120px;"><b>Tipper</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>EDIT</b></td>';
 		$content .= '</tr>';
 
@@ -321,11 +320,9 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 			// this tests if date is new and should be displayed (only disply once)
 			$newdate = date('D d.m.',$row['eval_date_fixed']);
-	   		if ($olddate == $newdate)
-	   			$newdate = '&nbsp;<br />&nbsp;';
-	  		else {
+	   		if ($olddate != $newdate){
 	   			$olddate = $newdate;
-	   			$content .= $this->printTableHead();
+	   			$content .= $this->printTableHead($newdate);
 	  		}
 
 	  		// set row color
@@ -358,21 +355,29 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 	   		// print row
 	   		$content .= '<td>'.tx_fsmivkrit_div::print8State($row['eval_state']).'</td>';
-			$content .= '<td align="left">'.$this->nix($newdate).'</td>';
-	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).'</td>';
-			$content .= '<td align="center">'.$row['eval_room_fixed'].'</td>';
+	   		$content .= '<td align="center">'.date('H:i',$row['eval_date_fixed']).' Uhr<br />';
+			$content .= ''.$row['eval_room_fixed'].'</td>';
 	  		$content .= '<td align="left">'.$this->pi_linkTP($row['name'],
 														array (
 															$this->extKey.'[survey]' => $this->survey,
 															$this->extKey.'[lecture]' => $row['uid'],
 															$this->extKey.'[type]' => self::kASSIGN_KRITTER_FORM
-														)).'</td>';
-			$content .= '<td align="left">'.$lecturerUID['name'].'</td>';
+														)).'<br />';
+			$content .= $lecturerUID['name'].'</td>';
 			$content .= '<td align="center">'.$row['participants'].'</td>';
 			$content .= '<td align="left">'.$row['comment'].'</td>';
 
-	   		trim($row['kritter_feuser_1'])==0 ?
-				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;">':	// red, because kritter needed
+			//calculate number of kritters
+			$numberOfKritters=0;
+			for ($i=1; $i<=4; $i++)
+				if ($row['kritter_feuser_'.$i]==0)
+					$numberOfKritters++;
+
+	   		if ($numberOfKritters==0 || $row['kritter_feuser_1']==0)
+				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Es fehlen Kritter!">';	// red, because kritter needed
+			else if ($row['participants']!=0 && $row['participants']/$row['kritter_feuser_1'] > 50 && $numberOfKritters!=4)
+				$content .= '<td bgcolor="orange" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Zu wenige Kritter für die Teilnehmeranzahl!">';	// orange, because still kritter
+			else
 				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
 	  		for ($i = 1; $i < 5; $i++) {
 	  			if ($row['kritter_feuser_'.$i]!=0 ) {
@@ -402,7 +407,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				.'</td>';
 			// TODO check by state!
 //			$content .= '<td align="center" style="border-left:4px solid black">'.$this->nix($this->ohnenull($getippt)).'</td>';
-	  		$content .= '<td align="left">'.$this->pi_linkTP('editieren',
+	  		$content .= '<td align="left">'.$this->pi_linkTP('edit',
 													array (
 														$this->extKey.'[survey]' => $this->survey,
 														$this->extKey.'[lecture]' => $row['uid'],
