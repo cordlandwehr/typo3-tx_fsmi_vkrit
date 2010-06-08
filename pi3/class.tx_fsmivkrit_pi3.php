@@ -275,7 +275,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	function printTableHead($newdate) {
 		$content .= '<tr bgcolor="#526feb">';
 		$content .= '	<td colspan="2" align="center" style="color:white; width: 20px;"><strong>'.
-			tx_fsmivkrit_div::weekdayShort(date('N',$row['eval_date_fixed']))." ".date('d.m.',$row['eval_date_fixed']).'
+			tx_fsmivkrit_div::weekdayShort(date('N',$newdate))." ".date('d.m.',$newdate).'
 			</strong></td>';
 		$content .= '	<td align="center" style="color:white"><b>Vorlesung &amp; Dozent</b></td>';
 		$content .= '	<td align="center" style="color:white"><b>#</b></td>';
@@ -293,6 +293,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 	function printTable ($survey) {
  		$content = '';
+ 		$olddate=0;
 
    		//TODO here we need the current number of pictures per evaluater
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
@@ -319,10 +320,10 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				continue;
 
 			// this tests if date is new and should be displayed (only disply once)
-			$newdate = date('D d.m.',$row['eval_date_fixed']);
-	   		if ($olddate != $newdate){
-	   			$olddate = $newdate;
-	   			$content .= $this->printTableHead($newdate);
+			$newdate = $row['eval_date_fixed'];
+	   		if ($olddate != date('z',$newdate)){
+	   			$olddate = date('z',$newdate);
+	   			$content .= $this->printTableHead($row['eval_date_fixed']);
 	  		}
 
 	  		// set row color
