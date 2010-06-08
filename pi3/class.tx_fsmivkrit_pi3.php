@@ -375,7 +375,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 	   		if ($numberOfKritters==0) {
 				$content .= '<td bgcolor="red" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Es fehlen Kritter!">';	// red, because kritter needed
-			} elseif ($row['participants']!=0 && $row['participants']/$numberOfKritters > 50  ) {
+			} elseif ($row['participants']!=0 && $row['participants']/$numberOfKritters > 50 && time()<$row['eval_date_fixed'] ) {
 				$content .= '<td bgcolor="orange" style="color:#fff;"><ol style="padding-left: 1.5em; margin-left: 0px;" title="Zu wenige Kritter für die Teilnehmeranzahl!">';	// orange, because still kritter
 			} else
 				$content .= '<td><ol style="padding-left: 1.5em; margin: 0px;">';						// standard
