@@ -151,6 +151,43 @@ class tx_fsmivkrit_div {
 			}
 		return $content;
 	}
+
+	/**
+	 * Returns day of week in German, given number, starting at Monday=1 (ISO standard)
+	 * @param $day of week as integer
+	 * @return string
+	 */
+	function weekdayLong($day) {
+		switch ($day) {
+			case 1: return "Montag"; break;
+			case 2: return "Dienstag"; break;
+			case 3: return "Mittwoch"; break;
+			case 4: return "Donnerstag"; break;
+			case 5: return "Freitag"; break;
+			case 6: return "Samstag"; break;
+			case 7: return "Sonntag"; break;
+			default: "";
+		}
+	}
+
+	/**
+	 * Returns day of week in German (short one), given number, starting at Monday=1 (ISO standard)
+	 * @param $day of week as integer
+	 * @return string
+	 */
+	function weekdayShort($day) {
+		switch ($day) {
+			case 1: return "Mo"; break;
+			case 2: return "Di"; break;
+			case 3: return "Mi"; break;
+			case 4: return "Do"; break;
+			case 5: return "Fr"; break;
+			case 6: return "Sa"; break;
+			case 7: return "So"; break;
+			default: "";
+		}
+	}
+
 }
 
 // Include extension?

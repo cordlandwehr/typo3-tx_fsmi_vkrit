@@ -20,6 +20,7 @@
  * This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
 
+require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 
 class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 	var $uid;
@@ -50,7 +51,9 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 			$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 			$fullMail .= '* '.$lectureDATA['name']."\n";
 			$fullMail .= '  '.$lectureDATA['participants'].' Teilnehmer'."\n";
-			$fullMail .= '  '.date('d.m.Y. / H:i',$lectureDATA['eval_date_fixed']).' / '.$lectureDATA['eval_room_fixed']."\n";
+			$fullMail .= '  '.tx_fsmiexams_div::weekdayLong(date('N',$lectureDATA['eval_date_fixed']))." / ".
+				date('d.m.Y / H:i',$lectureDATA['eval_date_fixed']).' / '.
+				$lectureDATA['eval_room_fixed']."\n";
 		}
   		if (count($lecturesWithoutKritter)==0)
 			$fullMail .= ' -- keine --'."\n";
@@ -93,7 +96,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 'Moderationswarnung'."\n".
 '--------------'."\n";
 		$fullMail .=
-'Veranstaltungen, bei denen letztes vorgeschlagenes Datum innerhalb der nächsten 3 Tage liegt.'."\n";
+'Veranstaltungen, bei denen letztes vorgeschlagenes Datum innerhalb der nächsten 3 Tage liegt:'."\n";
 
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 												FROM tx_fsmivkrit_lecture
@@ -115,7 +118,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 		}
 
 		if ($moderationWarning==false)
-			$fullMail .= ' -- keine --'."\n";
+			$fullMail .= "\n".' -- keine --'."\n";
 
 		// if nothing to say, simply keep your mouth shut
 		if ($emergency==false)
