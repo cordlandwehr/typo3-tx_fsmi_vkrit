@@ -133,29 +133,29 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 		// get sum
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(weight) as total_weight
-												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_helper.deleted=0
-													AND tx_fsmivkrit_lecture.deleted=0
-													AND tx_fsmivkrit_helper.hidden=0
-													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecture.deleted=0
+													AND fe_users.disable=0
+													AND fe_users.deleted=0
+													AND FIND_IN_SET('.$survey.',fe_users.tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid');
+													AND tx_fsmivkrit_lecture.tipper = fe_users.uid');
 		if ($res && $row = mysql_fetch_assoc($res))
 			$total_weight = $row['total_weight'];
 		else
 			$total_weight = 1; // 0 would be 'division by zero' ;)
 
 		// select total-weight
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
-												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_helper.deleted=0
-													AND tx_fsmivkrit_lecture.deleted=0
-													AND tx_fsmivkrit_helper.hidden=0
-													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid AS uid, fe_users.name AS name, fe_users.username as username, SUM(weight) as weight
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecture.deleted=0
+													AND fe_users.disable=0
+													AND fe_users.deleted=0
+													AND FIND_IN_SET('.$survey.',fe_users.tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid
-												GROUP BY tx_fsmivkrit_helper.uid
-												ORDER BY name');
+													AND tx_fsmivkrit_lecture.tipper = fe_users.uid
+												GROUP BY fe_users.uid
+												ORDER BY name, username');
 
 		$ranking = array ();
 		$maxWeight = 0;
@@ -163,24 +163,24 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 			$ranking[$row['uid']]['weight'] = $row['weight'];
 			if ($maxWeight < $row['weight'])
 				$maxWeight = $row['weight'];
-			$ranking[$row['uid']]['name'] = $row['name'];
+			$ranking[$row['uid']]['name'] = ($row['name']!=''?$row['name']:$row['username']);
 		}
 
 		if ($maxWeight == 0)
 			$maxWeight = $total_weight;
 
 		// select unfinished weight
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.uid AS uid, tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
-												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_helper.deleted=0
-													AND tx_fsmivkrit_lecture.deleted=0
-													AND tx_fsmivkrit_helper.hidden=0
-													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid AS uid, fe_users.name AS name, fe_users.username as username, SUM(weight) as weight
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecture.deleted=0
+													AND fe_users.disable=0
+													AND fe_users.deleted=0
+													AND FIND_IN_SET('.$survey.',fe_users.tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-													AND tx_fsmivkrit_lecture.tipper = tx_fsmivkrit_helper.uid
+													AND tx_fsmivkrit_lecture.tipper = fe_users.uid
 													AND tx_fsmivkrit_lecture.eval_state < \''.tx_fsmivkrit_div::kEVAL_STATE_ANONYMIZED.'\'
-												GROUP BY tx_fsmivkrit_helper.uid
-												ORDER BY name');
+												GROUP BY fe_users.uid
+												ORDER BY name, username');
 
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$ranking[$row['uid']]['todo_weight'] = $row['weight'];
@@ -207,33 +207,33 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 
 		// get sum
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(weight) as total_weight
-												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_helper.deleted=0
-													AND tx_fsmivkrit_lecture.deleted=0
-													AND tx_fsmivkrit_helper.hidden=0
-													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecture.deleted=0
+													AND fe_users.disable=0
+													AND fe_users.deleted=0
+													AND FIND_IN_SET('.$survey.',fe_users.tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-													AND tx_fsmivkrit_lecture.godfather = tx_fsmivkrit_helper.uid');
+													AND tx_fsmivkrit_lecture.godfather = fe_users.uid');
 		if ($res && $row = mysql_fetch_assoc($res))
 			$total_weight = $row['total_weight'];
 		else
 			$total_weight = 1; // 0 would be 'division by zero' ;)
 
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT tx_fsmivkrit_helper.name AS name, SUM(weight) as weight
-												FROM tx_fsmivkrit_helper, tx_fsmivkrit_lecture
-												WHERE tx_fsmivkrit_helper.deleted=0
-													AND tx_fsmivkrit_lecture.deleted=0
-													AND tx_fsmivkrit_helper.hidden=0
-													AND tx_fsmivkrit_helper.survey = \''.$survey.'\'
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.name AS name, fe_users.username AS username, SUM(weight) as weight
+												FROM fe_users, tx_fsmivkrit_lecture
+												WHERE tx_fsmivkrit_lecture.deleted=0
+													AND fe_users.disable=0
+													AND fe_users.deleted=0
+													AND FIND_IN_SET('.$survey.',fe_users.tx_fsmivkrit_fsmivkrit_helper_for_survey)
 													AND tx_fsmivkrit_lecture.survey = \''.$survey.'\'
-													AND tx_fsmivkrit_lecture.godfather = tx_fsmivkrit_helper.uid
-												GROUP BY tx_fsmivkrit_helper.uid
-												ORDER BY name');
+													AND tx_fsmivkrit_lecture.godfather = fe_users.uid
+												GROUP BY fe_users.uid
+												ORDER BY name, username');
 
 		$content .= '<table>';
 		$content .= '<tr bgcolor="#526feb" style="color:white; width: 40px;"><th>Name</th><th style="width:250px">Gewicht</th></tr>';
 		while ($res && $row = mysql_fetch_assoc($res))
-			$content .= '<tr><td width="150">'.$row['name'].'</td>
+			$content .= '<tr><td width="150">'.($row['name']!=''? $row['name']:$row['username']).'</td>
 							<td><span style="width:50px; font-weight: bold;">'.$row['weight'].'g</span>
 								<div style="background-color: green; padding-left: 3px; width:'.intval($row['weight']/$total_weight*200).'px;">&nbsp;</div></td></tr>';
 
