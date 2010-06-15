@@ -78,7 +78,7 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 				$msg='V-Krit Kritter Erinnerung '."\n". // first line is subject
 						$fullMail."\n".$mailPartIndividual.$mailClosing,
 				$recipients=$fe_user['email'],
-				$cc='cola@upb.de',
+				$cc='',
 				$email_from='criticus@uni-paderborn.de',
 				$email_fromName='V-Krit Orga',
 				$replyTo='');

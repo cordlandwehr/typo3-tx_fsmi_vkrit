@@ -509,8 +509,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 	   			$content .= '<option value="0">&nbsp;</option>';
 				$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 													FROM fe_users
-													WHERE deleted=0 AND disable=0
-														AND FIND_IN_SET('.$lectureUID['survey'].',tx_fsmivkrit_fsmivkrit_helper_for_survey)
+													WHERE disable=0 AND deleted=0
 													ORDER BY name');
 	   					while ($res && $rowHelper = mysql_fetch_assoc($res)) {
 	   						$content .= '<option value="'.$rowHelper['uid'].'" '.(
