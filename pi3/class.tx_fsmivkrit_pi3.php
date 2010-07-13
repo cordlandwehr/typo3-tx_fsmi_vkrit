@@ -91,7 +91,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$content .= $this->printTable($this->survey);
 				$content .= '<h3>Tipper-Ranking</h3>';
 				$content .= $this->printTipperRanking($this->survey);
-				$content .= '<h3>Paten-Ranking</h3>';
+				$content .= '<h3>Sortierer-Ranking</h3>';
 				$content .= $this->printGodfatherRanking($this->survey);
 				$content .= '<h3>Kritter-Ranking</h3>';
 				$content .= $this->printKritterRanking($this->survey);
@@ -102,7 +102,7 @@ class tx_fsmivkrit_pi3 extends tslib_pibase {
 				$content .= $this->printTable($this->survey);
 				$content .= '<h3>Tipper-Ranking</h3>';
 				$content .= $this->printTipperRanking($this->survey);
-				$content .= '<h3>Paten-Ranking</h3>';
+				$content .= '<h3>Sortierer-Ranking</h3>';
 				$content .= $this->printGodfatherRanking($this->survey);
 				$content .= '<h3>Kritter-Ranking</h3>';
 				$content .= $this->printKritterRanking($this->survey);

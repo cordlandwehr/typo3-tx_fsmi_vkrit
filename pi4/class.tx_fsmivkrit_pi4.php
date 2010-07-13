@@ -41,6 +41,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	var $prefixId      	= 'tx_fsmivkrit_pi4';		// Same as class name
 	var $scriptRelPath 	= 'pi4/class.tx_fsmivkrit_pi4.php';	// Path to this script relative to the extension dir.
 	var $extKey        	= 'fsmi_vkrit';	// The extension key.
+	var $survey			= 3; //FIXME this is ugly and dangerous, bad, bad, bad: hardcoded survey
 
 	// types
 	const kIMPORT		= 1;
@@ -133,8 +134,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 //				$content .= tx_fsmivkrit_div::printSystemMessage(
 //													tx_fsmivkrit_div::kSTATUS_INFO,
 //													'Noch nicht validiert!');
-//TODO THIS IS A FIXED VALUE, BAD BAD BAD!
-				$content .= $this->storeOutputDataXML($this->createOutputDOM(3));
+				$content .= $this->storeOutputDataXML($this->createOutputDOM($this->survey));
+				$content .= '<br />';
+				$content .= $this->storeOutputLecturesList($this->survey);
 				break;
 			}
 			default:
@@ -690,6 +692,35 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 										);
 
 		return '<a href="typo3temp/fsmivkrit_export.xml">XML Datei downloaden</a>';
+	}
+
+	function storeOutputLecturesList($survey) {
+		$resLecture = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+												AND no_eval=0
+												AND survey=\''.$survey.'\'');
+
+		$list = '';
+		while ($resLecture && $lecture = mysql_fetch_assoc($resLecture)) {
+			$lecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecture['lecturer']);
+
+			$list .= preg_replace('(,)','[,]', $lecture['name']);
+			$list .= ' ';
+			$list .= '('.
+				($lecturer['title']!=''?$lecturer['title'].' ':'')	//title
+				.$lecturer['forename'].		//forename
+				' '.$lecturer['name'].')';	//name
+			$list .= "\n";
+
+		}
+		t3lib_div::writeFileToTypo3tempDir (
+										PATH_site."typo3temp/".'fsmivkrit_lecture_list.txt',
+										$list
+										);
+
+
+		return '<a href="typo3temp/fsmivkrit_lecture_list.txt">Vorlesungsliste speichern</a>';
 	}
 
 	/**
