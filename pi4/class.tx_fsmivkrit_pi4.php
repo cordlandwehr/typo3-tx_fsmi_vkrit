@@ -699,7 +699,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 												FROM tx_fsmivkrit_lecture
 												WHERE deleted=0 AND hidden=0
 												AND no_eval=0
-												AND survey=\''.$survey.'\'');
+												AND survey=\''.$survey.'\'
+												ORDER BY name');
 
 		$list = '';
 		while ($resLecture && $lecture = mysql_fetch_assoc($resLecture)) {
