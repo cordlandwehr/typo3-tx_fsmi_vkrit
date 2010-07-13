@@ -705,7 +705,10 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		while ($resLecture && $lecture = mysql_fetch_assoc($resLecture)) {
 			$lecturer = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecture['lecturer']);
 
-			$list .= preg_replace('(,)','[,]', $lecture['name']);
+			$search = array ('/\(/', '/\)/');
+			$replace = array ('[', ']');
+			$list .= preg_replace($search, $replace,$lecture['name']);
+
 			$list .= ' ';
 			$list .= '('.
 				($lecturer['title']!=''?$lecturer['title'].' ':'')	//title
