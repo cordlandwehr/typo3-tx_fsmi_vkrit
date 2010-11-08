@@ -44,6 +44,9 @@ class tx_fsmivkrit_div {
 	const kSTATUS_OK 		= 3;
 	const imgPath			= 'typo3conf/ext/fsmi_vkrit/gfx/'; // absolute path to images
 
+	const kEVAL_RESHIPMENT_EMAIL	= 0;
+	const kEVAL_RESHIPMENT_MAIL		= 1;
+
 	const kEVAL_STATE_CREATED		= 0;
 	const kEVAL_STATE_NOTIFIED		= 1;
 	const kEVAL_STATE_COMPLETED		= 2;	// lecturer input completed

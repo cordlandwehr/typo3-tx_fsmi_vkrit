@@ -253,7 +253,9 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 									)
 								).'</td>
 								<td width="150"><a href="mailto:'.$resLecturer['forename'].' '.$resLecturer['name'].'<'.$resLecturer['email'].'>?subject=Veranstaltungskritik">'.
-									$resLecturer['name'].', '.$resLecturer['forename'].'</a></td>';
+									$resLecturer['name'].', '.$resLecturer['forename'].'</a>'.
+									($resLecturer['reshipment']==tx_fsmivkrit_div::kEVAL_RESHIPMENT_MAIL? '<br />Ergebnisse per Hauspost': '').
+									'</td>';
 				// show first eval date
 				$content .= '	<td width="100">'.(
 									// first eval date

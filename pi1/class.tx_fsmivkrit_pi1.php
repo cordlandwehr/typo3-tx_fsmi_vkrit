@@ -162,7 +162,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		return $this->pi_wrapInBaseClass($content);
 	}
 
-	function printInputForm ($lecture,$hash) {
+	function printInputForm ($lecture, $hash) {
 		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 		$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lectureUID['lecturer']);
 		$surveyUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $lectureUID['survey']);
@@ -306,6 +306,15 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 								value="'.htmlspecialchars($this->piVars["eval_room_3"]).'" />
 					</td></tr></table></fieldset>';
 
+		// reshipment of results
+		$content .= '<fieldset>';
+		$content .= '<legend>Zustellung der Ergebnisse</legend';
+		$content .= '<input type="radio" '.($this->piVars['reshipment']==tx_fsmivkrit_div::kEVAL_RESHIPMENT_EMAIL? 'checked="checked"':'').'
+			name="'.$this->extKey.'[reshipment]" value="'.tx_fsmivkrit_div::kEVAL_RESHIPMENT_EMAIL.'"> Zusendung per E-Mail<br />';
+		$content .= '<input type="radio" '.($this->piVars['reshipment']==tx_fsmivkrit_div::kEVAL_RESHIPMENT_MAIL? 'checked="checked"':'').'
+			name="'.$this->extKey.'[reshipment]" value="'.tx_fsmivkrit_div::kEVAL_RESHIPMENT_MAIL.'"> per Hauspost<br />';
+		$content .= '</fieldset>';
+
 		// comment input
 		$content .= '<fieldset>';
 		$content .= '<legend>Ergänzende Informationen:</legend>';
@@ -397,6 +406,10 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		}
 		$content .= '</ol>';
 
+		$content .= '<div><strong>Zusendung der Ergebnisse: </strong> per '.
+			($inputData['reshipment']==tx_fsmivkrit_div::kEVAL_RESHIPMENT_EMAIL? 'E-Mail' : 'Hauspost' ).
+			'</div>';
+
 		$content .= '<div><strong>Kommentar/Ergänzung</strong></div>';
 		$content .= '<pre>'.$inputData['comment'].'</pre>';
 
@@ -412,6 +425,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[auth]'.'" value="'.$hash.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[participants]'.'" value="'.$inputData['participants'].'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[reshipment]'.'" value="'.$inputData['reshipment'].'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[comment]'.'" value="'.$inputData['comment'].'" />';
 
 		$assistants = array ();
@@ -436,6 +450,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		return $content;
 	}
 
+	/**
+	 * Get all input values, escaped and clean; secure agains all common attacks
+	 */
 	function getInputValuesToArray () {
 		$POSTdata = t3lib_div::_POST($this->extKey);
 		$inputData = array ();
@@ -460,6 +477,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 						htmlspecialchars($POSTdata['eval_date_'.$i]).' '.htmlspecialchars($POSTdata['eval_time_'.$i]).':00');
 		}
 
+		$inputData['reshipment'] = intval($POSTdata['reshipment']);
 		$inputData['comment'] = htmlspecialchars($POSTdata['comment']);
 
 		return $inputData;
@@ -499,8 +517,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
 									'tx_fsmivkrit_lecture',
 									'uid=\''.$lecture.'\'',
-									array (	'crdate' => time(),
-											'tstamp' => time(),
+									array (	'tstamp' => time(),
 											'participants' 	=> $inputData['participants'],
 											'eval_date_1' 	=> $inputData['eval_1']['date'],
 											'eval_date_2' 	=> $inputData['eval_2']['date'],
@@ -521,6 +538,18 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$GLOBALS['TYPO3_DB']->exec_DELETEquery(
 										'tx_fsmivkrit_tutorial','lecture='.$lecture
 								);
+
+		$res = $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
+									'tx_fsmivkrit_lecturer',
+									'uid=\''.$lecturerUID['uid'].'\'',
+									array (	'tstamp' => time(),
+											'reshipment' => $inputData['reshipment']
+									));
+		if (!$res)
+			return tx_fsmivkrit_div::printSystemMessage(
+							tx_fsmivkrit_div::kSTATUS_ERROR,
+							'Daten konnten nicht gespeichert werden. Bitte informieren Sie den Administrator.');
+
 
 		// insert tutorials
 		foreach ($inputData['assistants'] as $tutor) {
@@ -586,33 +615,36 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 	}
 
 	function fillPiVarsWithDBValues ($lecture) {
-		$lectureUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
+		$lectureDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecture', $lecture);
 
 		// set participants
-		if ($this->piVars["participants"]=='' && $lectureUID['participants']!=0)
-			$this->piVars["participants"] = $lectureUID['participants'];
+		if ($this->piVars["participants"]=='' && $lectureDATA['participants']!=0)
+			$this->piVars["participants"] = $lectureDATA['participants'];
 
 		// set comment
-		if ($this->piVars["comment"]=='' && $lectureUID['comment']!='')
-			$this->piVars["comment"] = $lectureUID['comment'];
+		if ($this->piVars["comment"]=='' && $lectureDATA['comment']!='')
+			$this->piVars["comment"] = $lectureDATA['comment'];
+
+		if ($this->piVars['reshipment']=='' && $lectureDATA['reshipment']!='')
+			$this->piVars['reshipment'] = $lectureDATA['reshipment'];
 
 		// set dates
 		for ($i=1; $i<=3; $i++) {
-			if ($this->piVars["eval_date_".$i]=='' && $lectureUID['eval_date_'.$i] > 24*60*60)
-				$this->piVars["eval_date_".$i] = date('d.m.Y',$lectureUID['eval_date_'.$i]);
+			if ($this->piVars["eval_date_".$i]=='' && $lectureDATA['eval_date_'.$i] > 24*60*60)
+				$this->piVars["eval_date_".$i] = date('d.m.Y',$lectureDATA['eval_date_'.$i]);
 
-			if ($this->piVars["eval_time_".$i]=='' && $lectureUID['eval_date_'.$i]!=0)
-				$this->piVars["eval_time_".$i] = date('h:i',$lectureUID['eval_date_'.$i]);
+			if ($this->piVars["eval_time_".$i]=='' && $lectureDATA['eval_date_'.$i]!=0)
+				$this->piVars["eval_time_".$i] = date('h:i',$lectureDATA['eval_date_'.$i]);
 
-			if ($this->piVars["eval_room_".$i]=='' && $lectureUID['eval_room_'.$i]!='')
-				$this->piVars["eval_room_".$i] = $lectureUID['eval_room_'.$i];
+			if ($this->piVars["eval_room_".$i]=='' && $lectureDATA['eval_room_'.$i]!='')
+				$this->piVars["eval_room_".$i] = $lectureDATA['eval_room_'.$i];
 		}
 
 		if ($this->piVars["assistants"]=='') {
 			$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 													FROM tx_fsmivkrit_tutorial
 													WHERE deleted=0 AND hidden=0
-													AND lecture=\''.$lectureUID['uid'].'\'');
+													AND lecture=\''.$lectureDATA['uid'].'\'');
 			while ($res && $row = mysql_fetch_assoc($res)) {
 				$this->piVars["assistants"] .= "\n".$row['assistant_name'].','.$row['assistant_forename'];
 			}
@@ -622,6 +654,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 	function fillPiVarsWithPostValues ($data) {
 		$this->piVars['participants'] = intval($data['participants']);
 		$this->piVars['comment'] = strip_tags($data['comment']);
+		$this->piVars['reshipment'] = intval($data['reshipment']);
 		$this->piVars["assistants"]=strip_tags($data['assistants']);
 			// set dates
 		for ($i=1; $i<=3; $i++) {
