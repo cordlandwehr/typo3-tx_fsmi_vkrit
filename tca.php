@@ -160,7 +160,7 @@ $TCA['tx_fsmivkrit_lecture'] = array (
 			'config' => array (
 				'type' => 'input',
 				'size' => '30',
-				'eval' => 'required,datetime',
+				'eval' => 'datetime',
 			)
 		),
 		'eval_date_2' => array (
