@@ -41,7 +41,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	var $prefixId      	= 'tx_fsmivkrit_pi4';		// Same as class name
 	var $scriptRelPath 	= 'pi4/class.tx_fsmivkrit_pi4.php';	// Path to this script relative to the extension dir.
 	var $extKey        	= 'fsmi_vkrit';	// The extension key.
-	var $survey			= 3; //FIXME this is ugly and dangerous, bad, bad, bad: hardcoded survey
+	var $survey			= 0;	// saves the given survey UID, if given
 
 	// types
 	const kIMPORT		= 1;
@@ -82,13 +82,26 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 
 		$content = '';
 
-		// type selection head
-		$content .= $this->createTypeSelector();
+		$content .= '<h1>Import and Export of Evaluation Data</h1>';
 
 		// select input type
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
+		$this->survey = intval($GETcommands['survey']);
+
+		// get selector for survey or if set, show backlink
+		if ($this->survey==0) {
+			$content .= $this->createSurveyList();
+			$content .= '<p>Die entsprechende Umfrage muss über das Backend bereits angelegt worden sein.</p>';
+		} else {
+			$content .= $this->pi_linkTP('< zurück zur Auswahl', array () );
+			$content .= $this->createTypeSelector($this->survey);
+		}
+
+		// create main content
 		switch (intval($GETcommands['type'])) {
 			case self::kIMPORT: {
+				$content .= '<h2>Import Data from CSV file</h2>';
+
 				// check for POST data
 				if (t3lib_div::_POST($this->extKey)) {
 					// form files
@@ -131,12 +144,16 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				break;
 			}
 			case self::kEXPORT: {
+				$content .= '<h2>Export Data to EvaSys XML Format</h2>';
+				$surveyDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
+ 				$content .= '<div>Datenexport für die Veranstaltung '.$surveyDATA['name'].' '.$surveyDATA['semester'].'</div>';
+ 				$content .= '<ul>';
 //				$content .= tx_fsmivkrit_div::printSystemMessage(
 //													tx_fsmivkrit_div::kSTATUS_INFO,
 //													'Noch nicht validiert!');
-				$content .= $this->storeOutputDataXML($this->createOutputDOM($this->survey));
-				$content .= '<br />';
-				$content .= $this->storeOutputLecturesList($this->survey);
+				$content .= '<li>'.$this->storeOutputDataXML($this->createOutputDOM($this->survey)).'</li>';;
+				$content .= '<li>'.$this->storeOutputLecturesList($this->survey).'</li>';
+				$content .= '</ul>';
 				break;
 			}
 			default:
@@ -146,22 +163,69 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $this->pi_wrapInBaseClass($content);
 	}
 
-	function createTypeSelector () {
-		$content = '<div>';
+	/**
+	 * Creates UL list in HTML to display selection of import/export data
+	 * \param $survey UID of survey
+	 * \return string of output HTML
+	 */
+	function createTypeSelector ($survey) {
+		$content = '<span> | ';
 		$content .= $this->pi_linkTP('Import PAUL Data',
-								array (	$this->extKey.'[type]' => self::kIMPORT));
+								array (
+									$this->extKey.'[type]' => self::kIMPORT,
+									$this->extKey.'[survey]' => $survey
+								));
 		$content .= ' | ';
 		$content .= $this->pi_linkTP('Export EvaSys Data',
-								array (	$this->extKey.'[type]' => self::kEXPORT));
-		$content .= '</div>';
+								array (
+									$this->extKey.'[type]' => self::kEXPORT,
+									$this->extKey.'[survey]' => $survey
+								));
+		$content .= '</span>';
 
 		return $content;
+	}
 
+	/**
+	 * This function creates a list of survey elements to access the different
+	 * surveys to import or export data from this tool
+	 * \return string of HTML code
+	 */
+	function createSurveyList () {
+		$content = '';
+
+		// get all surveys that are not deleted or hidden
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+												FROM tx_fsmivkrit_survey
+												WHERE deleted=0 AND hidden=0');
+		$content .= '<ul>';
+		while ($res && $row = mysql_fetch_assoc($res))
+			$content .= '<li>'.$this->pi_linkTP(
+											$row['semester'].' - '.$row['name'],
+											array( $this->extKey.'[survey]' => $row['uid'] )
+									  ).
+						'</li>';
+		$content .= '</ul>';
+
+		return $content;
 	}
 
 	function createImportDataForm() {
 		$content = '';
-		$content .= '<h2>Import/Export Data from CSV file</h2>';
+		$surveyDATA = t3lib_BEfunc::getRecord('tx_fsmivkrit_survey', $this->survey);
+
+		// present warning iff data is already contained in selected survey
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT COUNT(*) as number
+												FROM tx_fsmivkrit_lecture
+												WHERE deleted=0 AND hidden=0
+													AND survey='.$this->survey);
+		if ($res && $row = mysql_fetch_assoc($res))
+			if ($row['number']>0)
+				$content .= tx_fsmivkrit_div::printSystemMessage(
+									tx_fsmivkrit_div::kSTATUS_WARNING,
+									'Es sind schon Daten für die Umfrage vorhanden. Ein Datenimport kann daher zu Dateninkonsistenzen führen.');
+
+
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// hidden field to tell system, that IMPORT data is coming
@@ -180,21 +244,13 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			</fieldset>
 
 			<fieldset>
-				<label for="'.$this->extKey.'_import_storage">Umfrage:</label>
-				<select name="'.$this->extKey.'[survey]" id="'.$this->extKey.'_storage"
-					value="'.htmlspecialchars($this->piVars["storage"]).'">
-					';
+				<label for="'.$this->extKey.'_import_storage">Umfrage:</label> '.$surveyDATA['name'].' '.$surveyDATA['semester'];
 
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
-												FROM tx_fsmivkrit_survey
-												WHERE deleted=0 AND hidden=0');
-
-		while ($res && $row = mysql_fetch_assoc($res))
-			$content .= '<option value="'.$row['uid'].'">'.$row['semester'].' - '.$row['name'].'</option>';
-
-		$content .= '</select>';
-		$content .= '<div>Die entsprechende Umfrage muss über das Backend bereits angelegt worden sein.</div>
-			</fieldset>';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]"
+						  id="'.$this->extKey.'_storage"
+						  value="'.$this->survey.'"
+						  readonly="readonly" />';
+		$content .= '</fieldset>';
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Datei überprüfen').'">';
