@@ -35,7 +35,7 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 	public function execute() {
 
 		// dirty hack
-		$survey = 3;
+		$survey = 4;
 
 		$mailClosing = "\n\n".'Rückfragen bitte an <criticus@upb.de>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
 

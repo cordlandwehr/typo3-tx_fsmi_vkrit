@@ -35,7 +35,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 	public function execute() {
 
 		// dirty hack
-		$survey = 3;
+		$survey = 4;
 
 		$fullMail =
 'Statusinformationen zur V-Krit:'."\n".

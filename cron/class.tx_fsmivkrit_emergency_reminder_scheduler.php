@@ -35,7 +35,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler extends tx_scheduler_Task {
 	public function execute() {
 		$emergency = false;
 		// dirty hack
-		$survey = 3;
+		$survey = 4;
 
 		$fullMail =
 'Statusinformationen zur V-Krit:'."\n".

@@ -467,6 +467,46 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 			}
 
 			$content .= '</table>';
+
+		}
+
+		// statistics data
+		$content .= '<h3>Statistische Daten</h3>';
+		$content .= $this->printStatisticsForSurvey( $this->survey );
+
+		return $content;
+	}
+
+	/**
+	 * This function prints statistics for all lectures in "FINISHED" state at selected survey.
+	 * \param $surveyUID
+	 * \return HTML text
+	 */
+	function printStatisticsForSurvey ($surveyUID) {
+		$content = '';
+		$content .= '<div>Dieses statistische Daten wereden über sämtliche Veranstaltungen der
+			ausgewählten Evaluation erhoben, welche mindestens den Status
+			&quot;Sortiert&quot; erhalten haben.</div>';
+
+		// some statistics data:
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT SUM(participants), SUM(weight), COUNT(*)
+											FROM tx_fsmivkrit_lecture
+											WHERE deleted=0
+											AND eval_state BETWEEN '.tx_fsmivkrit_div::kEVAL_STATE_SORTED.' AND '.tx_fsmivkrit_div::kEVAL_STATE_FINISHED.'
+											AND no_eval=0
+											AND survey=\''.$surveyUID.'\'');
+		if ($res && $row = mysql_fetch_assoc($res)) {
+
+			if ($row['COUNT(*)']==0) {
+				$content .= '<div><strong>Keine Veranstaltung entspricht den Kriterien der Statistischen Auswertung.</strong></div>';
+				return $content;
+			}
+
+			$content .= '<ul>';
+			$content .= '<li><strong>Gesamtgewicht:</strong> '.$row['SUM(weight)'].'g</li>';
+ 			$content .= '<li><strong>Anzahl evaluierter Veranstaltungen:</strong> '.$row['COUNT(*)'].'</li>';
+			$content .= '<li><strong>Anzahl Teilnehmer (vom Dozenten geschätzt):</strong> '.$row['SUM(participants)'].'</li>';
+			$content .= '</ul>';
 		}
 
 		return $content;
