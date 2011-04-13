@@ -753,7 +753,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	function storeOutputLecturesList($survey) {
 		$resLecture = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
 												FROM tx_fsmivkrit_lecture
-												WHERE deleted=0 AND hidden=0
+												WHERE deleted=0
 												AND no_eval=0
 												AND survey=\''.$survey.'\'
 												ORDER BY name');

@@ -147,7 +147,6 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	}
 
 	function createSurveySelector () {
-
 		// no survey selected, yet
 		if ($this->survey==0) {
 			$content = '<div><h3>Wähle eine Umfrage</h3><ul>';

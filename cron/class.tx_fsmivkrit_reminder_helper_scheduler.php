@@ -59,8 +59,8 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 		while ($res && $row = mysql_fetch_assoc($res)) {
 			$fe_user = t3lib_BEfunc::getRecord('fe_users', $row['user']);
 			$fullMail =
-'Hallo '.$fe_user['name'].','."\n".
-'du bist morgen für die folgenden Veranstaltungen zum Kritten eingetragen:'."\n";
+				'Hallo '.$fe_user['name'].','."\n".
+				'du bist morgen für die folgenden Veranstaltungen zum Kritten eingetragen:'."\n";
 
 			$lectures = explode(',',$row['lectures']);
 			$mailPartIndividual = '';
