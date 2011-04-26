@@ -22,10 +22,14 @@
 
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 
-class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
-	var $uid;
+class tx_fsmivkrit_reminder_helper_scheduler
+    extends tx_scheduler_Task 
+    implements tx_scheduler_AdditionalFieldProvider
+{
+    var $uid;
     var $emailOrganizer;
     var $emailHelper;
+    var $survey;
 
 	/**
 	 * next function fixes PHP4 issue
@@ -40,8 +44,8 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
         $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
         $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
-		// dirty hack
-		$survey = 4; //FIXME
+        // set survey as given by scheduler
+        $survey = $task->survey;
 
 		$mailClosing = "\n\n".'Rückfragen bitte an <'.$this->emailOrganizer.'>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
 
@@ -91,6 +95,44 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 		}
 		return true;
 	}
+
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function getAdditionalFields(array &$taskInfo, $task, tx_scheduler_Module $parentObject) {
+        if (empty($taskInfo['survey'])) {
+            if($parentObject->CMD == 'edit') {
+                $taskInfo['survey'] = $task->survey;
+            } else {
+                $taskInfo['survey'] = '';
+            }
+        }
+
+        // Write the code for the field
+        $fieldID = 'task_ip';
+        $fieldCode = '<input type="text" name="tx_scheduler[survey]" id="' . $fieldID . '" value="' . $taskInfo['survey'] . '" size="30" />';
+        $additionalFields = array();
+        $additionalFields[$fieldID] = array(
+            'code'     => $fieldCode,
+            'label'    => 'survey'
+        );
+
+        return $additionalFields;
+    }
+    
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function validateAdditionalFields(array &$submittedData, tx_scheduler_Module $parentObject) {
+        $submittedData['survey'] = intval($submittedData['survey']);
+    }
+    
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function saveAdditionalFields(array $submittedData, tx_scheduler_Task $task) {
+        $task->survey = $submittedData['survey'];
+    }
 
 	/**
 	 * This is a full copy of tslib::sendNotifyEmail, but without frontend-lib usage

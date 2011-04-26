@@ -22,10 +22,14 @@
 
 require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php');
 
-class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
-	var $uid;
+class tx_fsmivkrit_reminder_organizer_scheduler
+    extends tx_scheduler_Task 
+    implements tx_scheduler_AdditionalFieldProvider
+{
+    var $uid;
     var $emailOrganizer;
     var $emailHelper;
+    var $survey;
 
 	/**
 	 * next function fixes PHP4 issue
@@ -40,15 +44,15 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
         $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
         $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
-		// dirty hack
-		$survey = 4; //FIXME
+        // set survey as given by scheduler
+        $survey = $task->survey;
 
 		$fullMail =
 'Statusinformationen zur V-Krit:'."\n".
 '=============='."\n\n";
 
 		// state problems first
-		$lecturesWithoutKritter = $this->lecturesWithoutKritter($survey,7);//TODO set survey
+		$lecturesWithoutKritter = $this->lecturesWithoutKritter($survey,7);
 		if (count($lecturesWithoutKritter)>0)
 			$fullMail .=
 'Veranstaltungen ohne Kritter (kommende 7 Tage):'."\n".
@@ -67,7 +71,7 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 
 		// next the status information
 		// state problems first
-		$lecturesAll = $this->lecturesInNextDays($survey,7);//TODO set survey
+		$lecturesAll = $this->lecturesInNextDays($survey,7);
 		if (count($lecturesAll)>0)
 			$fullMail .=
 'Alle Veranstaltungen (kommende 7 Tage):'."\n".
@@ -120,6 +124,44 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 		// if we come here, something went really wrong
 		return false;
 	}
+
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function getAdditionalFields(array &$taskInfo, $task, tx_scheduler_Module $parentObject) {
+        if (empty($taskInfo['survey'])) {
+            if($parentObject->CMD == 'edit') {
+                $taskInfo['survey'] = $task->survey;
+            } else {
+                $taskInfo['survey'] = '';
+            }
+        }
+
+        // Write the code for the field
+        $fieldID = 'task_ip';
+        $fieldCode = '<input type="text" name="tx_scheduler[survey]" id="' . $fieldID . '" value="' . $taskInfo['survey'] . '" size="30" />';
+        $additionalFields = array();
+        $additionalFields[$fieldID] = array(
+            'code'     => $fieldCode,
+            'label'    => 'survey'
+        );
+
+        return $additionalFields;
+    }
+    
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function validateAdditionalFields(array &$submittedData, tx_scheduler_Module $parentObject) {
+        $submittedData['survey'] = intval($submittedData['survey']);
+    }
+    
+    /**
+     * \see Interface tx_scheduler_AdditionalFieldProvider
+     */
+    public function saveAdditionalFields(array $submittedData, tx_scheduler_Task $task) {
+        $task->survey = $submittedData['survey'];
+    }
 
 	/**
 	 * This is a full copy of tslib::sendNotifyEmail, but without frontend-lib usage

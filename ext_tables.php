@@ -118,7 +118,8 @@ t3lib_extMgm::addToAllTCAtypes('fe_users','tx_fsmivkrit_fsmivkrit_helper_for_sur
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_organizer_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
 	'title' => 'Information mails for Organizer',
-	'description' => 'Sends notification mails each evening to tell which tasks are open for current evaluation.'
+	'description' => 'Sends notification mails each evening to tell which tasks are open for current evaluation.',
+    'additionalFields' => 'tx_fsmivkrit_emergency_reminder_scheduler'
 );
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_reminder_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
@@ -129,7 +130,8 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_rem
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_helper_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
 	'title' => 'Remember helpers to be helper',
-	'description' => 'Sends Email to remember of beeing a helper.'
+	'description' => 'Sends Email to remember of beeing a helper.',
+    'additionalFields' => 'tx_fsmivkrit_emergency_reminder_scheduler'
 );
 
 // include statics
