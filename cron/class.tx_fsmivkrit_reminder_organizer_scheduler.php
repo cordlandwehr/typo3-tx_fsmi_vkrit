@@ -24,6 +24,8 @@ require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php
 
 class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 	var $uid;
+    var $emailOrganizer;
+    var $emailHelper;
 
 	/**
 	 * next function fixes PHP4 issue
@@ -34,8 +36,12 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 
 	public function execute() {
 
+        $confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['fsmi_vkrit']);
+        $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
+        $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
+
 		// dirty hack
-		$survey = 4;
+		$survey = 4; //FIXME
 
 		$fullMail =
 'Statusinformationen zur V-Krit:'."\n".
@@ -100,10 +106,10 @@ class tx_fsmivkrit_reminder_organizer_scheduler extends tx_scheduler_Task {
 		$send = $this->sendNotifyEmail (
 			$msg='V-Krit Status'."\n". // first line is subject
 					$fullMail,
-			$recipients='criticus@uni-paderborn.de',
-			$cc='cola@upb.de',
-			$email_from='criticus@uni-paderborn.de',
-			$email_fromName='V-Krit Orga',
+			$recipients=$this->emailOrganizer,
+			$cc='',
+			$email_from=$this->emailOrganizer,
+			$email_fromName='V-Krit Orgateam',
 			$replyTo='');
 
 		if ($send)

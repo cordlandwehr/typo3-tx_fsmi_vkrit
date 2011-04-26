@@ -44,6 +44,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 	var $prefixId      = 'tx_fsmivkrit_pi1';		// Same as class name
 	var $scriptRelPath = 'pi1/class.tx_fsmivkrit_pi1.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'fsmi_vkrit';	// The extension key.
+    var $emailOrganizer;
+    var $emailHelper;
 
 	// options for this frontend plugin
 	const kVERIFY	= 1;
@@ -65,6 +67,10 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$GETcommands = t3lib_div::_GP($this->extKey);	// can be both: POST or GET
 		$lecture = intval($GETcommands['lecture']);
 		$hash = htmlspecialchars($GETcommands['auth']);
+
+        $confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['fsmi_vkrit']);
+        $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
+        $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
 		$content .= '<h1>Dateneingabe für Veranstaltungen</h1>';
 
@@ -143,7 +149,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 										'Die Eintragung für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurde gesperrt.');
 						$content .= '<div>Das Orga-Team hat die Eintragung für diesen Datensatz gesperrt. Grund ist die bereits erfolgte
 										Festlegung auf einen Evaluationstermin.<br />
-										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:criticus@upb.de">criticus@upb.de</a>.</div>';
+										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:'.$this->emailOrganizer.'">'.$this->emailOrganizer.'</a>.</div>';
 						break;
 					}
 					default: { // same as before, but to not get confused... again here
@@ -152,7 +158,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 										'Die Eintragung für die Vorlesung <strong>'.$lectureUID['name'].'</strong> wurde gesperrt.');
 						$content .= '<div>Das Orga-Team hat die Eintragung für diesen Datensatz gesperrt. Grund ist die bereits erfolgte
 										Festlegung auf einen Evaluationstermin.<br />
-										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:criticus@upb.de">criticus@upb.de</a>.</div>';
+										Bei Fragen wenden Sie sich bitte direkt an <a href="mailto:'.$this->emailOrganizer.'">'.$this->emailOrganizer.'</a>.</div>';
 						break;
 					}
 				}

@@ -24,6 +24,8 @@ require_once(t3lib_extMgm::extPath('fsmi_vkrit').'api/class.tx_fsmivkrit_div.php
 
 class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 	var $uid;
+    var $emailOrganizer;
+    var $emailHelper;
 
 	/**
 	 * next function fixes PHP4 issue
@@ -34,10 +36,14 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 
 	public function execute() {
 
-		// dirty hack
-		$survey = 4;
+        $confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['fsmi_vkrit']);
+        $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
+        $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
-		$mailClosing = "\n\n".'Rückfragen bitte an <criticus@upb.de>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
+		// dirty hack
+		$survey = 4; //FIXME
+
+		$mailClosing = "\n\n".'Rückfragen bitte an <'.$this->emailOrganizer.'>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
 
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT fe_users.uid as user,
 													GROUP_CONCAT(DISTINCT tx_fsmivkrit_lecture.uid ORDER BY eval_date_fixed SEPARATOR \',\') as lectures
@@ -79,7 +85,7 @@ class tx_fsmivkrit_reminder_helper_scheduler extends tx_scheduler_Task {
 						$fullMail."\n".$mailPartIndividual.$mailClosing,
 				$recipients=$fe_user['email'],
 				$cc='',
-				$email_from='criticus@uni-paderborn.de',
+				$email_from=$this->emailOrganizer,
 				$email_fromName='V-Krit Orga',
 				$replyTo='');
 		}

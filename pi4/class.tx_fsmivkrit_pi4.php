@@ -42,6 +42,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	var $scriptRelPath 	= 'pi4/class.tx_fsmivkrit_pi4.php';	// Path to this script relative to the extension dir.
 	var $extKey        	= 'fsmi_vkrit';	// The extension key.
 	var $survey			= 0;	// saves the given survey UID, if given
+	var $emailOrganizer;
+	var $emailHelper;
 
 	// types
 	const kIMPORT		= 1;
@@ -79,6 +81,10 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$this->pi_setPiVarDefaults();
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
+
+        $confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['fsmi_vkrit']);
+        $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');   
+        $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
 		$content = '';
 
@@ -506,7 +512,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$document->createElement(
 					'email',
 				//TODO	$lecturer['email']
-					'criticus@upb.de'
+					$this->emailOrganizer
 				)
 			);
 			// TODO hack for username, should be PAUL username
@@ -566,7 +572,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newTutor->appendChild(
 				$document->createElement(
 					'email',
-					'criticus@upb.de'
+					$this->emailOrganizer
 				)
 			);
 			// TODO hack for username

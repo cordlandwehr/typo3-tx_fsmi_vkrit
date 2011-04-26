@@ -44,6 +44,8 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	var $scriptRelPath = 'pi2/class.tx_fsmivkrit_pi2.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'fsmi_vkrit';	// The extension key.
 	var $survey;
+    var $emailOrganizer;
+    var $emailHelper;
 
 	// global const
 	const kLIST						= 1;
@@ -71,6 +73,10 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 		$this->pi_loadLL();
 		$this->pi_USER_INT_obj = 1;	// Configuring so caching is not expected. This value means that no cHash params are ever set. We do this, because it's a USER_INT object!
 		$this->pi_initPIflexForm(); // Init and get the flexform data of the plugin
+
+        $confArr = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['fsmi_vkrit']);
+        $this->emailOrganizer = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'organizer@nomail.com');	
+        $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
 		$content = '';
 
@@ -561,7 +567,7 @@ Sollte Ihre Veranstaltung weniger als 10 Teilnehmer haben und die Veranstaltung
 soll dennoch evaluiert werden, dann tragen Sie dieses bitte als Kommentar
 ein.
 
-Bei Rückfragen melden Sie sich bitte bei criticus@uni-paderborn.de.
+Bei Rückfragen melden Sie sich bitte bei '.$this->emailOrganizer.'.
 Dieses Jahr verwenden wir abermals einen Datenimport aus PAUL. Dieser
 ist jedoch immer noch nicht automatisiert zu verarbeiten und erfordert einen
 hohen manuellen Aufwand. Sollten bei dieser Verarbeitung Fehler
@@ -691,10 +697,10 @@ mit.</textarea></div>
 			$send = $this->cObj->sendNotifyEmail(
 				$msg='Eintragung Veranstaltungskritik'."\n". // first line is subject
 						$mailContent,
-				$recipients=$lecturerUID['email'],
-				$cc='criticus@upb.de',
-				$email_from='criticus@uni-paderborn.de',
-				$email_fromName='',
+				$recipients=     $lecturerUID['email'],
+				$cc=             $this->emailOrganizer,
+				$email_from=     $this->emailOrganizer,
+				$email_fromName= '',
 				$replyTo='');
 
 			if ($send) {
@@ -1004,10 +1010,10 @@ mit.</textarea></div>
 		$send = $this->cObj->sendNotifyEmail(
 				$msg='Termin für Veranstaltungskritik wurde festgelegt'."\n". // first line is subject
 					$mailContent,
-				$recipients=$lecturerUID['email'],
-				$cc='criticus@upb.de',
-				$email_from='criticus@uni-paderborn.de',
-				$email_fromName='',
+				$recipients=        $lecturerUID['email'],
+				$cc=                $this->emailOrganizer,
+				$email_from=        $this->emailOrganizer,
+				$email_fromName=    '',
 				$replyTo='');
 
 		return tx_fsmivkrit_div::printSystemMessage(
