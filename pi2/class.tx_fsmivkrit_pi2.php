@@ -46,6 +46,12 @@ class tx_fsmivkrit_pi2 extends tslib_pibase {
 	var $survey;
     var $emailOrganizer;
     var $emailHelper;
+    
+    var $lecture_type = array(
+		'Fach', 
+		'Service', 
+		'Didaktik'
+	);
 
 	// global const
 	const kLIST						= 1;
@@ -1053,6 +1059,14 @@ mit.</textarea></div>
 								value="'.htmlspecialchars($lectureUID["name"]).'" /></td>
 					</tr>'.
 					'<tr>
+						<td><strong>Vorlesungsart:</strong></td>
+						<td><select name="'.$this->extKey.'[lecture_type]" id="'.$this->extKey.'_lecture_type">';
+		for ($i=0; $i<3; $i++) {
+			$selected = ($lectureUID["lecture_type"]==$i ? 'selected="selected"' : '');
+			$content .= '<option value="'.$i.'" '.$selected.'>'.$this->lecture_type[$i].'</option>';
+		}
+		$content .= '</select></tr>'.
+					'<tr>
 						<td><strong>Teilnehmer:</strong></td>
 						<td><input type="text" name="'.$this->extKey.'[participants]" id="'.$this->extKey.'_participants"
 								value="'.htmlspecialchars($lectureUID["participants"]).'" /></td>
@@ -1108,6 +1122,7 @@ mit.</textarea></div>
 					$content .= '<div>'.
 									$lecturerUID['name'].', '.$lecturerUID['forename'].
 									htmlspecialchars(' <'.$lecturerUID['email'].'>').'</div>';
+                    $content .= '<div>Orgaeinheit: '.$lecturerUID['organizational_unit'].'</div>';
 
 
 					// information about assistants
@@ -1149,7 +1164,8 @@ mit.</textarea></div>
 											'participants' 	=> 	intval($inputData['participants']),
 											'name' 	=> 			htmlspecialchars($inputData['name']),
 											'comment'		=> 	htmlspecialchars($inputData['comment']),
-											'eval_state'	=> 	intval($inputData['eval_state'])
+											'eval_state'	=> 	intval($inputData['eval_state']),
+											'lecture_type'	=> 	intval($inputData['lecture_type'])
 									));
 		if (!$res)
 			return tx_fsmivkrit_div::printSystemMessage(
