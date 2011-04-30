@@ -17,6 +17,7 @@
 			<label index="tx_fsmivkrit_lecturer.email">Email</label>
 			<label index="tx_fsmivkrit_lecturer.reshipment">Reshipment of Evaluation by mail</label>
 			<label index="tx_fsmivkrit_lecturer.foreign_id">Foreign ID</label>
+            <label index="tx_fsmivkrit_lecturer.organizational_unit">Organizational Unit</label>
 			<label index="tx_fsmivkrit_lecture">Lecture</label>
 			<label index="tx_fsmivkrit_lecture.name">Name</label>
 			<label index="tx_fsmivkrit_lecture.lecturer">Lecturer</label>
@@ -85,6 +86,7 @@
 			<label index="tx_fsmivkrit_lecturer.email">Email</label>
 			<label index="tx_fsmivkrit_lecturer.reshipment">Ergebnisse by Hauspost zusenden</label>
 			<label index="tx_fsmivkrit_lecturer.foreign_id">Externe ID</label>
+            <label index="tx_fsmivkrit_lecturer.organizational_unit">Orgaeinheit</label>
 			<label index="tx_fsmivkrit_lecture">Veranstaltung</label>
 			<label index="tx_fsmivkrit_lecture.name">Name</label>
 			<label index="tx_fsmivkrit_lecture.lecturer">Dozent</label>

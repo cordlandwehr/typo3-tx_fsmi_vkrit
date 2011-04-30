@@ -16,6 +16,7 @@ CREATE TABLE tx_fsmivkrit_lecturer (
 	email tinytext,
 	reshipment tinyint(3) DEFAULT '0' NOT NULL,
 	foreign_id tinytext,
+	organizational_unit tinytext,
 
 	PRIMARY KEY (uid),
 	KEY parent (pid)

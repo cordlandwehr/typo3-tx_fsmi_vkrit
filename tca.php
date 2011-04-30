@@ -79,9 +79,17 @@ $TCA['tx_fsmivkrit_lecturer'] = array (
 				'eval' => 'uniqueInPid',
 			)
 		),
+        'organizational_unit' => array (
+            'exclude' => 0,
+            'label' => 'LLL:EXT:fsmi_vkrit/locallang_db.xml:tx_fsmivkrit_lecturer.organizational_unit',
+            'config' => array (
+                'type' => 'input',
+                'size' => '30',
+            )
+        ),
 	),
 	'types' => array (
-		'0' => array('showitem' => 'hidden;;1;;1-1-1, title, sex, name, forename, email, reshipment, foreign_id')
+		'0' => array('showitem' => 'hidden;;1;;1-1-1, title, sex, name, forename, email, reshipment, foreign_id, organizational_unit')
 	),
 	'palettes' => array (
 		'1' => array('showitem' => '')

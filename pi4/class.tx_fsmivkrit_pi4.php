@@ -309,6 +309,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				'<td>'.$csvArray[$i][self::kCSV_NACHNAME].'</td>'.
 				'<td>'.$csvArray[$i][self::kCSV_EMAIL].'</td>'.
 				'<td>'.$csvArray[$i][self::kCSV_LV_NAME].'</td>'.
+				'<td>'.$csvArray[$i][self::kCSV_ORGAEINHEIT].'</td>'.
 				'</tr>';
 		$content .= '</table>';
 
@@ -354,7 +355,8 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 											'name' => $lecturer[self::kCSV_NACHNAME],
 											'forename' => $lecturer[self::kCSV_VORNAME],
 											'email' => $lecturer[self::kCSV_EMAIL],
-											'foreign_id' => $lecturer['hash']
+											'foreign_id' => $lecturer['hash'],
+											'organizational_unit' => $lecturer[self::kCSV_ORGAEINHEIT],
 									));
 			// break on error
 			if(!$res)
@@ -410,8 +412,9 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$csvArray[$i]['lecturer_hash'] = $hash;
 				continue;
 			} else {
-				debug('Oh my god, we found a SHA-256 collision!');
+				debug('Oh my god, we found a SHA-256 collision! Report it and become famous!');
 				// TODO do some thing but this is not likely to happen...
+				
 			}
 		}
 		return $lecturerArr;
