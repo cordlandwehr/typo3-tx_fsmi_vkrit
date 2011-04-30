@@ -39,6 +39,7 @@ CREATE TABLE tx_fsmivkrit_lecture (
 	lecturer text,
 	survey text,
 	participants int(11) DEFAULT '0' NOT NULL,
+	lecture_type int(11) DEFAULT '0' NOT NULL,
 	eval_date_1 int(11) DEFAULT '0' NOT NULL,
 	eval_date_2 int(11) DEFAULT '0' NOT NULL,
 	eval_date_3 int(11) DEFAULT '0' NOT NULL,

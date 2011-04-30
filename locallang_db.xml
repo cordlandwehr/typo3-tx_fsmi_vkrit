@@ -23,6 +23,10 @@
 			<label index="tx_fsmivkrit_lecture.lecturer">Lecturer</label>
 			<label index="tx_fsmivkrit_lecture.survey">Survey</label>
 			<label index="tx_fsmivkrit_lecture.participants">Participants</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type">Lecture Type</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.0">Major</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.1">Service</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.2">Education</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_1">Evaluation Date 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_2">Evaluation Date 2</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_3">Evaluation Date 3</label>
@@ -92,6 +96,10 @@
 			<label index="tx_fsmivkrit_lecture.lecturer">Dozent</label>
 			<label index="tx_fsmivkrit_lecture.survey">Umfrage</label>
 			<label index="tx_fsmivkrit_lecture.participants">Teilnehmer</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type">Veranstaltungsart</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.0">Fach</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.1">Service</label>
+            <label index="tx_fsmivkrit_lecture.lecture_type.I.2">Didaktik</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_1">Vkrit Vorschlag 1</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_2">Vkrit Vorschlag 2</label>
 			<label index="tx_fsmivkrit_lecture.eval_date_3">Vkrit Vorschlag 3</label>
