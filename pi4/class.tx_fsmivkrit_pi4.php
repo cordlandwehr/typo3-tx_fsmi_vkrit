@@ -45,6 +45,12 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	var $emailOrganizer;
 	var $emailHelper;
 
+    var $lecture_type = array(
+		'Fach', 
+		'Service', 
+		'Didaktik'
+	);
+
 	// types
 	const kIMPORT		= 1;
 	const kEXPORT		= 2;
@@ -610,7 +616,11 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newLecture->appendChild(
                 $document->createElement(
                     "p_o_study", 
-                    $lecture['lecture_type']."-".$lecturerUID['organizational_unit']."-".$lecture['name']
+                    $this->lecture_type[$lecture['lecture_type']].
+                    "|".
+                    $lecturerUID['organizational_unit'].
+                    "|".
+                    $lecture['name']
                 )
             );
 
