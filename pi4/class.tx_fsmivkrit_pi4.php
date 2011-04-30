@@ -602,6 +602,17 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$document->createElement('Lecture')
 			);
 			$newLecture->setAttribute('key', $this->getKeyForLecture($lecture['uid']));
+			
+			
+			// set p_o_field
+			// this is used for sorting of the data at EvaSys
+			$lecturerUID = t3lib_BEfunc::getRecord('tx_fsmivkrit_lecturer', $lecture["lecturer"]);
+			$newLecture->appendChild(
+                $document->createElement(
+                    "p_o_study", 
+                    $lecture['lecture_type']."-".$lecturerUID['organizational_unit']."-".$lecture['name']
+                )
+            );
 
 			// container for lecturer and tutors
 			$newDozs = $newLecture->appendChild(
