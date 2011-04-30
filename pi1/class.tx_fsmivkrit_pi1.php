@@ -47,6 +47,12 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
     var $emailOrganizer;
     var $emailHelper;
 
+    var $lecture_type = array(
+		'Fach-Veranstaltung', 
+		'Service-Veranstaltung', 
+		'Didaktik-Veranstaltung'
+	);
+
 	// options for this frontend plugin
 	const kVERIFY	= 1;
 	const kSAVE		= 2;
@@ -190,10 +196,10 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									'Der Verifikationswert ist falsch. Bitte verwenden sie die exakte URL aus der Benachrichtigungsmail.');
 
 		$content .= '<h3>Dateneingabe</h3>';
-		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
+		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="post" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kVERIFY.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kVERIFY.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[auth]'.'" value="'.$hash.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
 
@@ -203,8 +209,15 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 						<td><label for="'.$this->extKey.'_participants">Vorlesungsteilnehmer:</label></td>
 						<td><input type="text" name="'.$this->extKey.'[participants]" size="3" id="'.$this->extKey.'_participants"
 								value="'.htmlspecialchars($this->piVars["participants"]).'" /></td>
-					</tr>'; //TODO make selector
-
+					</tr>';
+		$content .= '<tr>
+						<td><label for="'.$this->extKey.'_lecture_type">Veranstaltungsart:</label></td>
+						<td><select name="'.$this->extKey.'[lecture_type]" id="'.$this->extKey.'_lecture_type">';
+		for ($i=0; $i<3; $i++) {
+			$selected = ($lectureUID["lecture_type"]==$i ? 'selected="selected"' : '');
+			$content .= '<option value="'.$i.'" '.$selected.'>'.$this->lecture_type[$i].'</option>';
+		}
+		$content .= '</select></td></tr>';
 		// assistents
 		$content .= '<tr>
 						<td style="vertical-align:top"><label for="'.$this->extKey.'_assistants">Tutoren:</label></td>
@@ -371,6 +384,8 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$content .= '<h3>Daten überprüfen</h3>';
 
 		$content .= '<div><strong>Teilnehmer:</strong> '.$inputData['participants'].'</div>';
+		
+		$content .= '<div><strong>Veranstaltungsart:</strong> '.$this->lecture_type[$inputData['lecture_type']].'</div>';
 
 		$content .= '<div><strong>Tutoren:</strong></div>';
 		$content .= '<ol>';
@@ -407,8 +422,6 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									'Der vorgeschlagene Termin liegt außerhalb des Evaluationszeitraumes.
 									Der Zeitraum ist '.date('j. F',$surveyUID['eval_start']).' bis '.date('j. F',$surveyUID['eval_end']).'.');
 
-// 			debug ($inputData['eval_'.$i]['date'], 'INPUT');
-// 			debug ($surveyUID['eval_end'], 'SET');
 		}
 		$content .= '</ol>';
 
@@ -423,13 +436,14 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 		$GLOBALS['TSFE']->fe_user->setKey('ses','inputData', $inputData);
 
 		$content .= '<h3>Daten übermitteln</h3>';
-		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
+		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="post" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
 		// TODO should be switched to sessions, to dangerous for data loss cause of typos
 		// hidden field to tell system, that IMPORT data is coming
-		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kSAVE.' />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kSAVE.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[auth]'.'" value="'.$hash.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture]'.'" value="'.$lecture.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[lecture_type]'.'" value="'.$inputData['lecture_type'].'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[participants]'.'" value="'.$inputData['participants'].'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[reshipment]'.'" value="'.$inputData['reshipment'].'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[comment]'.'" value="'.$inputData['comment'].'" />';
@@ -465,6 +479,9 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 
 		// participants
 		$inputData['participants'] = intval($POSTdata['participants']);
+		
+		// lecture type
+		$inputData['lecture_type'] = intval($POSTdata['lecture_type']);
 
 		// assistants
 		$tutorArr = explode("\n",htmlspecialchars($POSTdata['assistants']));
@@ -525,6 +542,7 @@ class tx_fsmivkrit_pi1 extends tslib_pibase {
 									'uid=\''.$lecture.'\'',
 									array (	'tstamp' => time(),
 											'participants' 	=> $inputData['participants'],
+											'lecture_type'	=> $inputData['lecture_type'],
 											'eval_date_1' 	=> $inputData['eval_1']['date'],
 											'eval_date_2' 	=> $inputData['eval_2']['date'],
 											'eval_date_3'	=> $inputData['eval_3']['date'],

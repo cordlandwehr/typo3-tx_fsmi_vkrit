@@ -1059,7 +1059,7 @@ mit.</textarea></div>
 								value="'.htmlspecialchars($lectureUID["name"]).'" /></td>
 					</tr>'.
 					'<tr>
-						<td><strong>Vorlesungsart:</strong></td>
+						<td><strong>Veranstaltungsart:</strong></td>
 						<td><select name="'.$this->extKey.'[lecture_type]" id="'.$this->extKey.'_lecture_type">';
 		for ($i=0; $i<3; $i++) {
 			$selected = ($lectureUID["lecture_type"]==$i ? 'selected="selected"' : '');
