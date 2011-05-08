@@ -166,8 +166,17 @@ class tx_fsmivkrit_emergency_reminder_scheduler
         }
 
         // Write the code for the field
-        $fieldID = 'task_ip';
-        $fieldCode = '<input type="text" name="tx_scheduler[survey]" id="' . $fieldID . '" value="' . $taskInfo['survey'] . '" size="30" />';
+        $fieldCode = '<select name="tx_scheduler[survey]" id="survey" >';
+        $res = $GLOBALS['TYPO3_DB']->sql_query('SELECT *
+                                                FROM tx_fsmivkrit_survey
+                                                WHERE deleted=0 AND hidden=0');
+        while ($res && $row = mysql_fetch_assoc($res))
+            $fieldCode .= '<option value="'.$row['uid'].'" '.
+                    (($taskInfo['survey']==$row['uid'])? ' selected="selected" ':' ').'>'.
+                    $row['semester'].': '.$row['name'].
+                    '</option>';
+        $fieldCode .= '</select>';
+        
         $additionalFields = array();
         $additionalFields[$fieldID] = array(
             'code'     => $fieldCode,
