@@ -118,14 +118,19 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				if (t3lib_div::_POST($this->extKey)) {
 					// form files
 					$formDataFiles = $_FILES[$this->extKey];
+					
+                    // force one character
+                    $delimiter = $GETcommands['delimiter'];
+                    if (strlen($delimiter)==0 || strlen($delimiter)>1)
+                        $delimiter = ',';
 
 					// get files
 					if ($GETcommands['file_confirmed']) {
-						$csvArray = $this->loadImportData(htmlspecialchars($GETcommands['file_confirmed']));
+						$csvArray = $this->loadImportData(htmlspecialchars($GETcommands['file_confirmed']), $delimiter);
 						t3lib_div::unlink_tempfile($GETcommands['file_confirmed']);
 					} else {
 						$filepath = t3lib_div::upload_to_tempfile($formDataFiles['tmp_name']['file']);
-						$csvArray = $this->loadImportData($filepath);
+						$csvArray = $this->loadImportData($filepath, $delimiter);
 					}
 
 					// set status message
@@ -146,7 +151,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 							$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_WARNING,
 									'Datei Eingelesen, aber noch nicht gespeichert!');
-							$content .= $this->createImportDataConfirmForm($filepath,intval($GETcommands['survey']));
+							$content .= $this->createImportDataConfirmForm( $filepath, intval($GETcommands['survey']), $delimiter);
 							$content .= $this->printImportData($csvArray);
 						}
 					}
@@ -235,7 +240,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			if ($row['number']>0)
 				$content .= tx_fsmivkrit_div::printSystemMessage(
 									tx_fsmivkrit_div::kSTATUS_WARNING,
-									'Es sind schon Daten für die Umfrage vorhanden. Ein Datenimport kann daher zu Dateninkonsistenzen führen.');
+									'Es sind schon Daten für die ausgewählte Umfrage vorhanden. Ein Datenimport kann daher zu Dateninkonsistenzen führen.');
 
 
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
@@ -243,26 +248,41 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		// hidden field to tell system, that IMPORT data is coming
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value="'.self::kIMPORT.'" />';
 
+            // survey
+        $content .='
+            <fieldset>
+                <label for="'.$this->extKey.'_import_storage">Gewählte Umfrage:</label> '.$surveyDATA['name'].' '.$surveyDATA['semester'];
+        $content .= '<input type="hidden" name="'.$this->extKey.'[survey]"
+                          id="'.$this->extKey.'_storage"
+                          value="'.$this->survey.'"
+                          readonly="readonly" />';
+        $content .= '</fieldset>';
+
+            // Importfile
 		$content .= '<fieldset>
 			<label for="'.$this->extKey.'_file">Importdatei:</label>
 			<input type="file" name="'.$this->extKey.'[file]" id="'.$this->extKey.'_file"
 					value="'.htmlspecialchars($this->piVars["file"]).'" />
+			<br />
+            
+            <label for="'.$this->extKey.'_delimiter">Feldtrenner:</label>
+            <select name="'.$this->extKey.'[delimiter]" id="'.$this->extKey.'_delimiter">
+                <option>,</option>
+                <option>;</option>
+                <option>|</option>
+                <option>&</option>
+            </select>
+            <hr />
 			<div>
 				Erwartet wird eine CSV Datei mit EXAKT den spezifizierten Werten.
-				Vor einer endgültigen Speicherung werden die zu speichernden Daten angezeigt.<br />
+				Vor einer endgültigen Speicherung werden die zu speichernden Daten angezeigt. Statt dem Standardfeldtrenner &quot;,&quot; kann optional ein 
+				anderer Feldtrenner gewählt werden.<br />
 				<pre>Funktion,Anrede,Titel,Vorname,Nachname,Email,LV-Name,LV-Kennung,LV-Ort,Studiengang,LV-Art,Teilnehmer,Orgaeinheit</pre>
-				Aufgrund desolater PAUL-Daten muss jede VL exakt einmal in der Liste stehen. Die erste Zeile wird ignoriert.
+				Aufgrund desolater PAUL-Daten muss jede VL exakt einmal in der Liste stehen. Die erste Zeile der Eingabedatei wird ignoriert.
 			</div>
-			</fieldset>
+			</fieldset>';
 
-			<fieldset>
-				<label for="'.$this->extKey.'_import_storage">Umfrage:</label> '.$surveyDATA['name'].' '.$surveyDATA['semester'];
 
-		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]"
-						  id="'.$this->extKey.'_storage"
-						  value="'.$this->survey.'"
-						  readonly="readonly" />';
-		$content .= '</fieldset>';
 
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Datei überprüfen').'">';
@@ -271,7 +291,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		return $content;
 	}
 
-	function createImportDataConfirmForm ($filepath,$survey) {
+	function createImportDataConfirmForm ($filepath, $survey, $delimiter) {
 		$content = '';
 		$content .= '<form action="'.$this->pi_getPageLink($GLOBALS["TSFE"]->id).'" method="POST" enctype="multipart/form-data" name="'.$this->extKey.'">';
 
@@ -279,6 +299,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$content .= '<input type="hidden" name="'.$this->extKey.'[type]'.'" value='.self::kIMPORT.' />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[file_confirmed]'.'" value="'.$filepath.'" />';
 		$content .= '<input type="hidden" name="'.$this->extKey.'[survey]'.'" value="'.$survey.'" />';
+		$content .= '<input type="hidden" name="'.$this->extKey.'[delimiter]'.'" value="'.$delimiter.'" />';
 		$content .= '<input type="submit" name="'.$this->extKey.'[submit_button]"
 				value="'.htmlspecialchars('Import abschließen').'">';
 
@@ -293,7 +314,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 	 *
 	 * @return array with imported data, called $csvArray
 	 */
-	function loadImportData ($filepath) {
+	function loadImportData ($filepath, $delimiter) {
 		if ($filepath=='')
 			return array ();
 
@@ -301,7 +322,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 		$file = fopen($filepath, 'r');
 		// delete first line
 		$data = fgetcsv($file);
-		while (($data = fgetcsv($file)))
+		while (($data = fgetcsv($file, 0, $delimiter)))
     		array_push($csvArray, $data);
     	fclose($file);
 
@@ -310,13 +331,21 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 
 	function printImportData ($csvArray) {
 		$content = '<table>';
-		for ($i=0; $i<count($csvArray); $i++)
-			$content .= '<tr>'.
-				'<td>'.$csvArray[$i][self::kCSV_NACHNAME].'</td>'.
-				'<td>'.$csvArray[$i][self::kCSV_EMAIL].'</td>'.
-				'<td>'.$csvArray[$i][self::kCSV_LV_NAME].'</td>'.
-				'<td>'.$csvArray[$i][self::kCSV_ORGAEINHEIT].'</td>'.
-				'</tr>';
+		$content .= '<tr><th>NACHNAME</th><th>EMAIL</th><th>LV_NAME</th><th>ORGAEINHEIT</th></tr>';
+		for ($i=0; $i<count($csvArray); $i++) {
+            if (count($csvArray[$i])<4)
+                $content .= '<tr colspan="4"><td>
+                    <strong>Zeile '.($i+2).' ist fehlerhaft und konnte nicht gelesen werden.</strong></td></tr>';
+            else {
+                $content .= '<tr>';
+				$content .= '<td>'.$csvArray[$i][self::kCSV_NACHNAME].'</td>';
+				$content .= '<td>'.(($csvArray[$i][self::kCSV_EMAIL]!='') ? $csvArray[$i][self::kCSV_EMAIL] : '<strong>FEHLT</strong>').'</td>';
+				$content .= '<td>'.$csvArray[$i][self::kCSV_LV_NAME].'</td>';
+				$content .= '<td>'.$csvArray[$i][self::kCSV_ORGAEINHEIT].'</td>';
+				$contetn .= '</tr>';
+			}
+				
+        }
 		$content .= '</table>';
 
 		return $content;
