@@ -182,6 +182,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler
      */
     public function validateAdditionalFields(array &$submittedData, tx_scheduler_Module $parentObject) {
         $submittedData['survey'] = intval($submittedData['survey']);
+        return true;
     }
     
     /**

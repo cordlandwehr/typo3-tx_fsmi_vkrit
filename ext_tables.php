@@ -119,7 +119,7 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_orga
 	'extension' => 'fsmi_vkrit',
 	'title' => 'Information mails for Organizer',
 	'description' => 'Sends notification mails each evening to tell which tasks are open for current evaluation.',
-    'additionalFields' => 'tx_fsmivkrit_emergency_reminder_scheduler'
+    'additionalFields' => 'tx_fsmivkrit_reminder_organizer_scheduler'
 );
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_reminder_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
@@ -129,9 +129,9 @@ $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_emergency_rem
 );
 $TYPO3_CONF_VARS['SC_OPTIONS']['scheduler']['tasks']['tx_fsmivkrit_reminder_helper_scheduler'] = array(
 	'extension' => 'fsmi_vkrit',
-	'title' => 'Remember helpers to be helper',
+	'title' => 'Remind helpers to be helper',
 	'description' => 'Sends Email to remember of beeing a helper.',
-    'additionalFields' => 'tx_fsmivkrit_emergency_reminder_scheduler'
+    'additionalFields' => 'tx_fsmivkrit_reminder_helper_scheduler'
 );
 
 // include statics
