@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Andreas Cord-Landwehr <fsmi@uni-paderborn.de>
+*  (c) 2009-2011 Andreas Cord-Landwehr <fsmi@uni-paderborn.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -684,7 +684,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newLecture->appendChild(
 				$document->createElement(
 					'short',
-					$lecture['foreign_id']
+					$surveyUID['semester'].'-'.$lecture['foreign_id']
 				)
 			);
 			$newLecture->appendChild(
