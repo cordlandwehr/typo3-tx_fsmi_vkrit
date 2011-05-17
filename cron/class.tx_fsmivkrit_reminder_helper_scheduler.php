@@ -45,7 +45,7 @@ class tx_fsmivkrit_reminder_helper_scheduler
         $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
         // set survey as given by scheduler
-        $survey = $task->survey;
+        $survey = $this->survey;
 
 		$mailClosing = "\n\n".'Rückfragen bitte an <'.$this->emailOrganizer.'>'."\n\n".'    Vielen Dank, deine V-Krit Orga';
 

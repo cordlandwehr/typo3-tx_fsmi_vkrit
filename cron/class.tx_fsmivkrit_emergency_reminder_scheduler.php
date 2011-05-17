@@ -46,7 +46,7 @@ class tx_fsmivkrit_emergency_reminder_scheduler
         $this->emailHelper = ($confArr['emailHelper'] ? $confArr['emailHelper'] : 'helper@nomail.com');
 
 		// set survey as given by scheduler
-		$survey = $task->survey;
+		$survey = $this->survey;
 
 		$fullMail =
 'Statusinformationen zur V-Krit:'."\n".
