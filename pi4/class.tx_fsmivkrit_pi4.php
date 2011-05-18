@@ -764,7 +764,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 				$newLecture->appendChild(
 					$document->createElement(
 						'short',
-						$lecture['foreign_id'].'_tutorial'
+						$surveyUID['semester'].'-'.$lecture['foreign_id'].'_tutorial'
 					)
 				);
 				$newLecture->appendChild(
