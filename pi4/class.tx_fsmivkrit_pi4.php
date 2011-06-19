@@ -602,7 +602,7 @@ class tx_fsmivkrit_pi4 extends tslib_pibase {
 			$newTutor->appendChild(
 				$document->createElement(
 					'lastname',
-					$tutor['name']
+					($tutor['name']=='' ? 'NN' : $tutor['name'])
 				)
 			);
 			// TODO here: mail
